@@ -1021,49 +1021,68 @@ function cardImgPath(id, ext) {
     return `${base}${setId}/${id}EN.${ext}`;
   }
 
-  // GBT sets: GBT01_001 → GBT01_001EN.png | GBT01_S001 → GBT01_S01EN.png (strip leading zero on SP)
+  // GBT sets: GBT01_001 → GBT01_001EN.png | GBT01_S001 → GBT01_S01EN.png
   if (setId.startsWith('GBT')) {
     const fileId = id.replace(/_S0(\d+)$/, '_S$1');
     return `${base}${setId}/${fileId}EN.${ext}`;
   }
 
-  // GEB sets: GEB01_001 → geb01_001.png | GEB01_S001 → geb01_s01.png (all lowercase, strip leading zero on SP)
+  // GEB sets: geb01_001.png | geb01_s01.png
   if (setId.startsWith('GEB')) {
     const fileId = id.replace(/_S0(\d+)$/, '_S$1').toLowerCase();
     return `${base}${setId}/${fileId}.${ext}`;
   }
 
-  // EB10 Noir/Blanc: IDs are EB10_001B / EB10_001W
-  // Image files: EB10_001EN-B.png / EB10_001EN-W.png
+  // EB10 Noir/Blanc
   if (setId === 'EB10') {
     const m = id.match(/^(EB10_(?:S0?\d+|\d+))([BW])$/);
     if (m) {
-      // SP: EB10_S001B → EB10_S01EN-B.png (strip leading zero in SP part)
-      const base = m[1].replace(/_S0(\d+)$/, '_S$1');
-      return `${IMG_CARDS}${setId}/${base}EN-${m[2]}.${ext}`;
+      const baseId = m[1].replace(/_S0(\d+)$/, '_S$1');
+      return `${IMG_CARDS}${setId}/${baseId}EN-${m[2]}.${ext}`;
     }
   }
 
-  // Legion Rare cards (EB11, EB12, BT16, BT17): IDs like EB11_LR001, BT16_LR001
-  // Image files: EB11_L01EN.png / BT16_L01EN.png (LR→L, strip leading zero, pad to 2 digits)
+  // Legion Rare cards (EB11, EB12, BT16, BT17)
   {
     const lr = id.match(/^([A-Z0-9]+)_LR0*(\d+)$/);
     if (lr) return `${IMG_CARDS}${setId}/${lr[1]}_L${lr[2].padStart(2,'0')}EN.${ext}`;
   }
 
-  // SP cards: EB01_S001 → EB01_S01EN.png (strip one leading zero)
+  // SP cards: strip one leading zero from SP number
   const fileId = id.replace(/_S0(\d+)$/, '_S$1');
-  return `${IMG_CARDS}${setId}/${fileId}EN.${ext}`;
+  // TD and BT/EB: try with EN suffix first (handled by fallback chain in setImgSrcWithFallback)
+  return `${base}${setId}/${fileId}EN.${ext}`;
 }
 
-// Attach onerror fallback that tries .jpg if .png fails (or vice-versa)
+// Returns all candidate paths to try for a card id (EN and non-EN variants)
+function cardImgCandidates(id) {
+  const setId = id.split('_')[0];
+  const isGSeries = /^G(BT|EB|TD)/.test(setId);
+  const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
+  const fileId = id.replace(/_S0(\d+)$/, '_S$1');
+  const fileIdLower = fileId.toLowerCase();
+  const exts = ['png','jpg','jpeg','webp'];
+  const candidates = [];
+
+  // Primary: with EN suffix
+  for (const e of exts) candidates.push(`${base}${setId}/${fileId}EN.${e}`);
+  // Secondary: without EN suffix
+  for (const e of exts) candidates.push(`${base}${setId}/${fileId}.${e}`);
+  // Tertiary: lowercase without EN
+  for (const e of exts) candidates.push(`${base}${setId}/${fileIdLower}.${e}`);
+  // Quaternary: lowercase with EN
+  for (const e of exts) candidates.push(`${base}${setId}/${fileIdLower}EN.${e}`);
+  return candidates;
+}
+
+// Attach onerror fallback that tries all extension/EN variants
 function setImgSrcWithFallback(imgEl, id, onBothFail) {
-  const tryExt = ['png','jpg','jpeg','webp'];
+  const candidates = cardImgCandidates(id);
   let attempt = 0;
   function next() {
-    if (attempt >= tryExt.length) { if (onBothFail) onBothFail(); return; }
+    if (attempt >= candidates.length) { if (onBothFail) onBothFail(); return; }
     imgEl.onerror = () => { attempt++; next(); };
-    imgEl.src = cardImgPath(id, tryExt[attempt++]);
+    imgEl.src = candidates[attempt++];
   }
   next();
 }
@@ -1094,7 +1113,7 @@ function renderReveal(cards, newCardIds, faceDown) {
           <div class="card-art">
             <img data-id="${card.id}" alt="${card.name}"
                  src="${cardImgPath(card.id)}"
-                 onerror="(function(el){el.dataset.tried=(parseInt(el.dataset.tried||0)+1);var exts=['png','jpg','jpeg','webp'];var n=parseInt(el.dataset.tried);if(n<exts.length){el.onerror=el.onerror;el.src=cardImgPath(el.dataset.id,exts[n]);}else{el.style.display='none';el.nextElementSibling.style.display='flex';}})(this)">
+                 onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)">
             <span class="card-emoji-fallback" style="display:none;font-size:30px;z-index:1">${card.icon}</span>
             <div style="position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(transparent,rgba(0,0,0,0.85));z-index:2"></div>
             ${(()=>{ const owned=collection[card.id]?.count||0; return owned>=4?'<div style="position:absolute;top:4px;left:4px;background:rgba(239,68,68,0.92);color:#fff;font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;z-index:5">MAX</div>':owned>0?`<div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:#fff;font-size:8px;padding:2px 5px;border-radius:3px;z-index:5">Owned: ${owned}</div>`:''; })()}
@@ -1459,7 +1478,7 @@ function renderGallery() {
     const count = owned ? owned.count : 0;
     return `<div class="gallery-card rarity-card-${card.rarity} ${count===0?'not-owned':''}" onclick="openZoom(getAllCardById('${card.id}'))">
       <img class="gc-img" data-id="${card.id}" alt="${card.name}"
-           onerror="this.dataset.tried=(parseInt(this.dataset.tried||0)+1);const exts=['png','jpg','jpeg'];const n=parseInt(this.dataset.tried);if(n<exts.length){this.onerror=this.onerror;this.src=cardImgPath(this.dataset.id,exts[n]);}else{this.style.display='none';this.nextElementSibling.style.display='flex';}"
+           onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)"
            src="${cardImgPath(card.id)}">
       <div class="gc-fallback" style="display:none"><span style="font-size:32px">${card.icon}</span><span style="font-size:9px;color:var(--text-muted);text-align:center;padding:0 4px">${card.name}</span></div>
       ${count>0?`<span class="gc-count">${count}x</span>`:''}
@@ -1780,7 +1799,7 @@ function renderDeckPool() {
     return `<div class="pool-card rarity-card-${card.rarity} ${addBlocked?'maxed':''} ${isTheFV?'svg-selected':''}"
       onclick="addToDeck(getAllCardById('${card.id}'))" ${svgHandler} title="${titleTip}">
       <img data-id="${card.id}" alt="${card.name}" src="${cardImgPath(card.id)}"
-           onerror="(function(el){el.dataset.tried=(parseInt(el.dataset.tried||0)+1);var exts=['png','jpg','jpeg','webp'];var n=parseInt(el.dataset.tried);if(n<exts.length){el.onerror=el.onerror;el.src=cardImgPath(el.dataset.id,exts[n]);}else{el.style.display='none';el.nextElementSibling.style.display='flex';}})(this)">
+           onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)">
       <div class="pc-fallback" style="display:none"><span>${card.icon}</span><span style="font-size:8px;text-align:center;padding:0 4px;color:var(--text-muted)">${card.name}</span></div>
       <span class="pc-count-badge">${owned}x</span>
       ${inDeck>0?`<div class="pc-in-deck">${inDeck} in deck</div>`:''}
