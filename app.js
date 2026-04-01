@@ -670,14 +670,9 @@ function selectTD(tdId) {
   // Probe box art with multi-format fallback
   const _tdBoxEl = document.getElementById(`td-box-img-${tdId}`);
   if (_tdBoxEl) {
-    const _tdExts = ['png','jpg','jpeg']; let _tdTry = 0;
-    (function _tryTdBox() {
-      if (_tdTry >= _tdExts.length) return;
-      const p = new Image();
-      p.onload  = () => { _tdBoxEl.src = p.src; _tdBoxEl.style.display = ''; };
-      p.onerror = () => { _tdTry++; _tryTdBox(); };
-      p.src = `${IMG_BOXES}box-${tdId}.${_tdExts[_tdTry++]}`;
-    })();
+    const p = new Image();
+    p.onload  = () => { _tdBoxEl.src = p.src; _tdBoxEl.style.display = ''; };
+    p.src = `${IMG_BOXES}box-${tdId}.webp`;
   }
   renderSetButtons();
 }
@@ -718,14 +713,12 @@ function selectSet(idx) {
   // Start hidden; probe each extension with a fresh Image() to avoid cached 404s
   boxImg.style.display = 'none'; boxImg.src = '';
   boxFallback.style.display = 'flex';
-  // Try both padded (box-BT016.png) and unpadded (box-BT01.png) filenames
+  // Try both padded (box-BT016.webp) and unpadded (box-BT01.webp) — webp only
   const _m = set.id.match(/^([A-Z]+)(\d+)$/);
   const _padId = _m ? `${_m[1]}${_m[2].padStart(3,'0')}` : set.id;
-  const _bNames = [];
-  for (const ext of ['png','jpg','jpeg']) {
-    if (_padId !== set.id) _bNames.push(`box-${_padId}.${ext}`);
-    _bNames.push(`box-${set.id}.${ext}`);
-  }
+  const _bNames = _padId !== set.id
+    ? [`box-${_padId}.webp`, `box-${set.id}.webp`]
+    : [`box-${set.id}.webp`];
   let _bTry = 0;
   (function _tryBox() {
     if (_bTry >= _bNames.length) return;
@@ -1011,7 +1004,7 @@ function clearCollection() {
 // ==================== RENDER CARDS ====================
 // Card image path: id format is already "BT01_001" → images/cards/BT01/BT01_001EN.png
 function cardImgPath(id, ext) {
-  ext = ext || 'png';
+  ext = ext || 'webp';
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD)/.test(setId);
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
@@ -1061,18 +1054,13 @@ function cardImgCandidates(id) {
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
   const fileId = id.replace(/_S0(\d+)$/, '_S$1');
   const fileIdLower = fileId.toLowerCase();
-  const exts = ['png','jpg','jpeg','webp'];
-  const candidates = [];
-
-  // Primary: with EN suffix
-  for (const e of exts) candidates.push(`${base}${setId}/${fileId}EN.${e}`);
-  // Secondary: without EN suffix
-  for (const e of exts) candidates.push(`${base}${setId}/${fileId}.${e}`);
-  // Tertiary: lowercase without EN
-  for (const e of exts) candidates.push(`${base}${setId}/${fileIdLower}.${e}`);
-  // Quaternary: lowercase with EN
-  for (const e of exts) candidates.push(`${base}${setId}/${fileIdLower}EN.${e}`);
-  return candidates;
+  // webp only — try EN suffix, no suffix, lowercase no suffix
+  return [
+    `${base}${setId}/${fileId}EN.webp`,
+    `${base}${setId}/${fileId}.webp`,
+    `${base}${setId}/${fileIdLower}.webp`,
+    `${base}${setId}/${fileIdLower}EN.webp`,
+  ];
 }
 
 // Attach onerror fallback that tries all extension/EN variants
@@ -1104,7 +1092,7 @@ function renderReveal(cards, newCardIds, faceDown) {
     slot.innerHTML = `
       <div class="card-inner ${faceDown ? '' : 'flipped'}" id="card-inner-${i}">
         <div class="card-face card-back">
-          <img src="${IMG_ASSETS}${isGUnit(card)?'card-back-g':'card-back'}.png" alt="card back"
+          <img src="${IMG_ASSETS}${isGUnit(card)?'card-back-g':'card-back'}.webp" alt="card back"
                onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
           <span class="back-fallback" style="display:none">🎴</span>
         </div>
@@ -1113,7 +1101,7 @@ function renderReveal(cards, newCardIds, faceDown) {
           <div class="card-art">
             <img data-id="${card.id}" alt="${card.name}"
                  src="${cardImgPath(card.id)}"
-                 onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)">
+                 loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)">
             <span class="card-emoji-fallback" style="display:none;font-size:30px;z-index:1">${card.icon}</span>
             <div style="position:absolute;bottom:0;left:0;right:0;height:35%;background:linear-gradient(transparent,rgba(0,0,0,0.85));z-index:2"></div>
             ${(()=>{ const owned=collection[card.id]?.count||0; return owned>=4?'<div style="position:absolute;top:4px;left:4px;background:rgba(239,68,68,0.92);color:#fff;font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;z-index:5">MAX</div>':owned>0?`<div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:#fff;font-size:8px;padding:2px 5px;border-radius:3px;z-index:5">Owned: ${owned}</div>`:''; })()}
@@ -1473,12 +1461,13 @@ function renderGallery() {
   const missingFirst = document.getElementById('gallery-missing-sort')?.checked;
   if (missingFirst) filtered.sort((a,b) => { const ao=collection[a.id]?.count>0?1:0,bo=collection[b.id]?.count>0?1:0; return ao-bo; });
   const grid = document.getElementById('gallery-grid');
-  grid.innerHTML = filtered.map(card => {
+
+  function makeGalleryCard(card) {
     const owned = collection[card.id];
     const count = owned ? owned.count : 0;
     return `<div class="gallery-card rarity-card-${card.rarity} ${count===0?'not-owned':''}" onclick="openZoom(getAllCardById('${card.id}'))">
       <img class="gc-img" data-id="${card.id}" alt="${card.name}"
-           onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)"
+           loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)"
            src="${cardImgPath(card.id)}">
       <div class="gc-fallback" style="display:none"><span style="font-size:32px">${card.icon}</span><span style="font-size:9px;color:var(--text-muted);text-align:center;padding:0 4px">${card.name}</span></div>
       ${count>0?`<span class="gc-count">${count}x</span>`:''}
@@ -1486,7 +1475,23 @@ function renderGallery() {
       ${isSentinel(card)?'<div style="position:absolute;bottom:22px;left:0;right:0;background:rgba(240,180,41,0.85);color:#000;font-size:7px;font-weight:700;text-align:center;padding:1px">🛡 Sentinel</div>':card.grade===0&&isTrigger(card)?`<div style="position:absolute;bottom:22px;left:0;right:0;background:${getTriggerColor(getTriggerType(card))};color:#fff;font-size:7px;font-weight:700;text-align:center;padding:1px">${getTriggerType(card)==='Heal'?'💚 Heal':getTriggerType(card)||''}</div>`:''}
       <button class="gc-add-deck" onclick="event.stopPropagation();addToDeck(getAllCardById('${card.id}'))" title="Add to deck">+</button>
     </div>`;
-  }).join('');
+  }
+
+  // Render first 80 immediately, then append the rest in idle chunks
+  const CHUNK = 80;
+  grid.innerHTML = filtered.slice(0, CHUNK).map(makeGalleryCard).join('');
+  let idx = CHUNK;
+  function appendChunk() {
+    if (idx >= filtered.length) return;
+    const frag = document.createDocumentFragment();
+    const div = document.createElement('div');
+    div.innerHTML = filtered.slice(idx, idx + CHUNK).map(makeGalleryCard).join('');
+    while (div.firstChild) frag.appendChild(div.firstChild);
+    grid.appendChild(frag);
+    idx += CHUNK;
+    requestIdleCallback ? requestIdleCallback(appendChunk) : setTimeout(appendChunk, 16);
+  }
+  requestIdleCallback ? requestIdleCallback(appendChunk) : setTimeout(appendChunk, 16);
 }
 
 // getAllCardById() → see CARD_MAP section above
@@ -1776,30 +1781,29 @@ function renderDeckPool() {
   const deckCounts = {};
   for (const [id, {count}] of Object.entries(deck)) deckCounts[id] = count;
 
-  document.getElementById('deck-pool-grid').innerHTML = allCards.map(card => {
+  document.getElementById('deck-pool-grid').innerHTML = '';
+  const dpGrid = document.getElementById('deck-pool-grid');
+
+  function makeDeckCard(card) {
     const owned = collection[card.id]?.count || 0;
     const inDeck = deckCounts[card.id] || 0;
     const isTheFV = fvCard && fvCard.id === card.id;
     const deckFull = getDeckTotal() >= DECK_MAX;
-    // Name-based copy limit (counts SVG + all rarities of same name)
     const nameCopies = countByName(getDeckName(card));
     const nameMaxed = nameCopies >= CARD_MAX_COPIES;
-    // Physical copies of this exact ID available for main deck
     const fvUsesThisId = isTheFV ? 1 : 0;
     const noMoreCopies = (inDeck + fvUsesThisId) >= owned;
     const wrongClan = !isClanAllowed(card, getDeckClan());
     const addBlocked = deckFull || nameMaxed || noMoreCopies || wrongClan;
-
     let dimReason = wrongClan ? `Wrong clan (deck is ${getDeckClan()})` : nameMaxed ? `Max 4 copies of "${card.name}"` : noMoreCopies ? 'No spare copies' : deckFull ? 'Deck full' : '';
     const svgHandler = card.grade === 0 ? `oncontextmenu="event.preventDefault();setFirstVanguard(getAllCardById('${card.id}'))"` : '';
     const titleTip = card.grade===0
       ? `${card.name} — Click: add trigger | Right-click: set as SVG${dimReason?' ('+dimReason+')':''}`
       : `${card.name}${dimReason?' — '+dimReason:''}`;
-
     return `<div class="pool-card rarity-card-${card.rarity} ${addBlocked?'maxed':''} ${isTheFV?'svg-selected':''}"
       onclick="addToDeck(getAllCardById('${card.id}'))" ${svgHandler} title="${titleTip}">
       <img data-id="${card.id}" alt="${card.name}" src="${cardImgPath(card.id)}"
-           onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)">
+           loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display=\'flex\');}})(this)">
       <div class="pc-fallback" style="display:none"><span>${card.icon}</span><span style="font-size:8px;text-align:center;padding:0 4px;color:var(--text-muted)">${card.name}</span></div>
       <span class="pc-count-badge">${owned}x</span>
       ${inDeck>0?`<div class="pc-in-deck">${inDeck} in deck</div>`:''}
@@ -1808,7 +1812,22 @@ function renderDeckPool() {
       ${isSentinel(card)?'<div style="position:absolute;bottom:22px;left:0;right:0;background:rgba(240,180,41,0.85);color:#000;font-size:7px;font-weight:700;text-align:center;padding:1px">🛡 Sentinel</div>':''}
       ${card.grade===0&&isTrigger(card)?`<div style="position:absolute;bottom:18px;left:0;right:0;background:${getTriggerColor(getTriggerType(card))};color:#fff;font-size:7px;font-weight:700;text-align:center;padding:1px">${getTriggerType(card)==='Heal'?'💚 Heal':getTriggerType(card)||''}</div>`:''}
     </div>`;
-  }).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Open packs to get cards first!</div>';
+  }
+
+  const DP_CHUNK = 80;
+  dpGrid.innerHTML = allCards.slice(0, DP_CHUNK).map(makeDeckCard).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Open packs to get cards first!</div>';
+  let dpIdx = DP_CHUNK;
+  function appendDpChunk() {
+    if (dpIdx >= allCards.length) return;
+    const frag = document.createDocumentFragment();
+    const div = document.createElement('div');
+    div.innerHTML = allCards.slice(dpIdx, dpIdx + DP_CHUNK).map(makeDeckCard).join('');
+    while (div.firstChild) frag.appendChild(div.firstChild);
+    dpGrid.appendChild(frag);
+    dpIdx += DP_CHUNK;
+    requestIdleCallback ? requestIdleCallback(appendDpChunk) : setTimeout(appendDpChunk, 16);
+  }
+  if (allCards.length > DP_CHUNK) requestIdleCallback ? requestIdleCallback(appendDpChunk) : setTimeout(appendDpChunk, 16);
 }
 
 // SVG counts as 1 of the 50-card deck (1 SVG + 49 main)
@@ -2699,7 +2718,7 @@ function playPackRip(icon, setLabel, boxSrc, callback) {
     const ic  = document.getElementById(iconId);
     img.style.display = 'block';
     fb.style.display  = 'none';
-    const exts = ['png','jpg','jpeg','webp'];
+    const exts = ['webp'];
     (function tryExt(i) {
       if (i >= exts.length) {
         img.style.display = 'none'; fb.style.display = 'flex';
