@@ -9,6 +9,10 @@ The assets and setlist are scraped and made by me
 
 Images used are from the official website and wiki for setlist + card art
 
+https://en.cf-vanguard.com/cardlist/
+
+https://cardfight.fandom.com/wiki/Cardfight!!_Vanguard_Wiki
+
 Progress atm:
 
 i will have everything at some point
