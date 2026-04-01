@@ -8,3 +8,11 @@ Some of the codes are AI, but thats only because there are too many cards in the
 The assets and setlist are scraped and made by me
 
 Images used are from the official website and wiki for setlist + card art
+
+Progress atm:
+
+i will have everything at some point
+
+All list for OG is done expect for PR and Special sets
+Sets with images are all the TDs and BT01-BT05 + GBT01 and GTD01-03
+
