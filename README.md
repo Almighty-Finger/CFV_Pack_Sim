@@ -14,5 +14,6 @@ Progress atm:
 i will have everything at some point
 
 All list for OG is done expect for PR and Special sets
+
 Sets with images are all the TDs and BT01-BT05 + GBT01 and GTD01-03
 
