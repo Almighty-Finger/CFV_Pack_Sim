@@ -208,9 +208,12 @@
 
   .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 137px);
+    grid-template-columns: repeat(5, 137px);
     gap: 12px;
-    justify-content: start;
+    justify-content: center;
+  }
+  .cards-grid.pack-7 {
+    grid-template-columns: repeat(7, 137px);
   }
 
   /* CARD */

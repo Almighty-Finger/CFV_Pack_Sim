@@ -1083,6 +1083,9 @@ const IMG_BOXES   = 'images/boxes/';   // box-BT01.png etc.
 
 function renderReveal(cards, newCardIds, faceDown) {
   const grid = document.getElementById('cards-grid');
+  const set = SETS[currentSetIdx];
+  const packSize = set ? (set.packSize || 5) : 5;
+  grid.className = packSize === 7 ? 'cards-grid pack-7' : 'cards-grid';
   grid.innerHTML = '';
   cards.forEach((card, i) => {
     const isNew = newCardIds.includes(card.id);
@@ -1362,6 +1365,7 @@ let galleryClanFilter = 'ALL';
 let galleryTypeFilter = 'ALL';
 let galleryGradeFilter = 'ALL';
 let gallerySetFilter = 'ALL';
+let _galRenderEpoch = 0;
 let galleryFormat = 'OG';   // 'OG' | 'G'
 let deckPoolFormat = 'OG';  // 'OG' | 'G'
 
@@ -1435,15 +1439,25 @@ function setGallerySet(s) { gallerySetFilter=s; buildGalleryFilters(); renderGal
 function renderGallery() {
   const search = document.getElementById('gallery-search').value.toLowerCase();
   const ownedOnly = document.getElementById('gallery-owned-only').checked;
-  const allCards = getAllSetCards();
 
-  const filtered = allCards.filter(card => {
-    if (ownedOnly && !collection[card.id]) return false;
-    if (gallerySetFilter !== 'ALL') { const set = SETS.find(s => s.id === gallerySetFilter); if (!set || !set.cards.find(c => c.id === card.id)) return false; }
+  // Pre-build set lookup for the active set filter (O(1) instead of O(n) per card)
+  const setFilterIds = gallerySetFilter === 'ALL' ? null
+    : new Set((SETS.find(s => s.id === gallerySetFilter)?.cards || []).map(c => c.id));
+
+  // Format filter: only show cards belonging to the active OG/G tab
+  const _galIsG = id => { const s = SETS.find(x => x.id === id.split('_')[0]); return !!(s && s.format === 'G'); };
+
+  const filtered = getAllSetCards().filter(card => {
+    // Format must match active tab
+    if (galleryFormat === 'G' ? !_galIsG(card.id) : _galIsG(card.id)) return false;
+    // Owned-only: strictly hide unowned cards
+    if (ownedOnly && !(collection[card.id]?.count > 0)) return false;
+    // Set filter
+    if (setFilterIds && !setFilterIds.has(card.id)) return false;
     if (galleryRarityFilter !== 'ALL' && card.rarity !== galleryRarityFilter) return false;
     if (galleryClanFilter !== 'ALL' && card.clan !== galleryClanFilter) return false;
     if (galleryTypeFilter === 'Wishlist') return wishlist.has(card.id);
-  if (galleryTypeFilter !== 'ALL') {
+    if (galleryTypeFilter !== 'ALL') {
       if (galleryTypeFilter === 'Trigger' && !isTrigger(card)) return false;
       else if (galleryTypeFilter === 'Sentinel' && !isSentinel(card)) return false;
       else if (galleryTypeFilter === 'Heal' && !isHeal(card)) return false;
@@ -1479,9 +1493,11 @@ function renderGallery() {
 
   // Render first 80 immediately, then append the rest in idle chunks
   const CHUNK = 80;
+  const _myGalEpoch = ++_galRenderEpoch;
   grid.innerHTML = filtered.slice(0, CHUNK).map(makeGalleryCard).join('');
   let idx = CHUNK;
   function appendChunk() {
+    if (_myGalEpoch !== _galRenderEpoch) return; // stale render, abort
     if (idx >= filtered.length) return;
     const frag = document.createDocumentFragment();
     const div = document.createElement('div');
@@ -1710,6 +1726,7 @@ function openDeckBuilder() {
 function closeDeckBuilder() { document.getElementById('deck-overlay').classList.remove('active'); }
 
 let deckPoolClanFilter = 'ALL';
+let _dpRenderEpoch = 0; // incremented each render to cancel stale async chunks
 let deckPoolTypeFilter = 'ALL';
 let deckPoolGradeFilter = 'ALL';
 let deckPoolSetFilter = 'ALL';
@@ -1752,12 +1769,16 @@ function setDeckPoolRarity(r) { deckPoolRarityFilter=r; buildDeckPoolFilters(); 
 
 function renderDeckPool() {
   const deckSearch = (document.getElementById('deck-search')?.value||'').toLowerCase();
+  // Build set lookup once for O(1) per-card check
+  const dpSetFilterIds = deckPoolSetFilter === 'ALL' ? null
+    : new Set((SETS.find(s => s.id === deckPoolSetFilter)?.cards || []).map(c => c.id));
+
   const allCards = getAllSetCards().filter(card => {
-    if (!collection[card.id]) return false;
+    if (!(collection[card.id]?.count > 0)) return false;
     const _cardSet = SETS.find(s=>s.id===card.id.split('_')[0]);
     const _cardIsG = !!(_cardSet && _cardSet.format==='G');
     if (deckPoolFormat === 'G' ? !_cardIsG : _cardIsG) return false;
-    if (deckPoolSetFilter !== 'ALL') { const s = SETS[SETS.findIndex(x=>x.id===deckPoolSetFilter)]; if (!s||!s.cards.find(c=>c.id===card.id)) return false; }
+    if (dpSetFilterIds && !dpSetFilterIds.has(card.id)) return false;
     if (deckPoolRarityFilter !== 'ALL' && card.rarity !== deckPoolRarityFilter) return false;
     if (deckPoolClanFilter !== 'ALL' && card.clan !== deckPoolClanFilter) return false;
     if (deckPoolTypeFilter !== 'ALL') {
@@ -1793,9 +1814,12 @@ function renderDeckPool() {
     const nameMaxed = nameCopies >= CARD_MAX_COPIES;
     const fvUsesThisId = isTheFV ? 1 : 0;
     const noMoreCopies = (inDeck + fvUsesThisId) >= owned;
-    const wrongClan = !isClanAllowed(card, getDeckClan());
-    const addBlocked = deckFull || nameMaxed || noMoreCopies || wrongClan;
-    let dimReason = wrongClan ? `Wrong clan (deck is ${getDeckClan()})` : nameMaxed ? `Max 4 copies of "${card.name}"` : noMoreCopies ? 'No spare copies' : deckFull ? 'Deck full' : '';
+    const deckClanNow = getDeckClan();
+    const wrongClan = !isClanAllowed(card, deckClanNow);
+    // Hide wrong-clan cards once a clan is established (except G Units which are always shown)
+    if (wrongClan && deckClanNow && !isGUnit(card)) return null;
+    const addBlocked = deckFull || nameMaxed || noMoreCopies;
+    let dimReason = nameMaxed ? `Max 4 copies of "${card.name}"` : noMoreCopies ? 'No spare copies' : deckFull ? 'Deck full' : '';
     const svgHandler = card.grade === 0 ? `oncontextmenu="event.preventDefault();setFirstVanguard(getAllCardById('${card.id}'))"` : '';
     const titleTip = card.grade===0
       ? `${card.name} — Click: add trigger | Right-click: set as SVG${dimReason?' ('+dimReason+')':''}`
@@ -1815,13 +1839,15 @@ function renderDeckPool() {
   }
 
   const DP_CHUNK = 80;
-  dpGrid.innerHTML = allCards.slice(0, DP_CHUNK).map(makeDeckCard).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Open packs to get cards first!</div>';
+  const _myEpoch = ++_dpRenderEpoch;
+  dpGrid.innerHTML = allCards.slice(0, DP_CHUNK).map(makeDeckCard).filter(Boolean).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Open packs to get cards first!</div>';
   let dpIdx = DP_CHUNK;
   function appendDpChunk() {
+    if (_myEpoch !== _dpRenderEpoch) return; // stale — a newer render started
     if (dpIdx >= allCards.length) return;
     const frag = document.createDocumentFragment();
     const div = document.createElement('div');
-    div.innerHTML = allCards.slice(dpIdx, dpIdx + DP_CHUNK).map(makeDeckCard).join('');
+    div.innerHTML = allCards.slice(dpIdx, dpIdx + DP_CHUNK).map(makeDeckCard).filter(Boolean).join('');
     while (div.firstChild) frag.appendChild(div.firstChild);
     dpGrid.appendChild(frag);
     dpIdx += DP_CHUNK;
@@ -1833,10 +1859,13 @@ function renderDeckPool() {
 // SVG counts as 1 of the 50-card deck (1 SVG + 49 main)
 let fvCard = null;
 
-// Cards whose name-count limit across the full 50 is tracked together across rarities
-// Cross-clan exception: Blaster Dark is allowed in Royal Paladin (Majesty Lord Blaster ruling)
+// Cross-clan exceptions:
+// Blaster Dark (Shadow Paladin) can be played in a Royal Paladin deck that contains Majesty Lord Blaster.
+// Majesty Lord Blaster is itself Royal Paladin, so no exception needed for it.
+// We allow Blaster Dark in Royal Paladin unconditionally (trusting the player knows the ruling).
 const CROSS_CLAN_ALLOW = {
   'Blaster Dark': ['Royal Paladin'],
+  // Majesty Lord Blaster is Royal Paladin — no cross-clan entry needed
 };
 
 function isClanAllowed(card, deckClan) {
@@ -1988,6 +2017,7 @@ function removeFromDeck(cardId) {
 function clearDeck() {
   if (!confirm('Clear the entire deck?')) return;
   deck = {};
+  fvCard = null;
   renderDeckPool();
   renderDeckPanel();
 }
@@ -2002,7 +2032,12 @@ function renderDeckPanel() {
 
   const grades = {};
   let triggers=0, heals=0, sentinels=0, gUnits=0;
-  if (fvCard) grades[0] = (grades[0]||0) + 1;
+  if (fvCard) {
+    grades[0] = (grades[0]||0) + 1;
+    if (isTrigger(fvCard)) triggers++;
+    if (isHeal(fvCard))    heals++;
+    if (isSentinel(fvCard)) sentinels++;
+  }
   for (const {card,count} of Object.values(deck)) {
     grades[card.grade] = (grades[card.grade]||0) + count;
     if (isTrigger(card))   triggers += count;
