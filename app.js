@@ -675,6 +675,8 @@ function selectTD(tdId) {
     p.src = `${IMG_BOXES}box-${tdId}.webp`;
   }
   renderSetButtons();
+  const _tdSet = SETS.find(s => s.id === tdId);
+  if (_tdSet) preloadSetImages(_tdSet);
 }
 
 function selectSet(idx) {
@@ -729,9 +731,54 @@ function selectSet(idx) {
     probe.src = url;
   })();
   renderSetButtons();
+  preloadSetImages(set);
 }
 
-// ==================== PACK LOGIC ====================
+// ==================== IMAGE PRELOADER ====================
+// When a set is selected, quietly preload all its card images in the background.
+// Uses a small concurrency limit so it doesn't compete with the UI or box art load.
+let _preloadQueue = [];
+let _preloadActive = 0;
+const _PRELOAD_CONCURRENCY = 4;
+let _preloadSetId = null; // track which set is currently preloading
+
+function preloadSetImages(set) {
+  if (!set || !set.cards) return;
+  if (_preloadSetId === set.id) return; // already preloading this set
+  _preloadSetId = set.id;
+
+  // Cancel any previous queue
+  _preloadQueue = [];
+  _preloadActive = 0;
+
+  // Build list of unique image URLs for this set
+  const urls = [];
+  for (const card of set.cards) {
+    const candidates = cardImgCandidates(card.id);
+    if (candidates.length) urls.push({ id: card.id, candidates, ci: 0 });
+  }
+
+  _preloadQueue = urls;
+  // Start up to CONCURRENCY workers
+  for (let i = 0; i < _PRELOAD_CONCURRENCY; i++) _preloadNext();
+}
+
+function _preloadNext() {
+  if (!_preloadQueue.length) { _preloadActive = Math.max(0, _preloadActive - 1); return; }
+  const item = _preloadQueue.shift();
+  _preloadActive++;
+  const img = new Image();
+  img.onload = () => { _preloadActive--; _preloadNext(); };
+  img.onerror = () => {
+    // Try next candidate for this card
+    if (item.ci < item.candidates.length - 1) {
+      item.ci++;
+      _preloadQueue.unshift(item); // retry with next candidate
+    }
+    _preloadActive--; _preloadNext();
+  };
+  img.src = item.candidates[item.ci];
+}
 function weightedPick(pool) {
   const total = pool.reduce((s,x) => s + x.weight, 0);
   let r = Math.random() * total;
