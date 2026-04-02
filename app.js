@@ -1027,6 +1027,21 @@ function revealCards() {
   stagedCards = [];
 }
 
+function resetPackStats() {
+  if (!confirm('Reset pack stats? This resets packs opened, pull history and session stats only. Your collection stays.')) return;
+  history = [];
+  totalPacks = 0;
+  packsSinceLastRRR = 0;
+  sessionStats = { totalPulled:0, byRarity:{}, bestPull:null, packPrice:sessionStats.packPrice, wishlistHits:0 };
+  stagedCards = [];
+  document.getElementById('total-packs').textContent = '0';
+  document.getElementById('reveal-section').classList.remove('active');
+  updatePityDisplay();
+  updateHistory();
+  updateStats();
+  showToast({ icon: '🔄', name: 'Pack stats reset', rarity: 'C' });
+}
+
 function clearCollection() {
   if (!confirm('Reset everything? This will clear your pack collection, history and stats.')) return;
   collection = {};
@@ -1449,7 +1464,7 @@ function buildGalleryFilters() {
   document.getElementById('gallery-clan-filters').innerHTML = clans.map(c =>
     `<button class="filter-btn ${c===galleryClanFilter?'active':''}" onclick="setGalleryClan('${c}')">${c==='ALL'?'All Clans':c}</button>`
   ).join('');
-  const types = ['ALL','Normal','Trigger','Critical','Draw','Stand','Heal','Sentinel','Wishlist'];
+  const types = ['ALL','Normal','Trigger','🗡 Critical','🃏 Draw','🔄 Stand','💚 Heal','Sentinel','Wishlist'];
   document.getElementById('gallery-type-filters').innerHTML = types.map(t =>
     `<button class="filter-btn ${t===galleryTypeFilter?'active':''}" onclick="setGalleryType('${t}')">${t==='ALL'?'All Types':t}</button>`
   ).join('');
@@ -1508,9 +1523,10 @@ function renderGallery() {
       if (galleryTypeFilter === 'Trigger' && !isTrigger(card)) return false;
       else if (galleryTypeFilter === 'Sentinel' && !isSentinel(card)) return false;
       else if (galleryTypeFilter === 'Heal' && !isHeal(card)) return false;
-      else if (galleryTypeFilter === 'Critical' && getTriggerType(card) !== 'Critical') return false;
-      else if (galleryTypeFilter === 'Draw' && getTriggerType(card) !== 'Draw') return false;
-      else if (galleryTypeFilter === 'Stand' && getTriggerType(card) !== 'Stand') return false;
+      else if (galleryTypeFilter === 'Critical' || galleryTypeFilter === '🗡 Critical') { if (getTriggerType(card) !== 'Critical') return false; }
+      else if (galleryTypeFilter === 'Draw' || galleryTypeFilter === '🃏 Draw') { if (getTriggerType(card) !== 'Draw') return false; }
+      else if (galleryTypeFilter === 'Stand' || galleryTypeFilter === '🔄 Stand') { if (getTriggerType(card) !== 'Stand') return false; }
+      else if (galleryTypeFilter === '💚 Heal') { if (!isHeal(card)) return false; }
       else if (galleryTypeFilter === 'Normal' && (card.grade === 0 || isSentinel(card))) return false;
     }
     if (galleryGradeFilter === 'GUNITS') { if (!isGUnit(card)) return false; }
@@ -1787,7 +1803,7 @@ function buildDeckPoolFilters() {
   const RARITY_ORDER_ALL2 = ['ALL','C','R','RR','RRR','SP','LR','SCR','GR','SGR'];
   const presentRarities2 = new Set(getAllSetCards().map(c=>c.rarity));
   const rarities = RARITY_ORDER_ALL2.filter(r => r==='ALL'||presentRarities2.has(r));
-  const types = ['ALL','Normal','Critical','Draw','Stand','Heal','Sentinel'];
+  const types = ['ALL','Normal','Trigger','🗡 Critical','🃏 Draw','🔄 Stand','💚 Heal','Sentinel'];
   const maxGrade2 = Math.max(...getAllSetCards().map(c=>c.grade));
   const grades = ['ALL',...Array.from({length:maxGrade2+1},(_,i)=>String(i))];
   const btn = (label, active, onclick) =>
@@ -1829,10 +1845,13 @@ function renderDeckPool() {
     if (deckPoolRarityFilter !== 'ALL' && card.rarity !== deckPoolRarityFilter) return false;
     if (deckPoolClanFilter !== 'ALL' && card.clan !== deckPoolClanFilter) return false;
     if (deckPoolTypeFilter !== 'ALL') {
-      if (deckPoolTypeFilter === 'Trigger' && !isTrigger(card)) return false;
+      if ((deckPoolTypeFilter === 'Trigger') && !isTrigger(card)) return false;
       else if (deckPoolTypeFilter === 'Sentinel' && !isSentinel(card)) return false;
-      else if (deckPoolTypeFilter === 'Heal' && !isHeal(card)) return false;
+      else if (deckPoolTypeFilter === 'Heal' || deckPoolTypeFilter === '💚 Heal') { if (!isHeal(card)) return false; }
       else if (deckPoolTypeFilter === 'Normal' && (card.grade === 0 || isSentinel(card))) return false;
+      else if (deckPoolTypeFilter === '🗡 Critical') { if (getTriggerType(card) !== 'Critical') return false; }
+      else if (deckPoolTypeFilter === '🃏 Draw') { if (getTriggerType(card) !== 'Draw') return false; }
+      else if (deckPoolTypeFilter === '🔄 Stand') { if (getTriggerType(card) !== 'Stand') return false; }
       else if (['Critical','Draw','Stand'].includes(deckPoolTypeFilter) && getTriggerType(card) !== deckPoolTypeFilter) return false;
     }
     if (deckPoolGradeFilter === 'GUNITS') { if (!isGUnit(card)) return false; }
@@ -2006,8 +2025,56 @@ function addToDeck(card) {
 
   if (!deck[card.id]) deck[card.id] = { card, count: 0 };
   deck[card.id].count++;
-  renderDeckPool();
+  // Refresh only the affected card in the pool (avoid full re-render)
+  _refreshPoolCard(card.id);
   renderDeckPanel();
+}
+
+// Update a single pool card's badge + blocked state without re-rendering the whole pool
+function _refreshPoolCard(cardId) {
+  // Find all pool-card elements for this id and nearby cards that share the same name
+  // (nameMaxed state may change for cards with the same base name)
+  const affected = new Set();
+  affected.add(cardId);
+  const card = getAllCardById(cardId);
+  if (card) {
+    const baseName = getDeckName(card);
+    // Also refresh cards sharing the same base name (copy-limit affects them all)
+    for (const {card:c} of Object.values(deck)) {
+      if (getDeckName(c) === baseName) affected.add(c.id);
+    }
+    for (const c of getAllSetCards()) {
+      if (getDeckName(c) === baseName && collection[c.id]) affected.add(c.id);
+    }
+  }
+  // Re-render only those elements
+  const deckClanNow = getDeckClan();
+  for (const id of affected) {
+    const el = document.querySelector(`.pool-card img[data-id="${id}"]`)?.closest('.pool-card');
+    if (!el) continue;
+    const c = getAllCardById(id);
+    if (!c) continue;
+    const owned = collection[id]?.count || 0;
+    const inDeck = deck[id]?.count || 0;
+    const isTheFV = fvCard && fvCard.id === id;
+    const deckFull = getDeckTotal() >= DECK_MAX;
+    const nameMaxed = countByName(getDeckName(c)) >= CARD_MAX_COPIES;
+    const noMoreCopies = (inDeck + (isTheFV?1:0)) >= owned;
+    const addBlocked = deckFull || nameMaxed || noMoreCopies;
+    el.classList.toggle('maxed', addBlocked);
+    const badge = el.querySelector('.pc-count-badge');
+    if (badge) badge.textContent = owned + 'x';
+    const inDeckEl = el.querySelector('.pc-in-deck');
+    if (inDeck > 0) {
+      if (inDeckEl) inDeckEl.textContent = inDeck + ' in deck';
+      else {
+        const d = document.createElement('div');
+        d.className = 'pc-in-deck';
+        d.textContent = inDeck + ' in deck';
+        el.appendChild(d);
+      }
+    } else if (inDeckEl) inDeckEl.remove();
+  }
 }
 
 function setFirstVanguard(card) {
@@ -2191,8 +2258,9 @@ function exportDeck() {
   text += `Clan: ${deckClan||'N/A'} | Total: ${total}/50\n\n`;
 
   if (fvCard) {
+    const fvTag = isHeal(fvCard)?' [Heal]':isSentinel(fvCard)?' [Sentinel]':isTrigger(fvCard)?' [Trigger]':'';
     text += `── First Vanguard ──\n`;
-    text += `1x ${fvCard.name} (${fvCard.id})\n\n`;
+    text += `1x ${fvCard.name} (${fvCard.id}) [${fvCard.rarity}]${fvTag}\n\n`;
   }
   for (const g of Array.from({length:maxGex+1},(_,i)=>maxGex-i)) {
     if (!byGrade[g].length) continue;
@@ -2284,8 +2352,12 @@ async function exportDeckImage() {
   ctx.font = '13px "Arial", sans-serif';
   ctx.fillText(`${deckClan}  ·  ${total} / 50 cards`, GAP*2+10, 70);
 
-  // Trigger summary bar
+  // Trigger summary bar (include FV if it's a trigger)
   const trigCounts = {Critical:0,Draw:0,Stand:0,Heal:0};
+  if (fvCard) {
+    const t = getTriggerType(fvCard);
+    if (t && trigCounts[t] !== undefined) trigCounts[t]++;
+  }
   for (const {card,count} of Object.values(deck)) {
     const t = getTriggerType(card);
     if (t && trigCounts[t] !== undefined) trigCounts[t] += count;

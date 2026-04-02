@@ -962,77 +962,141 @@
 @media (max-width: 767px) {
   :root {
     --sidebar-w: 100%;
-    --card-gap: 6px;
+    --card-gap: 5px;
+    --card-w: calc((100vw - 40px) / 5);
+    --card-h: calc(var(--card-w) * 200 / 137);
+    --pool-w: calc((100vw - 60px) / 5);
+    --pool-h: calc(var(--pool-w) * 146 / 100);
   }
 
   /* Stack layout vertically on mobile */
   .app {
     grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto 1fr;
   }
 
   header {
-    padding: 10px 16px;
+    padding: 10px 14px;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
-  .header-stats { gap: 10px; flex-wrap: wrap; }
-  .stat-pill { font-size: 11px; padding: 3px 8px; }
+  .header-stats { gap: 8px; flex-wrap: wrap; }
+  .stat-pill { font-size: 10px; padding: 2px 7px; }
+  .logo-text { font-size: 16px; }
+
+  /* Both panels go full width, stacked */
+  .pack-sim-panel { grid-column: 1; border-right: none; border-bottom: 1px solid var(--border); overflow-y: auto; }
+  .collection-panel { grid-column: 1; overflow-y: auto; }
+
+  /* Set buttons scroll horizontally */
+  .set-group-headers { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
+  .set-group-label { white-space: nowrap; }
+  .set-group-cards { flex-wrap: wrap; }
 
   /* Pack area stacks vertically */
   .pack-area {
     flex-direction: column;
     align-items: flex-start;
-    padding: 16px;
-    gap: 16px;
+    padding: 14px;
+    gap: 12px;
     border-radius: 0;
     border-left: none;
     border-right: none;
   }
-  .pack-visual { width: 90px; }
-  .pack-info h2 { font-size: 20px; }
-  .open-btns { flex-wrap: wrap; }
-  .btn { padding: 9px 14px; font-size: 13px; }
+  .pack-visual { width: 80px; }
+  .pack-info h2 { font-size: 18px; }
+  .pack-info p { font-size: 12px; margin-bottom: 12px; }
+  .open-btns { flex-wrap: wrap; gap: 6px; }
+  .btn { padding: 8px 12px; font-size: 12px; }
 
-  /* Cards grid: 5-card pack fits exactly on mobile */
-  :root {
-    --card-w: calc((100vw - 48px) / 5);
-    --card-h: calc(var(--card-w) * 200 / 137);
-  }
-  .cards-grid.pack-7 {
-    /* 7 cards: allow horizontal scroll on mobile */
-    grid-template-columns: repeat(7, var(--card-w));
-    overflow-x: auto;
-  }
+  /* Cards grid: 5-card fits exactly; 7-card scrolls */
   .cards-grid-wrap {
     overflow-x: auto;
     overflow-y: visible;
     max-height: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .cards-grid.pack-7 {
+    grid-template-columns: repeat(7, var(--card-w));
+    min-width: max-content;
   }
 
-  /* Set panel becomes full width */
-  .set-panel { border-right: none; border-bottom: 1px solid var(--border); }
-
-  /* Gallery full screen */
+  /* Gallery — full screen with working close button */
   .gallery-overlay { flex-direction: column; }
-  .gallery-header { border-bottom: 1px solid var(--border); }
+  .gallery-header-top {
+    position: relative;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+  /* Ensure close button is always tappable on mobile */
+  .gallery-header-top .btn {
+    position: relative;
+    z-index: 10;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
   .gallery-grid { grid-template-columns: repeat(auto-fill, var(--card-w)); }
+  .gallery-body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
-  /* Deck builder full screen on mobile */
-  .deck-overlay { flex-direction: column; }
-  .deck-body { grid-template-columns: 1fr; }
-  .deck-panel { display: none; } /* hide stats panel on mobile to save space */
+  /* Deck builder — full screen, show deck panel below pool */
+  .deck-overlay {
+    display: flex !important;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .deck-header {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 14px;
+    flex-shrink: 0;
+  }
+  .deck-header h2 { font-size: 18px; }
+  .deck-header .btn { min-height: 36px; }
+  .deck-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+    flex: 1;
+  }
+  .deck-pool {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  /* Show deck panel below the pool on mobile (collapsed by default) */
+  .deck-panel {
+    display: block;
+    overflow-y: auto;
+    max-height: 40vh;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+  }
+  .deck-stats-grid { grid-template-columns: repeat(3, 1fr); }
 
-  /* Collection sidebar goes below on mobile */
-  .pack-sim-panel, .collection-panel {
-    grid-column: 1;
+  /* Make FV right-click work on touch: add a long-press hint */
+  .pool-card[data-grade="0"]::after {
+    content: 'Hold = FV';
+    position: absolute;
+    bottom: 2px;
+    left: 0; right: 0;
+    font-size: 6px;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    pointer-events: none;
   }
 }
 
 /* ── Phone landscape / small tablet (480px–767px) ── */
 @media (min-width: 480px) and (max-width: 767px) {
   :root {
-    --card-w: calc((100vw - 60px) / 5);
+    --card-w: calc((100vw - 50px) / 5);
     --card-h: calc(var(--card-w) * 200 / 137);
   }
 }
