@@ -2291,10 +2291,216 @@ async function exportDeckImage() {
   for (const {card,count} of Object.values(deck)) byGrade[card.grade].push({card,count});
   for (let g=0; g<=maxGimg; g++) byGrade[g].sort((a,b)=>a.card.name.localeCompare(b.card.name));
 
-  // ── Layout constants ──
-  const CARD_W = 72, CARD_H = 100, GAP = 6, COLS = 10;
-  const SECTION_HEADER_H = 28, TOP_H = 110, BOTTOM_PAD = 24;
+  // ── Layout constants — high resolution ──
+  // Use larger card size and scale canvas by 2x for crisp output
+  const SCALE = 2;               // render at 2x then canvas CSS size stays logical
+  const CARD_W = 120, CARD_H = 175, GAP = 10, COLS = 10;
+  const SECTION_HEADER_H = 36, TOP_H = 150, BOTTOM_PAD = 32;
   const COL_W = CARD_W + GAP;
+
+  // Count rows needed per grade section
+  function gradeRows(g) {
+    const cards = byGrade[g];
+    if (!cards.length) return 0;
+    const items = g === 0 && fvCard
+      ? [{card:fvCard,count:1,isFV:true}, ...cards]
+      : cards;
+    return Math.ceil(items.length / COLS);
+  }
+
+  const sections = Array.from({length:maxGimg+1},(_,i)=>maxGimg-i);
+  let totalHeight = TOP_H;
+  for (const g of sections) {
+    const rows = gradeRows(g);
+    if (rows > 0) totalHeight += SECTION_HEADER_H + rows * (CARD_H + GAP) + GAP;
+  }
+  totalHeight += BOTTOM_PAD;
+
+  const WIDTH = COLS * COL_W + GAP * 2;
+
+  // Create canvas at 2x resolution for crisp output
+  const canvas = document.createElement('canvas');
+  canvas.width  = WIDTH  * SCALE;
+  canvas.height = totalHeight * SCALE;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE);
+
+  // ── Background ──
+  ctx.fillStyle = '#14171f';
+  ctx.fillRect(0, 0, WIDTH, totalHeight);
+
+  // Subtle grid texture
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < WIDTH; x += 20) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,totalHeight); ctx.stroke(); }
+  for (let y = 0; y < totalHeight; y += 20) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(WIDTH,y); ctx.stroke(); }
+
+  // ── Header ──
+  const grad = ctx.createLinearGradient(0,0,WIDTH,0);
+  grad.addColorStop(0,'#4f8ef7'); grad.addColorStop(1,'#7c3aed');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, WIDTH, 5);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 32px "Arial", sans-serif';
+  ctx.fillText(deckName, GAP*2, 48);
+
+  ctx.fillStyle = 'rgba(79,142,247,0.18)';
+  roundRect(ctx, GAP*2, 60, 280, 32, 7);
+  ctx.fill();
+  ctx.fillStyle = '#4f8ef7';
+  ctx.font = '15px "Arial", sans-serif';
+  ctx.fillText(`${deckClan}  ·  ${total} / 50 cards`, GAP*2+12, 82);
+
+  // Trigger summary bar (include FV if it's a trigger)
+  const trigCounts = {Critical:0,Draw:0,Stand:0,Heal:0};
+  if (fvCard) {
+    const t = getTriggerType(fvCard);
+    if (t && trigCounts[t] !== undefined) trigCounts[t]++;
+  }
+  for (const {card,count} of Object.values(deck)) {
+    const t = getTriggerType(card);
+    if (t && trigCounts[t] !== undefined) trigCounts[t] += count;
+  }
+  const trigColors = {Critical:'#f0b429',Draw:'#e67820',Stand:'#3b82f6',Heal:'#3dbf7f'};
+  let tx = GAP*2;
+  for (const [t,cnt] of Object.entries(trigCounts)) {
+    if (!cnt) continue;
+    ctx.fillStyle = trigColors[t]+'33';
+    roundRect(ctx, tx, 102, 120, 26, 6);
+    ctx.fill();
+    ctx.fillStyle = trigColors[t];
+    ctx.font = 'bold 12px "Arial"';
+    ctx.fillText(`${t}  ${cnt}x`, tx+10, 119);
+    tx += 128;
+  }
+
+  // ── Card sections ──
+  let y = TOP_H;
+
+  async function loadImg(src) {
+    return new Promise(res => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload  = () => res(img);
+      img.onerror = () => res(null);
+      img.src = src;
+    });
+  }
+
+  const RARITY_COLORS = {
+    RRR:'#f0b429', RR:'#a78bfa', R:'#60a5fa', C:'#6b7280', SP:'#f472b6', TD:'#9ca3af'
+  };
+
+  async function drawCardSlot(card, count, cx, cy, isFV=false) {
+    const img = await loadImg(cardImgPath(card.id));
+    if (img) {
+      ctx.drawImage(img, cx, cy, CARD_W, CARD_H);
+    } else {
+      ctx.fillStyle = RARITY_COLORS[card.rarity] || '#374151';
+      roundRect(ctx, cx, cy, CARD_W, CARD_H, 6);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 9px Arial';
+      ctx.textAlign = 'center';
+      const words = card.name.split(' ');
+      let line = '', lineY = cy + CARD_H/2 - 10;
+      for (const w of words) {
+        const test = line + (line?` ${w}`:w);
+        if (ctx.measureText(test).width > CARD_W - 8) {
+          ctx.fillText(line, cx + CARD_W/2, lineY); lineY += 12; line = w;
+        } else { line = test; }
+      }
+      if (line) ctx.fillText(line, cx + CARD_W/2, lineY);
+      ctx.textAlign = 'left';
+    }
+
+    // Border
+    ctx.strokeStyle = isFV ? '#4f8ef7' : 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = isFV ? 2.5 : 1;
+    roundRect(ctx, cx, cy, CARD_W, CARD_H, 6);
+    ctx.stroke();
+
+    // Count badge
+    if (count > 1) {
+      ctx.fillStyle = 'rgba(0,0,0,0.8)';
+      roundRect(ctx, cx+CARD_W-26, cy+3, 23, 18, 4);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 11px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${count}x`, cx+CARD_W-14, cy+15);
+      ctx.textAlign = 'left';
+    }
+
+    // FV badge
+    if (isFV) {
+      ctx.fillStyle = '#4f8ef7';
+      roundRect(ctx, cx+3, cy+3, 34, 16, 4);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 9px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('★ FV', cx+20, cy+14);
+      ctx.textAlign = 'left';
+    }
+
+    // Trigger/Sentinel bottom strip
+    const ttype = getTriggerType(card);
+    const isSent = isSentinel(card);
+    if (ttype || isSent) {
+      const label = isSent ? '🛡 Sentinel' : {Critical:'🗡 Critical',Draw:'🃏 Draw',Stand:'🔄 Stand',Heal:'💚 Heal'}[ttype]||ttype;
+      const col   = isSent ? '#f0b429' : trigColors[ttype]||'#555';
+      ctx.fillStyle = col;
+      roundRect(ctx, cx, cy+CARD_H-18, CARD_W, 18, {bl:6,br:6,tl:0,tr:0});
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 9px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, cx+CARD_W/2, cy+CARD_H-5);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  for (const g of sections) {
+    const items = g === 0 && fvCard
+      ? [{card:fvCard,count:1,isFV:true}, ...byGrade[g]]
+      : byGrade[g].map(x=>({...x,isFV:false}));
+    if (!items.length) continue;
+
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(0, y, WIDTH, SECTION_HEADER_H);
+    ctx.fillStyle = '#4f8ef7';
+    ctx.font = 'bold 15px Arial';
+    ctx.fillText(`GRADE ${g}`, GAP*2, y+23);
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '12px Arial';
+    const gTotal = items.reduce((s,x)=>s+x.count,0);
+    ctx.fillText(`${gTotal} cards`, GAP*2+110, y+23);
+    y += SECTION_HEADER_H + GAP;
+
+    for (let i = 0; i < items.length; i++) {
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+      const cx  = GAP + col * COL_W;
+      const cy  = y   + row * (CARD_H + GAP);
+      await drawCardSlot(items[i].card, items[i].count, cx, cy, items[i].isFV);
+    }
+
+    const rows = Math.ceil(items.length / COLS);
+    y += rows * (CARD_H + GAP) + GAP;
+  }
+
+  ctx.fillStyle = '#374151';
+  ctx.font = '11px Arial';
+  ctx.fillText('Generated by Vanguard Pack Simulator', GAP*2, totalHeight - 10);
+
+  const link = document.createElement('a');
+  link.download = `${deckName.replace(/[^a-z0-9]/gi,'_')}_deck.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast({icon:'🖼',name:'Deck image exported!',rarity:'C'});
+}
 
   // Count rows needed per grade section
   function gradeRows(g) {
@@ -2390,125 +2596,7 @@ async function exportDeckImage() {
     });
   }
 
-  // Rarity colours for placeholder
-  const RARITY_COLORS = {
-    RRR:'#f0b429', RR:'#a78bfa', R:'#60a5fa', C:'#6b7280', SP:'#f472b6', TD:'#9ca3af'
-  };
 
-  async function drawCardSlot(card, count, cx, cy, isFV=false) {
-    const img = await loadImg(cardImgPath(card.id));
-    if (img) {
-      ctx.drawImage(img, cx, cy, CARD_W, CARD_H);
-    } else {
-      // Fallback coloured placeholder
-      ctx.fillStyle = RARITY_COLORS[card.rarity] || '#374151';
-      roundRect(ctx, cx, cy, CARD_W, CARD_H, 5);
-      ctx.fill();
-      // Card name text
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 8px Arial';
-      ctx.textAlign = 'center';
-      const words = card.name.split(' ');
-      let line = '', lineY = cy + CARD_H/2 - 8;
-      for (const w of words) {
-        const test = line + (line?` ${w}`:w);
-        if (ctx.measureText(test).width > CARD_W - 6) {
-          ctx.fillText(line, cx + CARD_W/2, lineY); lineY += 10; line = w;
-        } else { line = test; }
-      }
-      if (line) ctx.fillText(line, cx + CARD_W/2, lineY);
-      ctx.textAlign = 'left';
-    }
-
-    // Rounded border
-    ctx.strokeStyle = isFV ? '#4f8ef7' : 'rgba(255,255,255,0.12)';
-    ctx.lineWidth = isFV ? 2 : 1;
-    roundRect(ctx, cx, cy, CARD_W, CARD_H, 5);
-    ctx.stroke();
-
-    // Count badge (top-right)
-    if (count > 1) {
-      ctx.fillStyle = 'rgba(0,0,0,0.75)';
-      roundRect(ctx, cx+CARD_W-22, cy+2, 20, 16, 4);
-      ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 10px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(`${count}x`, cx+CARD_W-12, cy+13);
-      ctx.textAlign = 'left';
-    }
-
-    // FV badge
-    if (isFV) {
-      ctx.fillStyle = '#4f8ef7';
-      roundRect(ctx, cx+2, cy+2, 28, 14, 3);
-      ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 8px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('★ FV', cx+16, cy+12);
-      ctx.textAlign = 'left';
-    }
-
-    // Trigger badge bottom strip
-    const ttype = getTriggerType(card);
-    const isSent = isSentinel(card);
-    if (ttype || isSent) {
-      const label = isSent ? '🛡 S' : {Critical:'⚡C',Draw:'➕D',Stand:'🔄St',Heal:'💚H'}[ttype]||ttype;
-      const col   = isSent ? '#f0b429' : trigColors[ttype]||'#555';
-      ctx.fillStyle = col;
-      roundRect(ctx, cx, cy+CARD_H-14, CARD_W, 14, {bl:5,br:5,tl:0,tr:0});
-      ctx.fill();
-      ctx.fillStyle = '#000';
-      ctx.font = 'bold 8px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(label, cx+CARD_W/2, cy+CARD_H-4);
-      ctx.textAlign = 'left';
-    }
-  }
-
-  for (const g of sections) {
-    const items = g === 0 && fvCard
-      ? [{card:fvCard,count:1,isFV:true}, ...byGrade[g]]
-      : byGrade[g].map(x=>({...x,isFV:false}));
-    if (!items.length) continue;
-
-    // Section header
-    ctx.fillStyle = 'rgba(255,255,255,0.06)';
-    ctx.fillRect(0, y, WIDTH, SECTION_HEADER_H);
-    ctx.fillStyle = '#4f8ef7';
-    ctx.font = 'bold 13px Arial';
-    ctx.fillText(`GRADE ${g}`, GAP*2, y+18);
-    ctx.fillStyle = '#6b7280';
-    ctx.font = '11px Arial';
-    const gTotal = items.reduce((s,x)=>s+x.count,0);
-    ctx.fillText(`${gTotal} cards`, GAP*2+90, y+18);
-    y += SECTION_HEADER_H + GAP;
-
-    for (let i = 0; i < items.length; i++) {
-      const col = i % COLS;
-      const row = Math.floor(i / COLS);
-      const cx  = GAP + col * COL_W;
-      const cy  = y   + row * (CARD_H + GAP);
-      await drawCardSlot(items[i].card, items[i].count, cx, cy, items[i].isFV);
-    }
-
-    const rows = Math.ceil(items.length / COLS);
-    y += rows * (CARD_H + GAP) + GAP;
-  }
-
-  // Footer
-  ctx.fillStyle = '#374151';
-  ctx.font = '10px Arial';
-  ctx.fillText('Generated by Vanguard Pack Simulator', GAP*2, totalHeight - 8);
-
-  // Download
-  const link = document.createElement('a');
-  link.download = `${deckName.replace(/[^a-z0-9]/gi,'_')}_deck.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  showToast({icon:'🖼',name:'Deck image exported!',rarity:'RRR'});
-}
 
 // Helper: rounded rectangle path (supports per-corner radii object or single number)
 function roundRect(ctx, x, y, w, h, r) {
