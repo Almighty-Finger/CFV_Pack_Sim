@@ -1997,10 +1997,11 @@ function addToDeck(card) {
     if (healCount >= 4) { showToast({icon:'⚠️',name:'Max 4 heal triggers in a deck',rarity:'C'}); return; }
   }
 
-  // Trigger limit: max 16 in main deck
+  // Trigger limit: max 16 total (main deck + FV)
   if (isTrigger(card)) {
     const triggerCount = Object.values(deck).filter(x=>isTrigger(x.card)).reduce((s,x)=>s+x.count,0);
-    if (triggerCount >= 16) { showToast({icon:'⚠️',name:'Max 16 triggers in a deck',rarity:'C'}); return; }
+    const fvTrigger = (fvCard && isTrigger(fvCard)) ? 1 : 0;
+    if (triggerCount + fvTrigger >= 16) { showToast({icon:'⚠️',name:'Max 16 triggers in a deck',rarity:'C'}); return; }
   }
 
   if (!deck[card.id]) deck[card.id] = { card, count: 0 };
@@ -2078,19 +2079,27 @@ function renderDeckPanel() {
   document.getElementById('ds-bar').style.background = barColor;
 
   const grades = {};
-  let triggers=0, heals=0, sentinels=0, gUnits=0;
+  let triggers=0, heals=0, crits=0, draws=0, stands=0, sentinels=0, gUnits=0;
   if (fvCard) {
     grades[0] = (grades[0]||0) + 1;
-    if (isTrigger(fvCard)) triggers++;
-    if (isHeal(fvCard))    heals++;
+    if (isTrigger(fvCard))  triggers++;
+    if (isHeal(fvCard))     heals++;
     if (isSentinel(fvCard)) sentinels++;
+    const fvt = getTriggerType(fvCard);
+    if (fvt === 'Critical') crits++;
+    else if (fvt === 'Draw') draws++;
+    else if (fvt === 'Stand') stands++;
   }
   for (const {card,count} of Object.values(deck)) {
     grades[card.grade] = (grades[card.grade]||0) + count;
-    if (isTrigger(card))   triggers += count;
-    if (isHeal(card))      heals    += count;
-    if (isSentinel(card))  sentinels+= count;
-    if (isGUnit(card))     gUnits   += count;
+    if (isTrigger(card))   triggers  += count;
+    if (isHeal(card))      heals     += count;
+    if (isSentinel(card))  sentinels += count;
+    if (isGUnit(card))     gUnits    += count;
+    const tt = getTriggerType(card);
+    if (tt === 'Critical') crits  += count;
+    else if (tt === 'Draw')  draws  += count;
+    else if (tt === 'Stand') stands += count;
   }
   document.getElementById('ds-g0').textContent = grades[0]||0;
   document.getElementById('ds-g1').textContent = grades[1]||0;
@@ -2101,14 +2110,23 @@ function renderDeckPanel() {
     g4el.innerHTML = `${gUnits||0}<span style="font-size:11px;opacity:0.6">/16</span>`;
     g4el.style.color = gUnits >= 16 ? 'var(--green)' : gUnits > 0 ? 'var(--rarity-lr)' : 'var(--rarity-lr)';
   }
-  document.getElementById('ds-triggers').textContent = `${triggers} (💚${heals} 🛡${sentinels})`;
+  const trigTotalEl = document.getElementById('ds-trig-total');
+  if (trigTotalEl) trigTotalEl.textContent = triggers;
+  const trigCritEl = document.getElementById('ds-trig-crit');
+  if (trigCritEl) trigCritEl.textContent = crits;
+  const trigDrawEl = document.getElementById('ds-trig-draw');
+  if (trigDrawEl) trigDrawEl.textContent = draws;
+  const trigStandEl = document.getElementById('ds-trig-stand');
+  if (trigStandEl) trigStandEl.textContent = stands;
+  const trigHealEl = document.getElementById('ds-trig-heal');
+  if (trigHealEl) trigHealEl.textContent = heals;
 
   // Validation checks
   const checks = [
     { ok: total === DECK_MAX,        warn: total > 0 && total < DECK_MAX,  msg: `Main Deck: ${total}/50` },
     { ok: !!fvCard,                 warn: false,                           msg: `First Vanguard (FV): ${fvCard ? '★ '+fvCard.name : 'Not set — right-click a G0'}` },
     { ok: !!getDeckClan(),           warn: false,                           msg: `Clan: ${getDeckClan()||'None yet'}` },
-    { ok: triggers === 16,           warn: triggers > 0 && triggers < 16,  msg: `Triggers: ${triggers}/16` },
+    { ok: triggers === 16, warn: triggers > 0 && triggers < 16, msg: `Triggers: ${triggers}/16 (🗡${crits} 🃏${draws} 🔄${stands} 💚${heals} 🛡${sentinels})` },
     { ok: heals <= 4,                warn: heals > 0 && heals < 4,         msg: `Heal triggers: ${heals}/4 max` },
     { ok: sentinels <= 4,            warn: sentinels > 0 && sentinels < 4, msg: `Sentinels: ${sentinels}/4 max` },
     { ok: gUnits === 16,               warn: gUnits > 0 && gUnits < 16,       msg: `G Zone: ${gUnits}/16` },
