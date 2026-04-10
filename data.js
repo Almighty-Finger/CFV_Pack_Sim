@@ -3068,7 +3068,7 @@ const SLOT_RULES_5_EB_LR      = [ { raritiesAllowed:["C"] }, { raritiesAllowed:[
 const SLOT_RULES_5_GEB_OLD    = SLOT_RULES_5_EB;
 
 // Generate a 5-card pack with exactly 2 triggers total
-function generatePack5(cards, rplusPool, forcedRarity) {
+function generatePack5(cards, rplusPool, forcedRarity, variableTrigger) {
   const used = new Set();
 
   const normalCPool = cards.filter(c => c.rarity === 'C' && !c.trigger && !c.sentinel);
@@ -3099,32 +3099,31 @@ function generatePack5(cards, rplusPool, forcedRarity) {
     return picked;
   }
 
-  // Roll R+ first so we know if it's a trigger
   const rPlusCard = pickRplus(forcedRarity);
-  const rPlusIsTrigger = !!(rPlusCard.trigger && rPlusCard.trigger !== 'Sentinel');
-
-  // Pack layout rules:
-  // Pack A (50%): slots 1-2 = normal, slots 3-4 = trigger, slot 5 = R+
-  // Pack B (50%): slots 1-3 = normal, slot 4 = trigger,    slot 5 = R+
-  // Pack C: same as A or B but R+ happens to be a trigger (natural from weighted roll)
-  // Triggers ONLY appear in positions 3, 4 (and 5 if R+ is a trigger)
-  // Max 2 triggers per pack total
-
-  const isTwoTriggerPack = Math.random() < 0.5; // 50/50 between Pack A and Pack B
 
   let slot1, slot2, slot3, slot4;
 
-  if (isTwoTriggerPack) {
-    // Pack A: [normal, normal, trigger, trigger, R+]
+  if (variableTrigger) {
+    // BT01-05 / EB01-07: variable — Pack A (2 triggers) or Pack B (1 trigger), 50/50
+    const isTwoTriggerPack = Math.random() < 0.5;
+    if (isTwoTriggerPack) {
+      // Pack A: [normal, normal, trigger, trigger, R+]
+      slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+      slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+      slot3 = pickFrom(trigCPool, normalCPool);
+      slot4 = pickFrom(trigCPool, normalCPool);
+    } else {
+      // Pack B: [normal, normal, normal, trigger, R+]
+      slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+      slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+      slot3 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+      slot4 = pickFrom(trigCPool, normalCPool);
+    }
+  } else {
+    // BT06+ / EB08+: always 2 triggers in slots 3 & 4
     slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
     slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
     slot3 = pickFrom(trigCPool, normalCPool);
-    slot4 = pickFrom(trigCPool, normalCPool);
-  } else {
-    // Pack B: [normal, normal, normal, trigger, R+]
-    slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
-    slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
-    slot3 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
     slot4 = pickFrom(trigCPool, normalCPool);
   }
 
@@ -3134,7 +3133,7 @@ function generatePack5(cards, rplusPool, forcedRarity) {
 // ── Box opening with FIXED rates ─────────────────────────────────────────────
 // BT box (30 packs): exactly 22R + 5RR + 3RRR. SP replaces one RRR slot (1 per 4 boxes).
 // EB box (15 packs): exactly 11R + 3RR + 1RRR.
-function generateBox5(cards, rplusPool, boxPacks, isEB) {
+function generateBox5(cards, rplusPool, boxPacks, isEB, variableTrigger) {
   // Build the fixed rarity sequence for this box
   let rarities = [];
   if (isEB) {
@@ -3164,7 +3163,7 @@ function generateBox5(cards, rplusPool, boxPacks, isEB) {
   // Generate each pack with its forced R+ rarity
   const allCards = [];
   for (let i = 0; i < boxPacks; i++) {
-    allCards.push(...generatePack5(cards, rplusPool, rarities[i]));
+    allCards.push(...generatePack5(cards, rplusPool, rarities[i], variableTrigger));
   }
   return allCards;
 }

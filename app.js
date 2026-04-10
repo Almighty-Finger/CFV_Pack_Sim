@@ -863,10 +863,17 @@ function generatePack() {
     const slots = num >= 7 ? SLOT_RULES_7_GBT07 : num >= 4 ? SLOT_RULES_7_GBT04 : SLOT_RULES_7_GBT01;
     return slots.map(slot => rollSlot(set.cards, slot, used));
   }
-  if (isEB && id.match(/EB1[012]/))       return generatePack5(set.cards, RPLUS_EB_LR);
-  if (isEB)                               return generatePack5(set.cards, RPLUS_EB);
-  if (isBT && id.match(/BT1[67]/))        return generatePack5(set.cards, RPLUS_BT_LR);
-  return generatePack5(set.cards, RPLUS_BT);
+
+  // variableTrigger = true for early sets (BT01-05, EB01-07): 1 or 2 triggers per pack
+  // false for later sets (BT06+, EB08+): always 2 triggers
+  const btNum = isBT ? parseInt(id.replace('BT','')) : 99;
+  const ebNum = isEB ? parseInt(id.replace('EB','')) : 99;
+  const variableTrigger = (isBT && btNum <= 5) || (isEB && ebNum <= 7);
+
+  if (isEB && id.match(/EB1[012]/))  return generatePack5(set.cards, RPLUS_EB_LR, null, variableTrigger);
+  if (isEB)                          return generatePack5(set.cards, RPLUS_EB,    null, variableTrigger);
+  if (isBT && id.match(/BT1[67]/))   return generatePack5(set.cards, RPLUS_BT_LR, null, variableTrigger);
+  return generatePack5(set.cards, RPLUS_BT, null, variableTrigger);
 }
 
 // ==================== OPEN PACK ====================
@@ -895,10 +902,13 @@ function stageBox() {
   if (is5card) {
     const id = set.id;
     const isEB = id.startsWith('EB') || isGEBOld;
+    const btNum = id.startsWith('BT') ? parseInt(id.replace('BT','')) : 99;
+    const ebNum = isEB ? parseInt(id.replace('EB','')) : 99;
+    const variableTrigger = (id.startsWith('BT') && btNum <= 5) || (isEB && ebNum <= 7);
     const rplusPool = id.match(/BT1[67]/) || id.match(/EB1[012]/)
       ? (isEB ? RPLUS_EB_LR : RPLUS_BT_LR)
       : (isEB ? RPLUS_EB : RPLUS_BT);
-    const allCards = generateBox5(set.cards, rplusPool, boxPacks, isEB);
+    const allCards = generateBox5(set.cards, rplusPool, boxPacks, isEB, variableTrigger);
     stagedCards = allCards;
     _presentStagedCards(boxPacks);
   } else {
