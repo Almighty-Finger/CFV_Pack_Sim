@@ -21,3 +21,9 @@ All list for OG is done expect for PR and Special sets
 
 Sets with images are all the TDs and BT01-BT10 + GBT01 and GTD01-03
 
+REMINDER: Because this website does not have cloud save...please use the save function to save your collection
+
+hope you guys like this thing i made
+
+and thank you Team Light Crusade for the CFV Progression Series and inspiring/motivating me to make this
+
