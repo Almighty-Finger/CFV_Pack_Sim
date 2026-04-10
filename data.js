@@ -3099,22 +3099,35 @@ function generatePack5(cards, rplusPool, forcedRarity) {
     return picked;
   }
 
+  // Roll R+ first so we know if it's a trigger
   const rPlusCard = pickRplus(forcedRarity);
   const rPlusIsTrigger = !!(rPlusCard.trigger && rPlusCard.trigger !== 'Sentinel');
 
-  // Pack layout: [normalC, normalC, slot3, slot4, R+]
-  // slot4 (index 3) = always a C trigger (sits right next to R+)
-  // slot3 (index 2) = 2nd C trigger if R+ is NOT a trigger; else normalC
-  // This way when R+ is a trigger: pack has 2 triggers total (slot4 + R+)
-  //       when R+ is NOT a trigger: pack has 2 triggers total (slot3 + slot4)
-  const slot4 = pickFrom(trigCPool, normalCPool);
-  const slot3 = rPlusIsTrigger
-    ? pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'))
-    : pickFrom(trigCPool, normalCPool);
-  const slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
-  const slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+  // Pack layout rules:
+  // Pack A (50%): slots 1-2 = normal, slots 3-4 = trigger, slot 5 = R+
+  // Pack B (50%): slots 1-3 = normal, slot 4 = trigger,    slot 5 = R+
+  // Pack C: same as A or B but R+ happens to be a trigger (natural from weighted roll)
+  // Triggers ONLY appear in positions 3, 4 (and 5 if R+ is a trigger)
+  // Max 2 triggers per pack total
 
-  // Final order: [normalC, normalC, normalC-or-trigger, trigger, R+]
+  const isTwoTriggerPack = Math.random() < 0.5; // 50/50 between Pack A and Pack B
+
+  let slot1, slot2, slot3, slot4;
+
+  if (isTwoTriggerPack) {
+    // Pack A: [normal, normal, trigger, trigger, R+]
+    slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+    slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+    slot3 = pickFrom(trigCPool, normalCPool);
+    slot4 = pickFrom(trigCPool, normalCPool);
+  } else {
+    // Pack B: [normal, normal, normal, trigger, R+]
+    slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+    slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+    slot3 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+    slot4 = pickFrom(trigCPool, normalCPool);
+  }
+
   return [slot1, slot2, slot3, slot4, rPlusCard];
 }
 
