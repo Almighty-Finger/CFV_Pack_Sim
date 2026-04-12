@@ -2171,28 +2171,90 @@ const SETS = [
     id:"TD01",label:"TD01",name:"Trial Deck Vol.01: Blaster Blade",icon:"⚔️",
     desc:"[【VG-TD01】 Featured Clan: Royal Paladin",
     packSize:50,
-    cards:[{id:"TD01_001",name:"Crimson Butterfly, Brigitte",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_002",name:"Knight of Conviction, Bors",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_003",name:"Solitary Knight, Gancelot",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_004",name:"Knight of Silence, Gallatin",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_005",name:"Blaster Blade",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_006",name:"Knight of the Harp, Tristan",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_007",name:"Covenant Knight, Randolf",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_008",name:"Little Sage, Marron",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_009",name:"Wingal",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_010",name:"Starlight Unicorn",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_011",name:"Knight of Rose, Morgana",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_012",name:"Stardust Trumpeter",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_013",name:"Bringer of Good Luck, Epona",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_014",name:"Yggdrasil Maiden, Elaine",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_015",name:"Weapons Dealer, Govannon",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD01_016",name:"Flogal",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+    cards:[
+      {id:"TD01_001",name:"Crimson Butterfly, Brigitte",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_002",name:"Knight of Conviction, Bors",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_003",name:"Solitary Knight, Gancelot",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_004",name:"Knight of Silence, Gallatin",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_005",name:"Blaster Blade",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_006",name:"Knight of the Harp, Tristan",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_007",name:"Covenant Knight, Randolf",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_008",name:"Little Sage, Marron",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_009",name:"Wingal",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_010",name:"Starlight Unicorn",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_011",name:"Knight of Rose, Morgana",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_012",name:"Stardust Trumpeter",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD01_013",name:"Bringer of Good Luck, Epona",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Critical"},
+      {id:"TD01_014",name:"Yggdrasil Maiden, Elaine",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Heal"},
+      {id:"TD01_015",name:"Weapons Dealer, Govannon",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Draw"},
+      {id:"TD01_016",name:"Flogal",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Stand"}
     ]
   },
   {
     id:"TD02",label:"TD02",name:"Trial Deck Vol.02: Dragonic Overlord",icon:"🐉",
     desc:"[【VG-TD02】 Featured Clan: Kagero",
     packSize:50,
-    cards:[{id:"TD02_001",name:"Dragonic Overlord",grade:3,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_002",name:"Dragon Monk, Goku",grade:3,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_003",name:"Demonic Dragon Berserker, Yaksha",grade:3,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_004",name:"Dragon Knight, Nehalem",grade:2,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_005",name:"Berserk Dragon",grade:2,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_006",name:"Wyvern Strike, Tejas",grade:2,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_007",name:"Embodiment of Armor, Bahr",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_008",name:"Dragon Monk, Gojo",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_009",name:"Flame of Hope, Aermo",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_010",name:"Demonic Dragon Madonna, Joka",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_011",name:"Wyvern Strike, Jarran",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_012",name:"Lizard Runner, Undeux",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_013",name:"Dragon Dancer, Monica",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_014",name:"Lizard Soldier, Ganlu",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_015",name:"Dragon Monk, Genjo",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉"},{id:"TD02_016",name:"Demonic Dragon Mage, Rakshasa",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉"},
+    cards:[
+      {id:"TD02_001",name:"Dragonic Overlord",grade:3,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_002",name:"Dragon Monk, Goku",grade:3,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_003",name:"Demonic Dragon Berserker, Yaksha",grade:3,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_004",name:"Dragon Knight, Nehalem",grade:2,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_005",name:"Berserk Dragon",grade:2,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_006",name:"Wyvern Strike, Tejas",grade:2,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_007",name:"Embodiment of Armor, Bahr",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_008",name:"Dragon Monk, Gojo",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_009",name:"Flame of Hope, Aermo",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_010",name:"Demonic Dragon Madonna, Joka",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_011",name:"Wyvern Strike, Jarran",grade:1,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_012",name:"Lizard Runner, Undeux",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉"},
+      {id:"TD02_013",name:"Dragon Dancer, Monica",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉",trigger:"Draw"},
+      {id:"TD02_014",name:"Lizard Soldier, Ganlu",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉",trigger:"Stand"},
+      {id:"TD02_015",name:"Dragon Monk, Genjo",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉",trigger:"Heal"},
+      {id:"TD02_016",name:"Demonic Dragon Mage, Rakshasa",grade:0,clan:"Kagero",rarity:"TD",icon:"🐉",trigger:"Critical"}
     ]
   },
   {
     id:"TD03",label:"TD03",name:"Trial Deck Vol.03: Golden Mechanical Soldier",icon:"👊",
     desc:"[【VG-TD03】 Featured Clan: Nova Grappler",
     packSize:50,
-    cards:[{id:"TD03_001",name:"Gold Rutile",grade:3,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_002",name:"Death Metal Droid",grade:3,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_003",name:"Mr. Invincible",grade:3,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_004",name:"King of Sword",grade:2,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_005",name:"Super Electromagnetic Lifeform, Storm",grade:2,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_006",name:"NGM Prototype",grade:2,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_007",name:"Tough Boy",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_008",name:"Oasis Girl",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_009",name:"Screamin\' and Dancin\' Announcer, Shout",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_010",name:"Queen of Heart",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_011",name:"Battering Minotaur",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_012",name:"Shining Lady",grade:0,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_013",name:"Cannon Ball",grade:0,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_014",name:"Ring Girl, Clara",grade:0,clan:"Nova Grappler",rarity:"TD",icon:"👊"},{id:"TD03_015",name:"Battleraizer",grade:0,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+    cards:[
+      {id:"TD03_001",name:"Gold Rutile",grade:3,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_002",name:"Death Metal Droid",grade:3,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_003",name:"Mr. Invincible",grade:3,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_004",name:"King of Sword",grade:2,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_005",name:"Super Electromagnetic Lifeform, Storm",grade:2,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_006",name:"NGM Prototype",grade:2,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_007",name:"Tough Boy",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_008",name:"Oasis Girl",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_009",name:"Screamin' and Dancin' Announcer, Shout",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_010",name:"Queen of Heart",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_011",name:"Battering Minotaur",grade:1,clan:"Nova Grappler",rarity:"TD",icon:"👊"},
+      {id:"TD03_012",name:"Shining Lady",grade:0,clan:"Nova Grappler",rarity:"TD",icon:"👊",trigger:"Critical"},
+      {id:"TD03_013",name:"Cannon Ball",grade:0,clan:"Nova Grappler",rarity:"TD",icon:"👊",trigger:"Stand"},
+      {id:"TD03_014",name:"Ring Girl, Clara",grade:0,clan:"Nova Grappler",rarity:"TD",icon:"👊",trigger:"Heal"},
+      {id:"TD03_015",name:"Battleraizer",grade:0,clan:"Nova Grappler",rarity:"TD",icon:"👊",trigger:"Stand"}
     ]
   },
   {
     id:"TD04",label:"TD04",name:"Trial Deck Vol.04: Maiden Princess of the Cherry Blossoms",icon:"🔮",
     desc:"[【VG-TD04】 Featured Clan: Oracle Think Tank",
     packSize:50,
-    cards:[{id:"TD04_001",name:"Oracle Guardian, Apollon",grade:3,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_002",name:"Goddess of Flower Divination, Sakuya",grade:3,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_003",name:"Meteor Break Wizard",grade:3,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_004",name:"Oracle Guardian, Wiseman",grade:2,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_005",name:"Security Guardian",grade:2,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_006",name:"Sword Dancer Angel",grade:2,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_007",name:"Oracle Guardian, Gemini",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_008",name:"Dark Cat",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_009",name:"Weather Girl, Milk",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_010",name:"Battle Sister, Maple",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_011",name:"Luck Bird",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_012",name:"Oracle Guardian, Nike",grade:0,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_013",name:"Dream Eater",grade:0,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_014",name:"Victory Maker",grade:0,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},{id:"TD04_015",name:"Lozenge Magus",grade:0,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+    cards:[
+      {id:"TD04_001",name:"Oracle Guardian, Apollon",grade:3,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_002",name:"Goddess of Flower Divination, Sakuya",grade:3,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_003",name:"Meteor Break Wizard",grade:3,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_004",name:"Oracle Guardian, Wiseman",grade:2,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_005",name:"Security Guardian",grade:2,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_006",name:"Sword Dancer Angel",grade:2,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_007",name:"Oracle Guardian, Gemini",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_008",name:"Dark Cat",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_009",name:"Weather Girl, Milk",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_010",name:"Battle Sister, Maple",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_011",name:"Luck Bird",grade:1,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮"},
+      {id:"TD04_012",name:"Oracle Guardian, Nike",grade:0,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮",trigger:"Critical"},
+      {id:"TD04_013",name:"Dream Eater",grade:0,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮",trigger:"Draw"},
+      {id:"TD04_014",name:"Victory Maker",grade:0,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮",trigger:"Draw"},
+      {id:"TD04_015",name:"Lozenge Magus",grade:0,clan:"Oracle Think Tank",rarity:"TD",icon:"🔮",trigger:"Heal"}
     ]
   },
   // ── G FORMAT ──
@@ -2200,21 +2262,78 @@ const SETS = [
     id:"GTD01",label:"GTD01",name:"Trial Deck Vol.1: Awakening of the Interdimensional Dragon",icon:"⚙️",
     desc:"【VGE-G-TD01】 Cardfight!! Vanguard G Trial Deck Vol.1: Awakening of the Interdimensional Dragon | Featured Clan: Gear Chronicle",
     packSize:50,format:"G",
-    cards:[{id:"GTD01_001",name:"Interdimensional Dragon, Mystery-flare Dragon",grade:4,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",gUnit:true},{id:"GTD01_002",name:"Chronojet Dragon",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_003",name:"Smithereen Colossus",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_004",name:"Steam Knight, Ubara-tutu",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_005",name:"Smokegear Dragon",grade:2,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_006",name:"Steam Fighter, Amber",grade:2,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_007",name:"Twinmaser Dragon",grade:2,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_008",name:"Great Carapace, Gear Turtle",grade:2,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_009",name:"Masergear Dragon",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_010",name:"Brasswing Dragon",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_011",name:"Steam Soldier, Tauge",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_012",name:"Steam Rider, Burnham",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_013",name:"Withdrawn Gear Raven",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Sentinel"},{id:"GTD01_014",name:"Gunnergear Dracokid",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},{id:"GTD01_015",name:"Steam Battler, Dadasig",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Critical"},{id:"GTD01_016",name:"Steam Knight, Shu Sin",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Draw"},{id:"GTD01_017",name:"Stomach Clock Gear Rabbit",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Stand"},{id:"GTD01_018",name:"Steam Maiden, Uluru",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Heal"},{id:"GTD01_019",name:"Luckypot Dracokid",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Draw"}
+    cards:[
+      {id:"GTD01_001",name:"Interdimensional Dragon, Mystery-flare Dragon",grade:4,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_002",name:"Chronojet Dragon",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_003",name:"Smithereen Colossus",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_004",name:"Steam Knight, Ubara-tutu",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_005",name:"Smokegear Dragon",grade:2,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_006",name:"Steam Fighter, Amber",grade:2,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_007",name:"Twinmaser Dragon",grade:2,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_008",name:"Great Carapace, Gear Turtle",grade:2,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_009",name:"Masergear Dragon",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_010",name:"Brasswing Dragon",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_011",name:"Steam Soldier, Tauge",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_012",name:"Steam Rider, Burnham",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_013",name:"Withdrawn Gear Raven",grade:1,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Sentinel"},
+      {id:"GTD01_014",name:"Gunnergear Dracokid",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_015",name:"Steam Battler, Dadasig",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Critical"},
+      {id:"GTD01_016",name:"Steam Knight, Shu Sin",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Draw"},
+      {id:"GTD01_017",name:"Stomach Clock Gear Rabbit",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Stand"},
+      {id:"GTD01_018",name:"Steam Maiden, Uluru",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Heal"},
+      {id:"GTD01_019",name:"Luckypot Dracokid",grade:0,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",trigger:"Draw"}
     ]
   },
   {
     id:"GTD02",label:"GTD02",name:"Trial Deck Vol.2: Divine Swordsman of the Shiny Star",icon:"⚔️",
     desc:"【VGE-G-TD02】 Cardfight!! Vanguard G Trial Deck Vol.2: Divine Swordsman of the Shiny Star | Featured Clan: Royal Paladin",
     packSize:50,format:"G",
-    cards:[{id:"GTD02_001",name:"Shrouded Divine Knight, Gablade",grade:4,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",gUnit:true},{id:"GTD02_002",name:"Blue Sky Knight, Altmile",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_003",name:"Aurashooter Dragon",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_004",name:"Profound Sage, Kunron",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_005",name:"Absolute Blade Knight, Livarot",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_006",name:"Knight of Twin Sword",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_007",name:"Transmigration Knight, Brede",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_008",name:"Mithrilguard Lion",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_009",name:"Lunar Crescent Knight, Felax",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_010",name:"Archer of Heaven's Tower",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_011",name:"Knight of Steel Wing",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_012",name:"Milky Way Unicorn",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_013",name:"Rainbow Guardian",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Sentinel"},{id:"GTD02_014",name:"Shining Knight, Millius",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"GTD02_015",name:"Burning Mane Lion",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Critical"},{id:"GTD02_016",name:"Pixy Assault Captain",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Draw"},{id:"GTD02_017",name:"Knight of Festival",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Stand"},{id:"GTD02_018",name:"Healing Pegasus",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Heal"},{id:"GTD02_019",name:"Margal",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Draw"}
+    cards:[
+      {id:"GTD02_001",name:"Shrouded Divine Knight, Gablade",grade:4,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_002",name:"Blue Sky Knight, Altmile",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_003",name:"Aurashooter Dragon",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_004",name:"Profound Sage, Kunron",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_005",name:"Absolute Blade Knight, Livarot",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_006",name:"Knight of Twin Sword",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_007",name:"Transmigration Knight, Brede",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_008",name:"Mithrilguard Lion",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_009",name:"Lunar Crescent Knight, Felax",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_010",name:"Archer of Heaven's Tower",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_011",name:"Knight of Steel Wing",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_012",name:"Milky Way Unicorn",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_013",name:"Rainbow Guardian",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Sentinel"},
+      {id:"GTD02_014",name:"Shining Knight, Millius",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_015",name:"Burning Mane Lion",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Critical"},
+      {id:"GTD02_016",name:"Pixy Assault Captain",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Draw"},
+      {id:"GTD02_017",name:"Knight of Festival",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Stand"},
+      {id:"GTD02_018",name:"Healing Pegasus",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Heal"},
+      {id:"GTD02_019",name:"Margal",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Draw"}
     ]
   },
   {
     id:"GTD03",label:"GTD03",name:"Trial Deck Vol.3: Flower Maiden of Purity",icon:"🌿",
     desc:"【VGE-G-TD03】 Cardfight!! Vanguard G Trial Deck Vol.3: Flower Maiden of Purity | Featured Clan: Neo Nectar",
     packSize:50,format:"G",
-    cards:[{id:"GTD03_001",name:"Flower Princess of Spring, Arborea",grade:4,clan:"Neo Nectar",rarity:"TD",icon:"🌿",gUnit:true},{id:"GTD03_002",name:"Ranunculus Flower Maiden, Ahsha",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_003",name:"Jungle Lord Dragon",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_004",name:"Full Bloom Dragon",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_005",name:"Blossoming Maiden, Cela",grade:2,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_006",name:"Grace Knight",grade:2,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_007",name:"Maiden of Gladiolus",grade:2,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_008",name:"Qool Qute Qiwi",grade:2,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_009",name:"Budding Maiden, Diane",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_010",name:"Coral Berry Squire",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_011",name:"Gardener Elf",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_012",name:"100% Orange",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Sentinel"},{id:"GTD03_013",name:"Maiden of Safflower",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_014",name:"Spring-Heralding Maiden, Ozu",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},{id:"GTD03_015",name:"Maiden of Dimorphotheca",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Critical"},{id:"GTD03_016",name:"Heave-ho Turnip",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Draw"},{id:"GTD03_017",name:"Lavender Knight",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Stand"},{id:"GTD03_018",name:"Fairy Light Dragon",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Heal"},{id:"GTD03_019",name:"Maiden of Daybreak",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Stand"}
+    cards:[
+      {id:"GTD03_001",name:"Flower Princess of Spring, Arborea",grade:4,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_002",name:"Ranunculus Flower Maiden, Ahsha",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_003",name:"Jungle Lord Dragon",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_004",name:"Full Bloom Dragon",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_005",name:"Blossoming Maiden, Cela",grade:2,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_006",name:"Grace Knight",grade:2,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_007",name:"Maiden of Gladiolus",grade:2,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_008",name:"Qool Qute Qiwi",grade:2,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_009",name:"Budding Maiden, Diane",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_010",name:"Coral Berry Squire",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_011",name:"Gardener Elf",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_012",name:"100% Orange",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Sentinel"},
+      {id:"GTD03_013",name:"Maiden of Safflower",grade:1,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_014",name:"Spring-Heralding Maiden, Ozu",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_015",name:"Maiden of Dimorphotheca",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Critical"},
+      {id:"GTD03_016",name:"Heave-ho Turnip",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Draw"},
+      {id:"GTD03_017",name:"Lavender Knight",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Stand"},
+      {id:"GTD03_018",name:"Fairy Light Dragon",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Heal"},
+      {id:"GTD03_019",name:"Maiden of Daybreak",grade:0,clan:"Neo Nectar",rarity:"TD",icon:"🌿",trigger:"Stand"}
     ]
   },
   {
@@ -2391,73 +2510,280 @@ const SETS = [
   {
     id:"TD05",label:"TD05",name:"Trial Deck Vol.05: Slash of Silver Wolf",icon:"🛡️",
     desc:"[【VG-TD05】 Featured Clan: Gold Paladin",packSize:50,
-    cards:[{id:"TD05_001",name:"Great Silver Wolf, Garmore",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_002",name:"Sleygal Double Edge",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_003",name:"Battlefield Storm, Sagramore",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_004",name:"Knight of Superior Skills, Beaumains",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_005",name:"Sleygal Sword",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_006",name:"Sacred Guardian Beast, Nemean Lion",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_007",name:"Charging Chariot Knight",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_008",name:"Knight of Elegant Skills, Gareth",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_009",name:"Evil Slaying Swordsman, Haugan",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_010",name:"Precipice Whirlwind, Sagramore",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_011",name:"Charjgal",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_012",name:"Blessing Owl",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_013",name:"Silver Fang Witch",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_014",name:"Grassland Breeze, Sagramore",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD05_015",name:"Silent Punisher",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Critical"},{id:"TD05_016",name:"Weapons Dealer, Gwydion",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Draw"},{id:"TD05_017",name:"Fortune Bell",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Stand"},{id:"TD05_018",name:"Elixir Sommelier",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Heal"}
+    cards:[
+      {id:"TD05_001",name:"Great Silver Wolf, Garmore",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_002",name:"Sleygal Double Edge",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_003",name:"Battlefield Storm, Sagramore",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_004",name:"Knight of Superior Skills, Beaumains",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_005",name:"Sleygal Sword",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_006",name:"Sacred Guardian Beast, Nemean Lion",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_007",name:"Charging Chariot Knight",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_008",name:"Knight of Elegant Skills, Gareth",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_009",name:"Evil Slaying Swordsman, Haugan",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_010",name:"Precipice Whirlwind, Sagramore",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_011",name:"Charjgal",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_012",name:"Blessing Owl",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_013",name:"Silver Fang Witch",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_014",name:"Grassland Breeze, Sagramore",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD05_015",name:"Silent Punisher",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Critical"},
+      {id:"TD05_016",name:"Weapons Dealer, Gwydion",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Draw"},
+      {id:"TD05_017",name:"Fortune Bell",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Stand"},
+      {id:"TD05_018",name:"Elixir Sommelier",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Heal"}
     ]
   },
   {
     id:"TD06",label:"TD06",name:"Trial Deck Vol.06: Resonance of Thunder Dragon",icon:"⚡",
     desc:"[【VG-TD06】 Featured Clan: Narukami",packSize:50,
-    cards:[{id:"TD06_001",name:"Thunder Break Dragon",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_002",name:"Djinn of the Lightning Flash",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_003",name:"Plasmabite Dragon",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_004",name:"Thunderstorm Dragoon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_005",name:"Shieldblade Dragoon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_006",name:"Djinn of the Lightning Flare",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_007",name:"Brightjet Dragon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_008",name:"Red River Dragoon",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_009",name:"Lizard Soldier, Riki",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_010",name:"Lightning of Hope, Helena",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_011",name:"Djinn of the Lightning Spark",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_012",name:"Dragon Dancer, RaiRai",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_013",name:"Wyvern Supply Unit",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_014",name:"Lizard Soldier, Sishin",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD06_015",name:"Yellow Gem Carbuncle",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Critical"},{id:"TD06_016",name:"Old Dragon Mage",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Draw"},{id:"TD06_017",name:"Zephyr Kid, Hayate",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Stand"},{id:"TD06_018",name:"Demonic Dragon Nymph, Seiobo",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Heal"}
+    cards:[
+      {id:"TD06_001",name:"Thunder Break Dragon",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_002",name:"Djinn of the Lightning Flash",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_003",name:"Plasmabite Dragon",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_004",name:"Thunderstorm Dragoon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_005",name:"Shieldblade Dragoon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_006",name:"Djinn of the Lightning Flare",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_007",name:"Brightjet Dragon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_008",name:"Red River Dragoon",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_009",name:"Lizard Soldier, Riki",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_010",name:"Lightning of Hope, Helena",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_011",name:"Djinn of the Lightning Spark",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_012",name:"Dragon Dancer, RaiRai",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_013",name:"Wyvern Supply Unit",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_014",name:"Lizard Soldier, Sishin",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD06_015",name:"Yellow Gem Carbuncle",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Critical"},
+      {id:"TD06_016",name:"Old Dragon Mage",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Draw"},
+      {id:"TD06_017",name:"Zephyr Kid, Hayate",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Stand"},
+      {id:"TD06_018",name:"Demonic Dragon Nymph, Seiobo",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Heal"}
     ]
   },
   {
     id:"TD07",label:"TD07",name:"Trial Deck Vol.07: Descendants of the Marine Emperor",icon:"🌊",
     desc:"[【VG-TD07】 Featured Clan: Aqua Force",packSize:50,
-    cards:[{id:"TD07_001",name:"Navalgazer Dragon",grade:3,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_002",name:"Marine General of the Full Tides, Xenophon",grade:3,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_003",name:"Key Anchor, Dabid",grade:3,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_004",name:"Tear Knight, Lazarus",grade:2,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_005",name:"Marine General of the Restless Tides, Algos",grade:2,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_006",name:"Coral Assault",grade:2,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_007",name:"Titan of the Infinite Trench",grade:2,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_008",name:"Tear Knight, Theo",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_009",name:"Tear Knight, Cyprus",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_010",name:"Accelerated Command",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_011",name:"Splash Assault",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_012",name:"Battle Siren, Cynthia",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_013",name:"Battle Siren, Dorothea",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_014",name:"Officer Cadet of the First Battle",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊"},{id:"TD07_015",name:"Battleship Intelligence",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊",trigger:"Critical"},{id:"TD07_016",name:"Pyroxene Communications Sea Otter Soldier",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊",trigger:"Draw"},{id:"TD07_017",name:"Dolphin Soldier of High Speed Raids",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊",trigger:"Stand"},{id:"TD07_018",name:"Medical Officer of the Rainbow Elixir",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊",trigger:"Heal"}
+    cards:[
+      {id:"TD07_001",name:"Navalgazer Dragon",grade:3,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_002",name:"Marine General of the Full Tides, Xenophon",grade:3,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_003",name:"Key Anchor, Dabid",grade:3,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_004",name:"Tear Knight, Lazarus",grade:2,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_005",name:"Marine General of the Restless Tides, Algos",grade:2,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_006",name:"Coral Assault",grade:2,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_007",name:"Titan of the Infinite Trench",grade:2,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_008",name:"Tear Knight, Theo",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_009",name:"Tear Knight, Cyprus",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_010",name:"Accelerated Command",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_011",name:"Splash Assault",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_012",name:"Battle Siren, Cynthia",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_013",name:"Battle Siren, Dorothea",grade:1,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_014",name:"Officer Cadet of the First Battle",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊"},
+      {id:"TD07_015",name:"Battleship Intelligence",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊",trigger:"Critical"},
+      {id:"TD07_016",name:"Pyroxene Communications Sea Otter Soldier",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊",trigger:"Draw"},
+      {id:"TD07_017",name:"Dolphin Soldier of High Speed Raids",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊",trigger:"Stand"},
+      {id:"TD07_018",name:"Medical Officer of the Rainbow Elixir",grade:0,clan:"Aqua Force",rarity:"TD",icon:"🌊",trigger:"Heal"}
     ]
   },
   {
     id:"TD08",label:"TD08",name:"Trial Deck Vol.08: Liberator of the Sanctuary",icon:"🛡️",
     desc:"[【VG-TD08】 Featured Clan: Gold Paladin",packSize:50,
-    cards:[{id:"TD08_001",name:"Solitary Liberator, Gancelot",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_002",name:"Dignified Gold Dragon",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_003",name:"Onslaught Liberator, Maelzion",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_004",name:"Liberator of Silence, Gallatin",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_005",name:"Liberator of Royalty, Phallon",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_006",name:"Blaster Blade Liberator",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_007",name:"Zoom Down Eagle",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_008",name:"Zoigal Liberator",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_009",name:"Knight of Elegant Skills, Gareth",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_010",name:"Little Liberator, Marron",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_011",name:"Pomerugal Liberator",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_012",name:"Future Liberator, Llew",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_013",name:"Angelic Liberator",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD08_014",name:"Strike Liberator",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Critical"},{id:"TD08_015",name:"Armed Liberator, Gwydion",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Draw"},{id:"TD08_016",name:"Fortune Liberator",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Stand"},{id:"TD08_017",name:"Elixir Liberator",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Heal"}
+    cards:[
+      {id:"TD08_001",name:"Solitary Liberator, Gancelot",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_002",name:"Dignified Gold Dragon",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_003",name:"Onslaught Liberator, Maelzion",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_004",name:"Liberator of Silence, Gallatin",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_005",name:"Liberator of Royalty, Phallon",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_006",name:"Blaster Blade Liberator",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_007",name:"Zoom Down Eagle",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_008",name:"Zoigal Liberator",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_009",name:"Knight of Elegant Skills, Gareth",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_010",name:"Little Liberator, Marron",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_011",name:"Pomerugal Liberator",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_012",name:"Future Liberator, Llew",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_013",name:"Angelic Liberator",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD08_014",name:"Strike Liberator",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Critical"},
+      {id:"TD08_015",name:"Armed Liberator, Gwydion",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Draw"},
+      {id:"TD08_016",name:"Fortune Liberator",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Stand"},
+      {id:"TD08_017",name:"Elixir Liberator",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Heal"}
     ]
   },
   {
     id:"TD09",label:"TD09",name:"Trial Deck Vol.09: Eradicator of the Empire",icon:"⚡",
     desc:"[【VG-TD09】 Featured Clan: Narukami",packSize:50,
-    cards:[{id:"TD09_001",name:"Eradicator, Vowing Sword Dragon",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_002",name:"Barrage Eradicator, Zion",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_003",name:"Discharging Dragon",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_004",name:"Eradicator, Thunder Boom Dragon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_005",name:"Eradicator, Spark Rain Dragon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_006",name:"Assassin Sword Eradicator, Susei",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_007",name:"Dragon Dancer, Veronica",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_008",name:"Lightning Blade Eradicator, Jeem",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_009",name:"Red River Dragoon",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_010",name:"Eradicator, Demolition Dragon",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_011",name:"Dust Storm Eradicator, Toko",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_012",name:"Eradicator of Fire, Kohkaiji",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_013",name:"Stone Bullet Eradicator, Houki",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡"},{id:"TD09_014",name:"Eradicator, Yellow Gem Carbuncle",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Critical"},{id:"TD09_015",name:"Eradicator, Dragon Mage",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Draw"},{id:"TD09_016",name:"Zephyr Eradicator, Hayate",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Stand"},{id:"TD09_017",name:"Worm Toxin Eradicator, Seiobo",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Heal"}
+    cards:[
+      {id:"TD09_001",name:"Eradicator, Vowing Sword Dragon",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_002",name:"Barrage Eradicator, Zion",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_003",name:"Discharging Dragon",grade:3,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_004",name:"Eradicator, Thunder Boom Dragon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_005",name:"Eradicator, Spark Rain Dragon",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_006",name:"Assassin Sword Eradicator, Susei",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_007",name:"Dragon Dancer, Veronica",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_008",name:"Lightning Blade Eradicator, Jeem",grade:2,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_009",name:"Red River Dragoon",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_010",name:"Eradicator, Demolition Dragon",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_011",name:"Dust Storm Eradicator, Toko",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_012",name:"Eradicator of Fire, Kohkaiji",grade:1,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_013",name:"Stone Bullet Eradicator, Houki",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡"},
+      {id:"TD09_014",name:"Eradicator, Yellow Gem Carbuncle",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Critical"},
+      {id:"TD09_015",name:"Eradicator, Dragon Mage",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Draw"},
+      {id:"TD09_016",name:"Zephyr Eradicator, Hayate",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Stand"},
+      {id:"TD09_017",name:"Worm Toxin Eradicator, Seiobo",grade:0,clan:"Narukami",rarity:"TD",icon:"⚡",trigger:"Heal"}
     ]
   },
   {
     id:"TD10",label:"TD10",name:"Trial Deck Vol.10: Purgatory Revenger",icon:"🌑",
     desc:"[【VG-TD10】 Featured Clan: Shadow Paladin",packSize:50,
-    cards:[{id:"TD10_001",name:"Illusionary Revenger, Mordred Phantom",grade:3,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_002",name:"Venomous Breath Dragon",grade:3,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_003",name:"Labyrinth Revenger, Arawn",grade:3,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_004",name:"Darkness Revenger, Rugos",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_005",name:"Nullity Revenger, Masquerade",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_006",name:"Blaster Dark Revenger",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_007",name:"Koilbau Revenger",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_008",name:"Revenger Fortress, Fatalita",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_009",name:"Black Sage, Charon",grade:1,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_010",name:"Sacrilege Revenger, Baal-berith",grade:1,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_011",name:"Transient Revenger, Masquerade",grade:1,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_012",name:"Branbau Revenger",grade:1,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_013",name:"Crisis Revenger, Fritz",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_014",name:"Grim Revenger",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},{id:"TD10_015",name:"Freezing Revenger",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑",trigger:"Draw"},{id:"TD10_016",name:"Awaking Revenger",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑",trigger:"Stand"},{id:"TD10_017",name:"Healing Revenger",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑",trigger:"Heal"}
+    cards:[
+      {id:"TD10_001",name:"Illusionary Revenger, Mordred Phantom",grade:3,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_002",name:"Venomous Breath Dragon",grade:3,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_003",name:"Labyrinth Revenger, Arawn",grade:3,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_004",name:"Darkness Revenger, Rugos",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_005",name:"Nullity Revenger, Masquerade",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_006",name:"Blaster Dark Revenger",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_007",name:"Koilbau Revenger",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_008",name:"Revenger Fortress, Fatalita",grade:2,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_009",name:"Black Sage, Charon",grade:1,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_010",name:"Sacrilege Revenger, Baal-berith",grade:1,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_011",name:"Transient Revenger, Masquerade",grade:1,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_012",name:"Branbau Revenger",grade:1,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_013",name:"Crisis Revenger, Fritz",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑"},
+      {id:"TD10_014",name:"Grim Revenger",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑",trigger:"Critical"},
+      {id:"TD10_015",name:"Freezing Revenger",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑",trigger:"Draw"},
+      {id:"TD10_016",name:"Awaking Revenger",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑",trigger:"Stand"},
+      {id:"TD10_017",name:"Healing Revenger",grade:0,clan:"Shadow Paladin",rarity:"TD",icon:"🌑",trigger:"Heal"}
     ]
   },
   {
     id:"TD11",label:"TD11",name:"Trial Deck Vol.11: Star-vader Invasion",icon:"🔗",
     desc:"[【VG-TD11】 Featured Clan: Link Joker",packSize:50,
-    cards:[{id:"TD11_001",name:"Star-vader, Infinite Zero Dragon",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_002",name:"Star-vader, Francium",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_003",name:"Twilight Baron",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_004",name:"Strike Star-vader, Krypton",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_005",name:"Star-vader, Mobius Breath Dragon",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_006",name:"Unrivaled Star-vader, Radon",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_007",name:"Star-vader, Pulsar Bear",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_008",name:"Deep Shadow Star-vader, Strontium",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_009",name:"Hollow Twin Blades, Binary Star",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_010",name:"Homing Star-vader, Fermium",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_011",name:"Mana Shot Star-vader, Neon",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_012",name:"Star-vader, Aurora Eagle",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_013",name:"Nova Star-vader, Actinium",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD11_014",name:"Star-vader, Meteor Liger",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Critical"},{id:"TD11_015",name:"Star-vader, Nebula Captor",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Draw"},{id:"TD11_016",name:"Keyboard Star-vader, Bismuth",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Stand"},{id:"TD11_017",name:"Star-vader, Stellar Garage",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Heal"}
+    cards:[
+      {id:"TD11_001",name:"Star-vader, Infinite Zero Dragon",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_002",name:"Star-vader, Francium",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_003",name:"Twilight Baron",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_004",name:"Strike Star-vader, Krypton",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_005",name:"Star-vader, Mobius Breath Dragon",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_006",name:"Unrivaled Star-vader, Radon",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_007",name:"Star-vader, Pulsar Bear",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_008",name:"Deep Shadow Star-vader, Strontium",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_009",name:"Hollow Twin Blades, Binary Star",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_010",name:"Homing Star-vader, Fermium",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_011",name:"Mana Shot Star-vader, Neon",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_012",name:"Star-vader, Aurora Eagle",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_013",name:"Nova Star-vader, Actinium",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD11_014",name:"Star-vader, Meteor Liger",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Critical"},
+      {id:"TD11_015",name:"Star-vader, Nebula Captor",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Draw"},
+      {id:"TD11_016",name:"Keyboard Star-vader, Bismuth",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Stand"},
+      {id:"TD11_017",name:"Star-vader, Stellar Garage",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Heal"}
     ]
   },
   {
     id:"TD12",label:"TD12",name:"Trial Deck Vol.12: Dimensional Brave Kaiser",icon:"🚔",
     desc:"[【VG-TD12】 Featured Clan: Dimension Police",packSize:50,
-    cards:[{id:"TD12_001",name:"Super Dimensional Robo, Daikaiser",grade:3,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_002",name:"Super Dimensional Robo, Daiyusha",grade:3,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_003",name:"Electro-star Combination, Cosmogreat",grade:3,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_004",name:"Dimensional Robo, Daifighter",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_005",name:"Dimensional Robo, Daidragon",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_006",name:"Dimensional Robo, Kaizard",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_007",name:"Super Dimensional Robo, Dailady",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_008",name:"Dimensional Robo, Daidriller",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_009",name:"Karenroid, Daisy",grade:1,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_010",name:"Dimensional Robo, Daitiger",grade:1,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_011",name:"Dimensional Robo, Daibrave",grade:1,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_012",name:"Dimensional Robo, Daimariner",grade:1,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_013",name:"Dimensional Robo, Goyusha",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔"},{id:"TD12_014",name:"Dimensional Robo, Daibattles",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔",trigger:"Critical"},{id:"TD12_015",name:"Dimensional Robo, Daicrane",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔",trigger:"Draw"},{id:"TD12_016",name:"Dimensional Robo, Goflight",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔",trigger:"Stand"},{id:"TD12_017",name:"Dimensional Robo, Gorescue",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔",trigger:"Heal"}
+    cards:[
+      {id:"TD12_001",name:"Super Dimensional Robo, Daikaiser",grade:3,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_002",name:"Super Dimensional Robo, Daiyusha",grade:3,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_003",name:"Electro-star Combination, Cosmogreat",grade:3,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_004",name:"Dimensional Robo, Daifighter",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_005",name:"Dimensional Robo, Daidragon",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_006",name:"Dimensional Robo, Kaizard",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_007",name:"Super Dimensional Robo, Dailady",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_008",name:"Dimensional Robo, Daidriller",grade:2,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_009",name:"Karenroid, Daisy",grade:1,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_010",name:"Dimensional Robo, Daitiger",grade:1,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_011",name:"Dimensional Robo, Daibrave",grade:1,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_012",name:"Dimensional Robo, Daimariner",grade:1,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_013",name:"Dimensional Robo, Goyusha",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔"},
+      {id:"TD12_014",name:"Dimensional Robo, Daibattles",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔",trigger:"Critical"},
+      {id:"TD12_015",name:"Dimensional Robo, Daicrane",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔",trigger:"Draw"},
+      {id:"TD12_016",name:"Dimensional Robo, Goflight",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔",trigger:"Stand"},
+      {id:"TD12_017",name:"Dimensional Robo, Gorescue",grade:0,clan:"Dimension Police",rarity:"TD",icon:"🚔",trigger:"Heal"}
     ]
   },
   {
     id:"TD13",label:"TD13",name:"Trial Deck Vol.13: Successor of the Sacred Regalia",icon:"🌸",
     desc:"[【VG-TD13】 Featured Clan: Genesis",packSize:50,
-    cards:[{id:"TD13_001",name:"Regalia of Wisdom, Angelica",grade:3,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_002",name:"Battle Maiden, Mizuha",grade:3,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_003",name:"Witch of Wolves, Saffron",grade:3,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_004",name:"Battle Maiden, Izunahime",grade:2,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_005",name:"Battle Maiden, Sahohime",grade:2,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_006",name:"Goddess of Trees, Jupiter",grade:2,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_007",name:"Battle Maiden, Shitateruhime",grade:2,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_008",name:"Battle Maiden, Mihikarihime",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_009",name:"Battle Maiden, Tatsutahime",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_010",name:"Existence Angel",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_011",name:"Witch of Cats, Cumin",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_012",name:"Apple Witch, Cider",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_013",name:"Reflector Angel",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸"},{id:"TD13_014",name:"Lemon Witch, Limonccino",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸",trigger:"Critical"},{id:"TD13_015",name:"Bandit Danny",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸",trigger:"Draw"},{id:"TD13_016",name:"Patrol Guardian",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸",trigger:"Stand"},{id:"TD13_017",name:"Witch of Big Pots, Laurier",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸",trigger:"Heal"}
+    cards:[
+      {id:"TD13_001",name:"Regalia of Wisdom, Angelica",grade:3,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_002",name:"Battle Maiden, Mizuha",grade:3,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_003",name:"Witch of Wolves, Saffron",grade:3,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_004",name:"Battle Maiden, Izunahime",grade:2,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_005",name:"Battle Maiden, Sahohime",grade:2,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_006",name:"Goddess of Trees, Jupiter",grade:2,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_007",name:"Battle Maiden, Shitateruhime",grade:2,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_008",name:"Battle Maiden, Mihikarihime",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_009",name:"Battle Maiden, Tatsutahime",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_010",name:"Existence Angel",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_011",name:"Witch of Cats, Cumin",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_012",name:"Apple Witch, Cider",grade:1,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_013",name:"Reflector Angel",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸"},
+      {id:"TD13_014",name:"Lemon Witch, Limonccino",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸",trigger:"Critical"},
+      {id:"TD13_015",name:"Bandit Danny",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸",trigger:"Draw"},
+      {id:"TD13_016",name:"Patrol Guardian",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸",trigger:"Stand"},
+      {id:"TD13_017",name:"Witch of Big Pots, Laurier",grade:0,clan:"Genesis",rarity:"TD",icon:"🌸",trigger:"Heal"}
     ]
   },
   {
     id:"TD14",label:"TD14",name:"Trial Deck Vol.14: Seeker of Hope",icon:"⚔️",
     desc:"[【VG-TD14】 Featured Clan: Royal Paladin",packSize:50,
-    cards:[{id:"TD14_001",name:"Seeker, Sacred Wingal",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_002",name:"Secret Sword Seeker, Vortigern",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_003",name:"Blue Flame Seeker, Taranis",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_004",name:"Natural Talent Seeker, Valrod",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_005",name:"Blaster Blade Seeker",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_006",name:"Full Bloom Seeker, Cerdic",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_007",name:"Provocation Seeker, Blumental",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_008",name:"Bladgal Seeker",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_009",name:"Seeker, Youthful Mage",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_010",name:"Honest Seeker, Cynric",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_011",name:"Righteousness Seeker, Gangaren",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_012",name:"Seeker, Rune Eagle",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_013",name:"Bravery Seeker, Marc",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},{id:"TD14_014",name:"Impact Seeker, Modoron",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Critical"},{id:"TD14_015",name:"Messegal Seeker",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Draw"},{id:"TD14_016",name:"Siren Seeker, Maris",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Stand"},{id:"TD14_017",name:"Seeker, Loving Healer",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Heal"}
+    cards:[
+      {id:"TD14_001",name:"Seeker, Sacred Wingal",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_002",name:"Secret Sword Seeker, Vortigern",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_003",name:"Blue Flame Seeker, Taranis",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_004",name:"Natural Talent Seeker, Valrod",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_005",name:"Blaster Blade Seeker",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_006",name:"Full Bloom Seeker, Cerdic",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_007",name:"Provocation Seeker, Blumental",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_008",name:"Bladgal Seeker",grade:2,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_009",name:"Seeker, Youthful Mage",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_010",name:"Honest Seeker, Cynric",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_011",name:"Righteousness Seeker, Gangaren",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_012",name:"Seeker, Rune Eagle",grade:1,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_013",name:"Bravery Seeker, Marc",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"TD14_014",name:"Impact Seeker, Modoron",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Critical"},
+      {id:"TD14_015",name:"Messegal Seeker",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Draw"},
+      {id:"TD14_016",name:"Siren Seeker, Maris",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Stand"},
+      {id:"TD14_017",name:"Seeker, Loving Healer",grade:0,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",trigger:"Heal"}
     ]
   },
   {
     id:"TD16",label:"TD16",name:"Trial Deck Vol.16: Divine Judgment of the Bluish Flames",icon:"🛡️",
     desc:"[【VG-TD16】 Featured Clan: Gold Paladin",packSize:50,
-    cards:[{id:"TD16_001",name:"Bluish Flame Liberator, Percival",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_002",name:"Fervor Liberator, Cadven",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_003",name:"Liberator, Blue Flame Dragon",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_004",name:"Unbending Liberator, Keredic",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_005",name:"Liberator of Royalty, Phallon",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_006",name:"Oath Liberator, Aglovale",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_007",name:"Provision Liberator, Caradocus",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_008",name:"Hantgal Liberator",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_009",name:"Rebellion Liberator, Polyus",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_010",name:"Deathly Silence Liberator, Curdle",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_011",name:"Little Liberator, Marron",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_012",name:"Bordgal Liberator",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_013",name:"Genius Liberator, Waltimell",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},{id:"TD16_014",name:"Great Wish Liberator, Esus",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Critical"},{id:"TD16_015",name:"Liberator, Lucky Charmy",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Draw"},{id:"TD16_016",name:"Wise Thought Liberator, Jurron",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Stand"},{id:"TD16_017",name:"Numinous Tree Liberator, Elchea",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Heal"}
+    cards:[
+      {id:"TD16_001",name:"Bluish Flame Liberator, Percival",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_002",name:"Fervor Liberator, Cadven",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_003",name:"Liberator, Blue Flame Dragon",grade:3,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_004",name:"Unbending Liberator, Keredic",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_005",name:"Liberator of Royalty, Phallon",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_006",name:"Oath Liberator, Aglovale",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_007",name:"Provision Liberator, Caradocus",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_008",name:"Hantgal Liberator",grade:2,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_009",name:"Rebellion Liberator, Polyus",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_010",name:"Deathly Silence Liberator, Curdle",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_011",name:"Little Liberator, Marron",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_012",name:"Bordgal Liberator",grade:1,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_013",name:"Genius Liberator, Waltimell",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️"},
+      {id:"TD16_014",name:"Great Wish Liberator, Esus",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Critical"},
+      {id:"TD16_015",name:"Liberator, Lucky Charmy",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Draw"},
+      {id:"TD16_016",name:"Wise Thought Liberator, Jurron",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Stand"},
+      {id:"TD16_017",name:"Numinous Tree Liberator, Elchea",grade:0,clan:"Gold Paladin",rarity:"TD",icon:"🛡️",trigger:"Heal"}
     ]
   },
   {
     id:"TD17",label:"TD17",name:"Trial Deck Vol.17: Will of the Locked Dragon",icon:"🔗",
     desc:"[【VG-TD17】 Featured Clan: Link Joker",packSize:50,
-    cards:[{id:"TD17_001",name:"Star-vader, Garnet Star Dragon",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_002",name:"Star-vader, Graviton",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_003",name:"Heavy Blast Star-vader, Berkelium",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_004",name:"Bomber Star-vader, Magnesium",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_005",name:"Companion Star Star-vader, Photon",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_006",name:"Unrivaled Star-vader, Radon",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_007",name:"Star-vader, Sinister Eagle",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_008",name:"Star-vader, Stronghold",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_009",name:"Star-vader, Satellite Mirage",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_010",name:"Throwing Star-vader, Thorium",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_011",name:"Mana Shot Star-vader, Neon",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_012",name:"Star-vader, Crumble Mare",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_013",name:"Aperture Star-vader, Quantum",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗"},{id:"TD17_014",name:"Star-vader, Apollonel Dragon",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Critical"},{id:"TD17_015",name:"Vortex Star-vader, Molybdenum",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Draw"},{id:"TD17_016",name:"Star-vader, Gammadile",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Stand"},{id:"TD17_017",name:"Star-vader, Pixie Powder",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Heal"}
+    cards:[
+      {id:"TD17_001",name:"Star-vader, Garnet Star Dragon",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_002",name:"Star-vader, Graviton",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_003",name:"Heavy Blast Star-vader, Berkelium",grade:3,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_004",name:"Bomber Star-vader, Magnesium",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_005",name:"Companion Star Star-vader, Photon",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_006",name:"Unrivaled Star-vader, Radon",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_007",name:"Star-vader, Sinister Eagle",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_008",name:"Star-vader, Stronghold",grade:2,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_009",name:"Star-vader, Satellite Mirage",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_010",name:"Throwing Star-vader, Thorium",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_011",name:"Mana Shot Star-vader, Neon",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_012",name:"Star-vader, Crumble Mare",grade:1,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_013",name:"Aperture Star-vader, Quantum",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗"},
+      {id:"TD17_014",name:"Star-vader, Apollonel Dragon",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Critical"},
+      {id:"TD17_015",name:"Vortex Star-vader, Molybdenum",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Draw"},
+      {id:"TD17_016",name:"Star-vader, Gammadile",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Stand"},
+      {id:"TD17_017",name:"Star-vader, Pixie Powder",grade:0,clan:"Link Joker",rarity:"TD",icon:"🔗",trigger:"Heal"}
     ]
   },
   // ── NEW EB SETS (EB03–EB12) ──
