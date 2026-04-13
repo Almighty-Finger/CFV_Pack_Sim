@@ -1593,171 +1593,78 @@ const CARD_MAX_COPIES = 4;
 
 // ── Card type helpers ──
 // ── Sentinels: Grade 1 with [CONT] Sentinel (max 4 per deck total) ──
-const CRITICAL_IDS = new Set([
-  // BT01
-  'BT01_012','BT01_024','BT01_056','BT01_063',
-  // BT02
-  'BT02_045','BT02_048','BT02_052','BT02_055','BT02_068','BT02_074',
-  // BT03
-  'BT03_046','BT03_053','BT03_063','BT03_069','BT03_078',
-  // BT04
-  'BT04_050','BT04_058','BT04_066','BT04_079',
-  // BT05
-  'BT05_052','BT05_059','BT05_068','BT05_071',
-  // EB01
-  'EB01_032',
-  // EB02
-  'EB02_027','EB02_032',
-  // TD01
-  'TD01_013',
-  // TD02
-  'TD02_016',
-  // TD03
-  'TD03_012',
-  // TD04
-  'TD04_012',
-  // TD10_014 has non-breaking space in spreadsheet trigger field
-  'TD10_014',
-  // GTD01/02/03
-  'GTD01_015','GTD02_015','GTD03_015',
-  // EB03–EB12, TD05–TD17
-  'EB04_029', 'EB04_033', 'EB05_029', 'EB05_034', 'EB06_029', 'EB06_030', 'EB07_029', 'EB07_034', 'EB08_029', 'EB08_030', 'EB09_029', 'EB09_030', 'EB10_029B', 'EB10_029W', 'EB10_030B', 'EB10_030W', 'EB11_029', 'EB11_030', 'EB12_029', 'EB12_033', 'TD05_015', 'TD06_015', 'TD07_015', 'TD08_014', 'TD09_014', 'TD11_014', 'TD12_014', 'TD13_014', 'TD14_014', 'TD16_014', 'TD17_014',
-]);
-const DRAW_IDS = new Set([
-  // BT01
-  'BT01_045','BT01_051','BT01_057','BT01_058',
-  // BT02
-  'BT02_046','BT02_059','BT02_064','BT02_073',
-  // BT03
-  'BT03_054','BT03_056','BT03_060','BT03_075',
-  // BT04
-  'BT04_051','BT04_059','BT04_067','BT04_073',
-  // BT05
-  'BT05_053','BT05_060','BT05_075','BT05_079',
-  // EB02
-  'EB02_028','EB02_033',
-  // TD01
-  'TD01_015',
-  // TD02
-  'TD02_013',
-  // TD04
-  'TD04_013','TD04_014',
-  // GTD01/02/03
-  'GTD01_016','GTD01_019','GTD02_016','GTD02_019','GTD03_016',
-  // EB03–EB12, TD05–TD17
-  'EB03_036', 'EB04_030', 'EB04_031', 'EB05_030', 'EB05_031', 'EB06_031', 'EB06_034', 'EB07_030', 'EB07_031', 'EB08_031', 'EB08_032', 'EB09_031', 'EB09_034', 'EB10_031B', 'EB10_031W', 'EB10_032B', 'EB10_032W', 'EB11_031', 'EB11_032', 'EB12_030', 'EB12_034', 'TD05_016', 'TD06_016', 'TD07_016', 'TD08_015', 'TD09_015', 'TD10_015', 'TD11_015', 'TD12_015', 'TD13_015', 'TD14_015', 'TD16_015', 'TD17_015',
-]);
-const STAND_IDS = new Set([
-  // BT01
-  'BT01_032','BT01_046','BT01_052','BT01_064','BT01_S012',
-  // BT02
-  'BT02_053','BT02_058','BT02_063','BT02_067',
-  // BT03
-  'BT03_047','BT03_049','BT03_061','BT03_079',
-  // BT04
-  'BT04_052','BT04_060','BT04_068','BT04_074','BT04_080',
-  // BT05
-  'BT05_055','BT05_062','BT05_065','BT05_077','BT05_082',
-  // EB01
-  'EB01_020','EB01_024',
-  // EB02
-  'EB02_029','EB02_030',
-  // TD01
-  'TD01_016',
-  // TD02
-  'TD02_014',
-  // TD03
-  'TD03_013','TD03_015',
-  // GTD01/02/03
-  'GTD01_017','GTD02_017','GTD03_017','GTD03_019',
-  // EB03–EB12, TD05–TD17
-  'EB03_023', 'EB03_031', 'EB04_034', 'EB04_035', 'EB05_032', 'EB06_032', 'EB06_035', 'EB07_032', 'EB08_034', 'EB08_035', 'EB09_032', 'EB09_035', 'EB10_033B', 'EB10_033W', 'EB10_035B', 'EB10_035W', 'EB11_033', 'EB11_035', 'EB12_031', 'EB12_035', 'TD05_017', 'TD06_017', 'TD07_017', 'TD08_016', 'TD09_016', 'TD10_016', 'TD11_016', 'TD12_016', 'TD13_016', 'TD14_016', 'TD16_016', 'TD17_016',
-]);
-const HEAL_IDS = new Set([
-  // BT01
-  'BT01_027','BT01_047','BT01_053','BT01_065','BT01_S011',
-  // BT02
-  'BT02_047','BT02_054',
-  // BT03
-  'BT03_048','BT03_055','BT03_062',
-  // BT04
-  'BT04_053','BT04_061','BT04_069',
-  // BT05
-  'BT05_054','BT05_061',
-  // EB01
-  'EB01_018','EB01_033',
-  // EB02
-  'EB02_031',
-  // TD01
-  'TD01_014',
-  // TD02
-  'TD02_015',
-  // TD03
-  'TD03_014',
-  // TD04
-  'TD04_015',
-  // GTD01/02/03
-  'GTD01_018','GTD02_018','GTD03_018',
-  // EB03–EB12, TD05–TD17
-  'EB04_032', 'EB05_033', 'EB05_035', 'EB06_033', 'EB07_033', 'EB07_035', 'EB08_033', 'EB09_033', 'EB10_034B', 'EB10_034W', 'EB11_034', 'EB12_032', 'TD05_018', 'TD06_018', 'TD07_018', 'TD08_017', 'TD09_017', 'TD10_017', 'TD11_017', 'TD12_017', 'TD13_017', 'TD14_017', 'TD16_017', 'TD17_017',
-]);
+// ── Trigger / Sentinel detection ─────────────────────────────────────────────
+// Uses the trigger field on each card object (set during data generation).
+// Falls back to hardcoded ID sets for cards that predate trigger-field generation.
+
 const SENTINEL_IDS = new Set([
-  // BT01
+  // BT01-05, EB01-05, TDs, GTDs — cards whose trigger field may be missing
   'BT01_011','BT01_015','BT01_019',
-  // BT02
   'BT02_010','BT02_014','BT02_019',
-  // BT03
   'BT03_011','BT03_016','BT03_017',
-  // BT04
   'BT04_011','BT04_014','BT04_017',
-  // BT05
   'BT05_011','BT05_013',
-  // EB02
   'EB02_007',
-  // GTD01/02/03
   'GTD01_013','GTD02_013','GTD03_012',
-  // EB04–EB12, TD05–TD17 (from Type=Sentinel in spreadsheet)
-  'EB04_007', 'EB05_007', 'EB06_007', 'EB07_007', 'EB08_008', 'EB09_008', 'EB10_007B', 'EB10_007W', 'EB10_008B', 'EB10_008W', 'EB11_008', 'EB12_007', 'EB12_008',
+  'EB04_007','EB05_007','EB06_007','EB07_007','EB08_008','EB09_008',
+  'EB10_007B','EB10_007W','EB10_008B','EB10_008W','EB11_008','EB12_007','EB12_008',
 ]);
+
+function _getCardTrigger(card) {
+  // Primary: read the trigger field set during card data generation
+  if (card.trigger) return card.trigger;
+  // Fallback for SP parallels: check base card
+  if (card.rarity === 'SP' || card.rarity === 'TD') {
+    const base = resolveBaseCard(card);
+    if (base && base.trigger) return base.trigger;
+  }
+  return null;
+}
+
 function getTriggerType(card) {
   if (card.grade !== 0) return null;
-  const id = resolveBaseCard(card)?.id ?? card.id;
-  if (HEAL_IDS.has(id))     return 'Heal';
-  if (CRITICAL_IDS.has(id)) return 'Critical';
-  if (DRAW_IDS.has(id))     return 'Draw';
-  if (STAND_IDS.has(id))    return 'Stand';
-  return null; // Grade 0 but not a trigger — it's a First Vanguard (FV) unit
+  const t = _getCardTrigger(card);
+  if (t === 'Heal')     return 'Heal';
+  if (t === 'Critical') return 'Critical';
+  if (t === 'Draw')     return 'Draw';
+  if (t === 'Stand')    return 'Stand';
+  return null;
 }
+
 function getUnitType(card) {
   if (card.grade === 0) return getTriggerType(card) ? getTriggerType(card)+' Trigger' : 'G0';
   return 'Normal Unit';
 }
 
-
 function getTriggerColor(type) {
   return {
-    'Critical': 'rgba(240,180,41,0.85)',   // yellow
-    'Draw':     'rgba(230,120,40,0.85)',    // orange
-    'Stand':    'rgba(59,130,246,0.85)',    // blue
-    'Heal':     'rgba(61,191,127,0.85)',    // green
+    'Critical': 'rgba(240,180,41,0.85)',
+    'Draw':     'rgba(230,120,40,0.85)',
+    'Stand':    'rgba(59,130,246,0.85)',
+    'Heal':     'rgba(61,191,127,0.85)',
   }[type] || 'rgba(0,0,0,0.65)';
 }
 
-// Any Grade 0 can be a First Vanguard
 function isFirstVanguard(card) { return card.grade === 0; }
 
-// A Grade 0 card is a trigger only if it's in one of the trigger ID sets
 function isTrigger(card) {
   if (card.grade !== 0) return false;
-  const id = resolveBaseCard(card)?.id ?? card.id;
-  return HEAL_IDS.has(id) || CRITICAL_IDS.has(id) || DRAW_IDS.has(id) || STAND_IDS.has(id);
+  return !!getTriggerType(card);
 }
+
 function isHeal(card) {
-  if (HEAL_IDS.has(card.id)) return true;
-  // SP parallel: check base card
-  if (card.rarity === 'SP' && card.grade === 0) {
+  return getTriggerType(card) === 'Heal';
+}
+
+function isSentinel(card) {
+  // Check trigger field first
+  if (_getCardTrigger(card) === 'Sentinel') return true;
+  // Fallback to hardcoded set
+  if (SENTINEL_IDS.has(card.id)) return true;
+  // SP parallel fallback
+  if (card.rarity === 'SP') {
     const base = resolveBaseCard(card);
-    if (base && HEAL_IDS.has(base.id)) return true;
+    if (base && (_getCardTrigger(base) === 'Sentinel' || SENTINEL_IDS.has(base.id))) return true;
   }
   return false;
 }
