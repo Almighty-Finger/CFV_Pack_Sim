@@ -1680,7 +1680,6 @@ function resolveBaseCard(card) {
   const baseName = card.name.replace(/ \(SP\)$/, '');
   return getAllSetCards().find(c => c.name === baseName && c.grade === card.grade && c.rarity !== 'SP') || null;
 }
-function isSentinel(card) { return SENTINEL_IDS.has(card.id) || (card.rarity === 'SP' && !!resolveBaseCard(card) && SENTINEL_IDS.has((resolveBaseCard(card)||{}).id)); }
 
 // ── Get the single clan currently in the deck ──
 function getDeckClan() {
