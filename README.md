@@ -21,7 +21,9 @@ All list for OG is done expect for PR and Special sets
 
 Sets with images are all the TDs and BT01-BT10 + GBT01 and GTD01-03
 
-REMINDER: Because this website does not have cloud save...please use the save function to save your collection
+REMINDER: Because this website does not have cloud save...please use the save function(top right) to save your collection
+
+also with how GitHub work please fully refresh the site everytime there is an update (ctrl + shift + R)
 
 hope you guys like this thing i made
 
