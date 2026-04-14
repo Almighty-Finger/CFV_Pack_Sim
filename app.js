@@ -1098,13 +1098,16 @@ function cardImgPath(id, ext) {
     return `${base}${setId}/${fileId}.${ext}`;
   }
 
-  // EB10 Noir/Blanc
+  // EB10 Noir/Blanc — normal cards: EB10_001B → EB10_001EN-B.webp
+  // SP cards: EB10_S001 → try EB10_S01EN-B.webp and EB10_S01EN-W.webp via candidates
   if (setId === 'EB10') {
+    // Normal B/W variants (e.g. EB10_001B, EB10_001W)
     const m = id.match(/^(EB10_(?:S0?\d+|\d+))([BW])$/);
     if (m) {
       const baseId = m[1].replace(/_S0(\d+)$/, '_S$1');
       return `${IMG_CARDS}${setId}/${baseId}EN-${m[2]}.${ext}`;
     }
+    // SP cards without B/W suffix — fall through to standard SP path below
   }
 
   // Legion Rare cards (EB11, EB12, BT16, BT17)
@@ -1126,6 +1129,17 @@ function cardImgCandidates(id) {
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
   const fileId = id.replace(/_S0(\d+)$/, '_S$1');
   const fileIdLower = fileId.toLowerCase();
+
+  // EB10 SP cards (e.g. EB10_S001) — try both -B and -W variants
+  if (setId === 'EB10' && id.match(/^EB10_S\d+$/)) {
+    return [
+      `${base}${setId}/${fileId}EN-B.webp`,
+      `${base}${setId}/${fileId}EN-W.webp`,
+      `${base}${setId}/${fileId}EN.webp`,
+      `${base}${setId}/${fileId}.webp`,
+    ];
+  }
+
   // webp only — try EN suffix, no suffix, lowercase no suffix
   return [
     `${base}${setId}/${fileId}EN.webp`,

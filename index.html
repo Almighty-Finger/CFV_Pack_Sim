@@ -20,9 +20,9 @@
       <div class="stat-pill"><span class="label">Cards</span><span class="value" id="total-cards-stat">0</span></div>
       <div class="stat-pill" style="border-color: rgba(240,180,41,0.3)"><span class="label">RRR+</span><span class="value" id="rrr-count" style="color:var(--gold)">0</span></div>
       <span class="save-indicator" id="save-indicator"></span>
-      <button class="btn" style="font-size:11px;padding:5px 12px;background:transparent;border-color:var(--border)" onclick="saveSession()">💾 Save</button>
-      <button class="btn" style="font-size:11px;padding:5px 12px;background:transparent;border-color:var(--border)" onclick="loadSession()">📂 Load</button>
-      <button class="btn" style="font-size:11px;padding:5px 12px;background:transparent;border-color:rgba(239,69,101,0.3);color:var(--red)" onclick="clearSession()">🗑️ Reset</button>
+      <button class="btn" style="font-size:11px;padding:5px 14px;background:rgba(79,142,247,0.15);border:1px solid rgba(79,142,247,0.5);color:#7bb3ff;font-weight:600" onclick="saveSession()">💾 Save</button>
+      <button class="btn" style="font-size:11px;padding:5px 14px;background:rgba(79,142,247,0.15);border:1px solid rgba(79,142,247,0.5);color:#7bb3ff;font-weight:600" onclick="loadSession()">📂 Load</button>
+      <button class="btn" style="font-size:11px;padding:5px 14px;background:rgba(239,69,101,0.15);border:1px solid rgba(239,69,101,0.5);color:#f87171;font-weight:600" onclick="clearSession()">🗑️ Reset</button>
       <input type="file" id="load-file-input" accept=".json" style="display:none" onchange="onLoadFileChosen(this)">
     </div>
   </header>

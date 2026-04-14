@@ -2263,7 +2263,7 @@ const SETS = [
     desc:"【VGE-G-TD01】 Cardfight!! Vanguard G Trial Deck Vol.1: Awakening of the Interdimensional Dragon | Featured Clan: Gear Chronicle",
     packSize:50,format:"G",
     cards:[
-      {id:"GTD01_001",name:"Interdimensional Dragon, Mystery-flare Dragon",grade:4,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
+      {id:"GTD01_001",name:"Interdimensional Dragon, Mystery-flare Dragon",grade:4,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",gUnit:true},
       {id:"GTD01_002",name:"Chronojet Dragon",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
       {id:"GTD01_003",name:"Smithereen Colossus",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
       {id:"GTD01_004",name:"Steam Knight, Ubara-tutu",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
@@ -2289,7 +2289,7 @@ const SETS = [
     desc:"【VGE-G-TD02】 Cardfight!! Vanguard G Trial Deck Vol.2: Divine Swordsman of the Shiny Star | Featured Clan: Royal Paladin",
     packSize:50,format:"G",
     cards:[
-      {id:"GTD02_001",name:"Shrouded Divine Knight, Gablade",grade:4,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
+      {id:"GTD02_001",name:"Shrouded Divine Knight, Gablade",grade:4,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",gUnit:true},
       {id:"GTD02_002",name:"Blue Sky Knight, Altmile",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
       {id:"GTD02_003",name:"Aurashooter Dragon",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
       {id:"GTD02_004",name:"Profound Sage, Kunron",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
@@ -2315,7 +2315,7 @@ const SETS = [
     desc:"【VGE-G-TD03】 Cardfight!! Vanguard G Trial Deck Vol.3: Flower Maiden of Purity | Featured Clan: Neo Nectar",
     packSize:50,format:"G",
     cards:[
-      {id:"GTD03_001",name:"Flower Princess of Spring, Arborea",grade:4,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
+      {id:"GTD03_001",name:"Flower Princess of Spring, Arborea",grade:4,clan:"Neo Nectar",rarity:"TD",icon:"🌿",gUnit:true},
       {id:"GTD03_002",name:"Ranunculus Flower Maiden, Ahsha",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
       {id:"GTD03_003",name:"Jungle Lord Dragon",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
       {id:"GTD03_004",name:"Full Bloom Dragon",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
