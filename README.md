@@ -21,7 +21,7 @@ i will have everything at some point
 
 All list for OG is done expect for PR and Special sets
 
-Images uploaded till: BT12/EB02/GBT01 all OG TD / GTD01-03
+Images uploaded till: Everything that exist in the sim
 
 REMINDER: Because this website does not have cloud save...please use the save function(top right) to save your collection
 
