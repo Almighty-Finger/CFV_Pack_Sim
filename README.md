@@ -14,7 +14,7 @@ Images used are from the official website and wiki for setlist + card art
 https://en.cf-vanguard.com/cardlist/
 
 https://cardfight.fandom.com/wiki/Cardfight!!_Vanguard_Wiki
-
+______________________________________________________________________________________________________________________________
 Progress atm:
 
 i will have everything at some point
@@ -44,7 +44,7 @@ hope you guys like this thing i made
 and thank you Team Light Crusade for the CFV Progression Series and inspiring/motivating me to make this
 ______________________________________________________________________________________________________________________________
 
-You can find me on
+Any question, addition or bug fixing you can find me on-
 
 Twitter:@RanDx007
 
