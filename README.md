@@ -23,15 +23,15 @@ All list for OG is done expect for PR and Special sets
 ______________________________________________________________________________________________________________________________
 Bug Fixing:
 
-BT15 Omega Glendios rarity
+BT15 Omega Glendios rarity should be RRR
 
-BT16 SPs 
+BT16 SPs setlist
 
-EB10 SPs
+EB10 SPs wording
 
-buff LR rates
+buff LR rates(i myself have not open 1 yet)
 
-God Pack maybe?
+God Pack maybe?(idk what to put into this pack maybe just all SPs)
 ______________________________________________________________________________________________________________________________
 Images uploaded till: Everything that exist in the sim
 
@@ -42,4 +42,12 @@ also with how GitHub work please fully refresh the site everytime there is an up
 hope you guys like this thing i made
 
 and thank you Team Light Crusade for the CFV Progression Series and inspiring/motivating me to make this
+______________________________________________________________________________________________________________________________
 
+You can find me on
+
+Twitter:@RanDx007
+
+Discord:.randx
+
+Youtube:@randx1075
