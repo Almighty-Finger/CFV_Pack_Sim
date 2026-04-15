@@ -23,7 +23,7 @@ All list for OG is done expect for PR and Special sets
 ______________________________________________________________________________________________________________________________
 Bug Fixing:
 
-BT15 Omega Glendios rarity should be RRR
+~BT15 Omega Glendios rarity should be RRR~
 
 BT16 SPs setlist
 
