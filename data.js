@@ -1183,7 +1183,7 @@ const SETS = [
       {id:"BT11_052",name:"Celestial, Landing Pegasus",grade:0,clan:"Angel Feather",rarity:"C",icon:"👼",trigger:"Draw"},
       {id:"BT11_053",name:"Encourage Celestial, Tamiel",grade:0,clan:"Angel Feather",rarity:"C",icon:"👼",trigger:"Stand"},
       {id:"BT11_054",name:"Recovery Celestial, Ramuel",grade:0,clan:"Angel Feather",rarity:"C",icon:"👼",trigger:"Heal"},
-      {id:"BT11_055",name:"Hazard Bobb",grade:2,clan:"Genesis",rarity:"C",icon:"🌸"},
+      {id:"BT11_055",name:"Crimson Witch, Radish",grade:3,clan:"Genesis",rarity:"C",icon:"🌸"},
       {id:"BT11_056",name:"Pineapple Law",grade:1,clan:"Genesis",rarity:"C",icon:"🌸"},
       {id:"BT11_057",name:"Witch of Prohibited Books, Cinnamon",grade:0,clan:"Genesis",rarity:"C",icon:"🌸"},
       {id:"BT11_058",name:"Vivid Rabbit",grade:0,clan:"Genesis",rarity:"C",icon:"🌸"},
@@ -1617,7 +1617,7 @@ const SETS = [
     packSize:5,
     guaranteedTrigger:true,
     cards:[
-      {id:"BT15_000",name:"Star-vader, \"Omega\" Glendios",grade:3,clan:"Link Joker",rarity:"ЯЯЯ",icon:"🔗"},
+      {id:"BT15_000",name:"Star-vader, \"Omega\" Glendios",grade:3,clan:"Link Joker",rarity:"RRR",icon:"🔗"},
       {id:"BT15_001",name:"Revenger, Desperate Dragon",grade:3,clan:"Shadow Paladin",rarity:"RRR",icon:"🌑"},
       {id:"BT15_002",name:"Revenger, Dragruler Phantom",grade:3,clan:"Shadow Paladin",rarity:"RRR",icon:"🌑"},
       {id:"BT15_003",name:"Liberator, Monarch Sanctuary Alfred",grade:3,clan:"Gold Paladin",rarity:"RRR",icon:"🛡️"},
@@ -1893,13 +1893,13 @@ const SETS = [
       {id:"BT16_LR006",name:"Oath Liberator, Aglovale",grade:2,clan:"Gold Paladin",rarity:"LR",icon:"🛡️"},
       {id:"BT16_S001",name:"Light Source Seeker, Alfred Exiv",grade:3,clan:"Royal Paladin",rarity:"SP",icon:"⚔️"},
       {id:"BT16_S002",name:"Seeker, Thing Saver Dragon",grade:3,clan:"Royal Paladin",rarity:"SP",icon:"⚔️"},
-      {id:"BT16_S003",name:"Bluish Flame Liberator, Prominence Glare",grade:3,clan:"Gold Paladin",rarity:"SP",icon:"🛡️"},
-      {id:"BT16_S004",name:"Bluish Flame Liberator, Prominence Core",grade:3,clan:"Gold Paladin",rarity:"SP",icon:"🛡️"},
-      {id:"BT16_S005",name:"Brawler, Big Bang Knuckle Dragon",grade:3,clan:"Narukami",rarity:"SP",icon:"⚡"},
-      {id:"BT16_S006",name:"Brawler, Big Bang Knuckle Buster",grade:3,clan:"Narukami",rarity:"SP",icon:"⚡"},
-      {id:"BT16_S007",name:"Juxtapose Deletor, Zaele",grade:3,clan:"Link Joker",rarity:"SP",icon:"🔗"},
-      {id:"BT16_S008",name:"Daunting Deletor, Oksizz",grade:3,clan:"Link Joker",rarity:"SP",icon:"🔗"},
-      {id:"BT16_S009",name:"Seeker, Purgation Breath Dragon",grade:3,clan:"Royal Paladin",rarity:"SP",icon:"⚔️"},
+      {id:"BT16_S003",name:"Seeker, Purgation Breath Dragon",grade:3,clan:"Royal Paladin",rarity:"SP",icon:"⚔️"},
+      {id:"BT16_S004",name:"Bluish Flame Liberator, Prominence Glare",grade:3,clan:"Gold Paladin",rarity:"SP",icon:"🛡️"},
+      {id:"BT16_S005",name:"Bluish Flame Liberator, Prominence Core",grade:3,clan:"Gold Paladin",rarity:"SP",icon:"🛡️"},
+      {id:"BT16_S006",name:"Brawler, Big Bang Knuckle Dragon",grade:3,clan:"Narukami",rarity:"SP",icon:"⚡"},
+      {id:"BT16_S007",name:"Brawler, Big Bang Knuckle Buster",grade:3,clan:"Narukami",rarity:"SP",icon:"⚡"},
+      {id:"BT16_S008",name:"Juxtapose Deletor, Zaele",grade:3,clan:"Link Joker",rarity:"SP",icon:"🔗"},
+      {id:"BT16_S009",name:"Daunting Deletor, Oksizz",grade:3,clan:"Link Joker",rarity:"SP",icon:"🔗"},
       {id:"BT16_S010",name:"Brawler, Big Bang Slash Dragon",grade:2,clan:"Narukami",rarity:"SP",icon:"⚡"},
       {id:"BT16_S011",name:"Emerald Blaze",grade:3,clan:"Spike Brothers",rarity:"SP",icon:"🏈"},
       {id:"BT16_S012",name:"Murasame Liberator, Coil",grade:3,clan:"Gold Paladin",rarity:"SP",icon:"🛡️"},
@@ -3193,22 +3193,22 @@ const SETS = [
       {id:"EB10_034W",name:"Duo Tropical Healer, Medjerda",grade:0,clan:"Bermuda Triangle",rarity:"C",icon:"🧜",trigger:"Heal"},
       {id:"EB10_035B",name:"Duo Night Wing, Tangariro",grade:0,clan:"Bermuda Triangle",rarity:"C",icon:"🧜",trigger:"Stand"},
       {id:"EB10_035W",name:"Duo Night Wing, Tangariro",grade:0,clan:"Bermuda Triangle",rarity:"C",icon:"🧜",trigger:"Stand"},
-      {id:"EB10_S001",name:"Duo Stage Storm, Iori",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S002",name:"Duo Stage Storm, Iori",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S003",name:"Duo Temptation, Reit",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S004",name:"Duo Temptation, Reit",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S005",name:"Duo True Sister, Meer",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S006",name:"Duo True Sister, Meer",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S007",name:"Duo Flower Girl, Lily",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S008",name:"Duo Flower Girl, Lily",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S009",name:"Duo Mini Heart, Rhone",grade:2,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S010",name:"Duo Mini Heart, Rhone",grade:2,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S011",name:"PR♥ISM-Duo, Slaney",grade:2,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S012",name:"PR♥ISM-Duo, Slaney",grade:2,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
-      {id:"EB10_S013",name:"Duo Promise Day, Colima",grade:1,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜",trigger:"Sentinel"},
-      {id:"EB10_S014",name:"Duo Promise Day, Colima",grade:1,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜",trigger:"Sentinel"},
-      {id:"EB10_S015",name:"PR♥ISM-Duo, Aria",grade:1,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜",trigger:"Sentinel"},
-      {id:"EB10_S016",name:"PR♥ISM-Duo, Aria",grade:1,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜",trigger:"Sentinel"}
+      {id:"EB10_S001B",name:"Duo Stage Storm, Iori",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S001W",name:"Duo Stage Storm, Iori",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S002B",name:"Duo Temptation, Reit",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S002W",name:"Duo Temptation, Reit",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S003B",name:"Duo True Sister, Meer",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S003W",name:"Duo True Sister, Meer",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S004B",name:"Duo Flower Girl, Lily",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S004W",name:"Duo Flower Girl, Lily",grade:3,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S005B",name:"Duo Mini Heart, Rhone",grade:2,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S005W",name:"Duo Mini Heart, Rhone",grade:2,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S006B",name:"PR♥ISM-Duo, Slaney",grade:2,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S006W",name:"PR♥ISM-Duo, Slaney",grade:2,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜"},
+      {id:"EB10_S007B",name:"Duo Promise Day, Colima",grade:1,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜",trigger:"Sentinel"},
+      {id:"EB10_S007W",name:"Duo Promise Day, Colima",grade:1,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜",trigger:"Sentinel"},
+      {id:"EB10_S008B",name:"PR♥ISM-Duo, Aria",grade:1,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜",trigger:"Sentinel"},
+      {id:"EB10_S008W",name:"PR♥ISM-Duo, Aria",grade:1,clan:"Bermuda Triangle",rarity:"SP",icon:"🧜",trigger:"Sentinel"}
     ]
   },
   {
@@ -3399,6 +3399,10 @@ function generatePack5(cards, rplusPool, forcedRarity, variableTrigger) {
 
   const normalCPool = cards.filter(c => c.rarity === 'C' && !c.trigger && !c.sentinel);
   const trigCPool   = cards.filter(c => c.rarity === 'C' && c.trigger && c.trigger !== 'Sentinel');
+  const lrCards     = cards.filter(c => c.rarity === 'LR');
+  const spCards     = cards.filter(c => c.rarity === 'SP');
+  const hasLR       = lrCards.length > 0;
+  const hasSP       = spCards.length > 0;
 
   function pickFrom(pool, fallbackPool) {
     const fresh = pool.filter(c => !used.has(c.id));
@@ -3409,15 +3413,20 @@ function generatePack5(cards, rplusPool, forcedRarity, variableTrigger) {
     return picked;
   }
 
-  function pickRplus(overrideRarity) {
+  function pickRplus(overrideRarity, lrBoosted) {
     const allowed = rplusPool.raritiesAllowed;
     const setRarities = new Set(cards.map(c => c.rarity));
-    const available = allowed.filter(r => setRarities.has(r));
+    let available = allowed.filter(r => setRarities.has(r));
+    let weights = rplusPool.weights
+      ? available.map(r => ({ rarity: r, weight: rplusPool.weights[allowed.indexOf(r)] }))
+      : RARITY_POOL.filter(x => available.includes(x.rarity));
+    // LR pity: after ~5 boxes (150 packs) without LR, boost LR weight 3x
+    if (lrBoosted && hasLR) {
+      weights = weights.map(w => w.rarity === 'LR' ? { ...w, weight: w.weight * 3 } : w);
+    }
     const rarity = overrideRarity && available.includes(overrideRarity)
       ? overrideRarity
-      : weightedPick(rplusPool.weights
-          ? available.map(r => ({ rarity: r, weight: rplusPool.weights[allowed.indexOf(r)] }))
-          : RARITY_POOL.filter(x => available.includes(x.rarity)));
+      : weightedPick(weights);
     const candidates = cards.filter(c => c.rarity === rarity && !used.has(c.id));
     const fallback   = cards.filter(c => c.rarity === rarity);
     const picked = (candidates.length ? candidates : fallback)[Math.floor(Math.random() * (candidates.length || fallback.length))];
@@ -3425,28 +3434,62 @@ function generatePack5(cards, rplusPool, forcedRarity, variableTrigger) {
     return picked;
   }
 
-  const rPlusCard = pickRplus(forcedRarity);
+  // ── God Pack check ────────────────────────────────────────────────────────
+  // SP God Pack: ~1% chance after 500+ total packs — all 5 slots are SP
+  // LR God Pack (BT16/17, EB10-12 only): ~0.5% chance after 1000+ packs
+  //   BT LR God Pack: slots 1-4 = SP, slot 5 = LR (paired mate always comes with it)
+  //   EB LR God Pack: slots 1-3 = SP, slots 4-5 = both LR of the set
+  const tp = typeof totalPacksOpened !== 'undefined' ? totalPacksOpened : 0;
+  const spGodChance  = tp >= 500  ? 0.01 : tp >= 300 ? 0.005 : 0;
+  const lrGodChance  = tp >= 1000 ? 0.005 : tp >= 700 ? 0.002 : 0;
+
+  if (hasLR && lrGodChance > 0 && Math.random() < lrGodChance) {
+    // LR God Pack
+    const isEB = lrCards.some(c => c.id.startsWith('EB'));
+    if (isEB) {
+      // EB: SP SP SP LR LR
+      const sp1 = hasSP ? spCards[Math.floor(Math.random()*spCards.length)] : normalCPool[0];
+      const sp2 = hasSP ? spCards[Math.floor(Math.random()*spCards.length)] : normalCPool[0];
+      const sp3 = hasSP ? spCards[Math.floor(Math.random()*spCards.length)] : normalCPool[0];
+      const lr1 = lrCards[0], lr2 = lrCards[Math.min(1, lrCards.length-1)];
+      if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'✨',name:'⚡ LR GOD PACK!',rarity:'SP'}), 500);
+      return [sp1, sp2, sp3, lr1, lr2];
+    } else {
+      // BT: SP SP SP SP LR
+      const sps = hasSP ? [0,1,2,3].map(i => spCards[i % spCards.length]) : [normalCPool[0],normalCPool[0],normalCPool[0],normalCPool[0]];
+      const lr1 = lrCards[Math.floor(Math.random()*lrCards.length)];
+      if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'✨',name:'⚡ LR GOD PACK!',rarity:'SP'}), 500);
+      return [...sps, lr1];
+    }
+  }
+
+  if (hasSP && spGodChance > 0 && Math.random() < spGodChance) {
+    // SP God Pack — all 5 cards are SP
+    const pack = [0,1,2,3,4].map(i => spCards[i % spCards.length]);
+    if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'🌟',name:'✨ SP GOD PACK!',rarity:'SP'}), 500);
+    return pack;
+  }
+
+  // ── Normal pack ───────────────────────────────────────────────────────────
+  const lrBoosted = hasLR && typeof packsSinceLastLR !== 'undefined' && packsSinceLastLR >= 150;
+  const rPlusCard = pickRplus(forcedRarity, lrBoosted);
 
   let slot1, slot2, slot3, slot4;
 
   if (variableTrigger) {
-    // BT01-05 / EB01-07: variable — Pack A (2 triggers) or Pack B (1 trigger), 50/50
     const isTwoTriggerPack = Math.random() < 0.5;
     if (isTwoTriggerPack) {
-      // Pack A: [normal, normal, trigger, trigger, R+]
       slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
       slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
       slot3 = pickFrom(trigCPool, normalCPool);
       slot4 = pickFrom(trigCPool, normalCPool);
     } else {
-      // Pack B: [normal, normal, normal, trigger, R+]
       slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
       slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
       slot3 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
       slot4 = pickFrom(trigCPool, normalCPool);
     }
   } else {
-    // BT06+ / EB08+: always 2 triggers in slots 3 & 4
     slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
     slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
     slot3 = pickFrom(trigCPool, normalCPool);

@@ -7,6 +7,8 @@ let collection = {}; // cardId -> { card, count }
 let history = [];
 let totalPacks = 0;
 let packsSinceLastRRR = 0;   // pity tracker
+let packsSinceLastLR  = 0;   // LR pity tracker (boosts LR rate after ~5 boxes)
+let totalPacksOpened  = 0;   // lifetime pack count (for god pack thresholds)
 let wishlist = new Set();    // card IDs on wishlist
 let sessionStats = {         // lifetime stats
   totalPulled: 0,
@@ -120,6 +122,8 @@ function clearSession() {
   totalPacks = 0;
   stagedCards = [];
   packsSinceLastRRR = 0;
+  packsSinceLastLR = 0;
+  totalPacksOpened = 0;
   sessionStats = { totalPulled:0, byRarity:{}, bestPull:null, packPrice:sessionStats.packPrice, wishlistHits:0 };
   document.getElementById('total-packs').textContent = '0';
   document.getElementById('total-cards-stat').textContent = '0';
@@ -1031,6 +1035,10 @@ function revealCards() {
     const hitRRR = packCards.some(c => ["RRR","LR","SP","OR","GR","SCR","SGR"].includes(c.rarity));
     if (hitRRR) { packsSinceLastRRR = 0; }
     else { packsSinceLastRRR++; }
+    const hitLR = packCards.some(c => c.rarity === 'LR');
+    if (hitLR) { packsSinceLastLR = 0; }
+    else { packsSinceLastLR++; }
+    totalPacksOpened++;
   }
   updatePityDisplay();
 
@@ -1098,16 +1106,12 @@ function cardImgPath(id, ext) {
     return `${base}${setId}/${fileId}.${ext}`;
   }
 
-  // EB10 Noir/Blanc — normal cards: EB10_001B → EB10_001EN-B.webp
-  // SP cards: EB10_S001 → try EB10_S01EN-B.webp and EB10_S01EN-W.webp via candidates
+  // EB10 Noir/Blanc — IDs include B/W suffix: EB10_001B, EB10_S001B, EB10_S001W etc.
   if (setId === 'EB10') {
-    // Normal B/W variants (e.g. EB10_001B, EB10_001W)
-    const m = id.match(/^(EB10_(?:S0?\d+|\d+))([BW])$/);
+    const m = id.match(/^(EB10_(?:S\d+|\d+))([BW])$/);
     if (m) {
-      const baseId = m[1].replace(/_S0(\d+)$/, '_S$1');
-      return `${IMG_CARDS}${setId}/${baseId}EN-${m[2]}.${ext}`;
+      return `${IMG_CARDS}${setId}/${m[1]}EN-${m[2]}.${ext}`;
     }
-    // SP cards without B/W suffix — fall through to standard SP path below
   }
 
   // Legion Rare cards (EB11, EB12, BT16, BT17)
@@ -1130,14 +1134,16 @@ function cardImgCandidates(id) {
   const fileId = id.replace(/_S0(\d+)$/, '_S$1');
   const fileIdLower = fileId.toLowerCase();
 
-  // EB10 SP cards (e.g. EB10_S001) — try both -B and -W variants
-  if (setId === 'EB10' && id.match(/^EB10_S\d+$/)) {
-    return [
-      `${base}${setId}/${fileId}EN-B.webp`,
-      `${base}${setId}/${fileId}EN-W.webp`,
-      `${base}${setId}/${fileId}EN.webp`,
-      `${base}${setId}/${fileId}.webp`,
-    ];
+  // EB10 B/W variants — all EB10 cards with B/W suffix (normal and SP)
+  if (setId === 'EB10') {
+    const m = id.match(/^(EB10_(?:S\d+|\d+))([BW])$/);
+    if (m) {
+      return [
+        `${base}${setId}/${m[1]}EN-${m[2]}.webp`,
+        `${base}${setId}/${m[1]}-${m[2]}.webp`,
+        `${base}${setId}/${m[1].toLowerCase()}EN-${m[2].toLowerCase()}.webp`,
+      ];
+    }
   }
 
   // webp only — try EN suffix, no suffix, lowercase no suffix
@@ -1540,7 +1546,7 @@ function renderGallery() {
     if (ownedOnly && !(collection[card.id]?.count > 0)) return false;
     // Set filter
     if (setFilterIds && !setFilterIds.has(card.id)) return false;
-    if (galleryRarityFilter !== 'ALL' && card.rarity !== galleryRarityFilter) return false;
+    if (galleryRarityFilter !== 'ALL') { const rMatch = galleryRarityFilter === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR') : card.rarity === galleryRarityFilter; if (!rMatch) return false; }
     if (galleryClanFilter !== 'ALL' && card.clan !== galleryClanFilter) return false;
     if (galleryTypeFilter === 'Wishlist') return wishlist.has(card.id);
     if (galleryTypeFilter !== 'ALL') {
@@ -1772,7 +1778,7 @@ function renderDeckPool() {
     const _cardIsG = !!(_cardSet && _cardSet.format==='G');
     if (deckPoolFormat === 'G' ? !_cardIsG : _cardIsG) return false;
     if (dpSetFilterIds && !dpSetFilterIds.has(card.id)) return false;
-    if (deckPoolRarityFilter !== 'ALL' && card.rarity !== deckPoolRarityFilter) return false;
+    if (deckPoolRarityFilter !== 'ALL') { const rMatch = deckPoolRarityFilter === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR') : card.rarity === deckPoolRarityFilter; if (!rMatch) return false; }
     if (deckPoolClanFilter !== 'ALL' && card.clan !== deckPoolClanFilter) return false;
     if (deckPoolTypeFilter !== 'ALL') {
       if ((deckPoolTypeFilter === 'Trigger') && !isTrigger(card)) return false;
@@ -2539,6 +2545,8 @@ buildSaveData = function() {
   const data = _origBuildSaveData();
   data.wishlist = [...wishlist];
   data.packsSinceLastRRR = packsSinceLastRRR;
+  data.packsSinceLastLR = packsSinceLastLR;
+  data.totalPacksOpened = totalPacksOpened;
   data.sessionStats = sessionStats;
   return data;
 };
@@ -2547,6 +2555,8 @@ applySaveData = function(data) {
   _origApplySaveData(data);
   wishlist = new Set(data.wishlist || []);
   packsSinceLastRRR = data.packsSinceLastRRR || 0;
+  packsSinceLastLR = data.packsSinceLastLR || 0;
+  totalPacksOpened = data.totalPacksOpened || 0;
   if (data.sessionStats) sessionStats = {...sessionStats, ...data.sessionStats};
   updatePityDisplay();
 };
