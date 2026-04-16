@@ -25,13 +25,13 @@ Bug Fixing:
 
 ~BT15 Omega Glendios rarity should be RRR~
 
-BT16 SPs setlist
+~BT16 SPs setlist~
 
 EB10 SPs wording
 
-buff LR rates(i myself have not open 1 yet)
+~buff LR rates(i myself have not open 1 yet)~
 
-God Pack maybe?(idk what to put into this pack maybe just all SPs)
+~God Pack maybe?(idk what to put into this pack maybe just all SPs)~
 ______________________________________________________________________________________________________________________________
 Images uploaded till: Everything that exist in the sim
 
