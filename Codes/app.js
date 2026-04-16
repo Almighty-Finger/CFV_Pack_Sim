@@ -1106,11 +1106,12 @@ function cardImgPath(id, ext) {
     return `${base}${setId}/${fileId}.${ext}`;
   }
 
-  // EB10 Noir/Blanc — IDs include B/W suffix: EB10_001B, EB10_S001B, EB10_S001W etc.
+  // EB10 Noir/Blanc — IDs: EB10_001B/W, EB10_S001B/W
+  // Image naming: EB10_001ENB.webp / EB10_001ENW.webp (no hyphen, suffix at end)
   if (setId === 'EB10') {
     const m = id.match(/^(EB10_(?:S\d+|\d+))([BW])$/);
     if (m) {
-      return `${IMG_CARDS}${setId}/${m[1]}EN-${m[2]}.${ext}`;
+      return `${IMG_CARDS}${setId}/${m[1]}EN${m[2]}.${ext}`;
     }
   }
 
@@ -1134,14 +1135,14 @@ function cardImgCandidates(id) {
   const fileId = id.replace(/_S0(\d+)$/, '_S$1');
   const fileIdLower = fileId.toLowerCase();
 
-  // EB10 B/W variants — all EB10 cards with B/W suffix (normal and SP)
+  // EB10 B/W variants — EB10_001B → EB10_001ENB.webp (no hyphen)
   if (setId === 'EB10') {
     const m = id.match(/^(EB10_(?:S\d+|\d+))([BW])$/);
     if (m) {
       return [
+        `${base}${setId}/${m[1]}EN${m[2]}.webp`,
         `${base}${setId}/${m[1]}EN-${m[2]}.webp`,
-        `${base}${setId}/${m[1]}-${m[2]}.webp`,
-        `${base}${setId}/${m[1].toLowerCase()}EN-${m[2].toLowerCase()}.webp`,
+        `${base}${setId}/${m[1]}.webp`,
       ];
     }
   }

@@ -1896,13 +1896,13 @@ const SETS = [
       {id:"BT16_S003",name:"Seeker, Purgation Breath Dragon",grade:3,clan:"Royal Paladin",rarity:"SP",icon:"⚔️"},
       {id:"BT16_S004",name:"Bluish Flame Liberator, Prominence Glare",grade:3,clan:"Gold Paladin",rarity:"SP",icon:"🛡️"},
       {id:"BT16_S005",name:"Bluish Flame Liberator, Prominence Core",grade:3,clan:"Gold Paladin",rarity:"SP",icon:"🛡️"},
-      {id:"BT16_S006",name:"Brawler, Big Bang Knuckle Dragon",grade:3,clan:"Narukami",rarity:"SP",icon:"⚡"},
-      {id:"BT16_S007",name:"Brawler, Big Bang Knuckle Buster",grade:3,clan:"Narukami",rarity:"SP",icon:"⚡"},
-      {id:"BT16_S008",name:"Juxtapose Deletor, Zaele",grade:3,clan:"Link Joker",rarity:"SP",icon:"🔗"},
-      {id:"BT16_S009",name:"Daunting Deletor, Oksizz",grade:3,clan:"Link Joker",rarity:"SP",icon:"🔗"},
-      {id:"BT16_S010",name:"Brawler, Big Bang Slash Dragon",grade:2,clan:"Narukami",rarity:"SP",icon:"⚡"},
-      {id:"BT16_S011",name:"Emerald Blaze",grade:3,clan:"Spike Brothers",rarity:"SP",icon:"🏈"},
-      {id:"BT16_S012",name:"Murasame Liberator, Coil",grade:3,clan:"Gold Paladin",rarity:"SP",icon:"🛡️"},
+      {id:"BT16_S006",name:"Murasame Liberator, Coil",grade:3,clan:"Gold Paladin",rarity:"SP",icon:"🛡️"},
+      {id:"BT16_S007",name:"Brawler, Big Bang Knuckle Dragon",grade:3,clan:"Narukami",rarity:"SP",icon:"⚡"},
+      {id:"BT16_S008",name:"Brawler, Big Bang Knuckle Buster",grade:3,clan:"Narukami",rarity:"SP",icon:"⚡"},
+      {id:"BT16_S009",name:"Brawler, Big Bang Slash Dragon",grade:2,clan:"Narukami",rarity:"SP",icon:"⚡"},
+      {id:"BT16_S010",name:"Juxtapose Deletor, Zaele",grade:3,clan:"Link Joker",rarity:"SP",icon:"🔗"},
+      {id:"BT16_S011",name:"Daunting Deletor, Oksizz",grade:3,clan:"Link Joker",rarity:"SP",icon:"🔗"},
+      {id:"BT16_S012",name:"Emerald Blaze",grade:3,clan:"Spike Brothers",rarity:"SP",icon:"🏈"},
       {id:"BT16_S013",name:"Silver Blaze",grade:2,clan:"Spike Brothers",rarity:"SP",icon:"🏈"},
       {id:"BT16_S014",name:"Blue Storm Wave Dragon, Tetra-burst Dragon",grade:3,clan:"Aqua Force",rarity:"SP",icon:"🌊"}
     ]
@@ -2263,7 +2263,7 @@ const SETS = [
     desc:"【VGE-G-TD01】 Cardfight!! Vanguard G Trial Deck Vol.1: Awakening of the Interdimensional Dragon | Featured Clan: Gear Chronicle",
     packSize:50,format:"G",
     cards:[
-      {id:"GTD01_001",name:"Interdimensional Dragon, Mystery-flare Dragon",grade:4,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️",gUnit:true},
+      {id:"GTD01_001",name:"Interdimensional Dragon, Mystery-flare Dragon",grade:4,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
       {id:"GTD01_002",name:"Chronojet Dragon",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
       {id:"GTD01_003",name:"Smithereen Colossus",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
       {id:"GTD01_004",name:"Steam Knight, Ubara-tutu",grade:3,clan:"Gear Chronicle",rarity:"TD",icon:"⚙️"},
@@ -2289,7 +2289,7 @@ const SETS = [
     desc:"【VGE-G-TD02】 Cardfight!! Vanguard G Trial Deck Vol.2: Divine Swordsman of the Shiny Star | Featured Clan: Royal Paladin",
     packSize:50,format:"G",
     cards:[
-      {id:"GTD02_001",name:"Shrouded Divine Knight, Gablade",grade:4,clan:"Royal Paladin",rarity:"TD",icon:"⚔️",gUnit:true},
+      {id:"GTD02_001",name:"Shrouded Divine Knight, Gablade",grade:4,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
       {id:"GTD02_002",name:"Blue Sky Knight, Altmile",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
       {id:"GTD02_003",name:"Aurashooter Dragon",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
       {id:"GTD02_004",name:"Profound Sage, Kunron",grade:3,clan:"Royal Paladin",rarity:"TD",icon:"⚔️"},
@@ -2315,7 +2315,7 @@ const SETS = [
     desc:"【VGE-G-TD03】 Cardfight!! Vanguard G Trial Deck Vol.3: Flower Maiden of Purity | Featured Clan: Neo Nectar",
     packSize:50,format:"G",
     cards:[
-      {id:"GTD03_001",name:"Flower Princess of Spring, Arborea",grade:4,clan:"Neo Nectar",rarity:"TD",icon:"🌿",gUnit:true},
+      {id:"GTD03_001",name:"Flower Princess of Spring, Arborea",grade:4,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
       {id:"GTD03_002",name:"Ranunculus Flower Maiden, Ahsha",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
       {id:"GTD03_003",name:"Jungle Lord Dragon",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
       {id:"GTD03_004",name:"Full Bloom Dragon",grade:3,clan:"Neo Nectar",rarity:"TD",icon:"🌿"},
@@ -3394,168 +3394,160 @@ const SLOT_RULES_5_EB_LR      = [ { raritiesAllowed:["C"] }, { raritiesAllowed:[
 const SLOT_RULES_5_GEB_OLD    = SLOT_RULES_5_EB;
 
 // Generate a 5-card pack with exactly 2 triggers total
-function generatePack5(cards, rplusPool, forcedRarity, variableTrigger) {
+function generatePack5(cards, rplusPool, forcedRarity, variableTrigger, isGodPackSlot) {
   const used = new Set();
-
   const normalCPool = cards.filter(c => c.rarity === 'C' && !c.trigger && !c.sentinel);
   const trigCPool   = cards.filter(c => c.rarity === 'C' && c.trigger && c.trigger !== 'Sentinel');
   const lrCards     = cards.filter(c => c.rarity === 'LR');
   const spCards     = cards.filter(c => c.rarity === 'SP');
-  const hasLR       = lrCards.length > 0;
-  const hasSP       = spCards.length > 0;
+  const hasLR = lrCards.length > 0;
+  const hasSP = spCards.length > 0;
 
-  function pickFrom(pool, fallbackPool) {
+  function pickFrom(pool, fb) {
     const fresh = pool.filter(c => !used.has(c.id));
-    const src = fresh.length ? fresh : (fallbackPool || pool).filter(c => !used.has(c.id));
-    const final = src.length ? src : (fallbackPool || pool);
-    const picked = final[Math.floor(Math.random() * final.length)];
-    used.add(picked.id);
-    return picked;
+    const src = fresh.length ? fresh : (fb||pool).filter(c => !used.has(c.id));
+    const final = src.length ? src : (fb||pool);
+    const p = final[Math.floor(Math.random()*final.length)];
+    used.add(p.id); return p;
   }
+  function randSP() { return spCards[Math.floor(Math.random()*spCards.length)]; }
 
   function pickRplus(overrideRarity, lrBoosted) {
     const allowed = rplusPool.raritiesAllowed;
     const setRarities = new Set(cards.map(c => c.rarity));
-    let available = allowed.filter(r => setRarities.has(r));
+    const available = allowed.filter(r => setRarities.has(r));
     let weights = rplusPool.weights
       ? available.map(r => ({ rarity: r, weight: rplusPool.weights[allowed.indexOf(r)] }))
       : RARITY_POOL.filter(x => available.includes(x.rarity));
-    // LR pity: after ~5 boxes (150 packs) without LR, boost LR weight 3x
+    // LR pity: boost after 150 dry packs, more after 240
     if (lrBoosted && hasLR) {
-      weights = weights.map(w => w.rarity === 'LR' ? { ...w, weight: w.weight * 3 } : w);
+      const boost = (typeof packsSinceLastLR !== 'undefined' && packsSinceLastLR >= 240) ? 6 : 3;
+      weights = weights.map(w => w.rarity === 'LR' ? {...w, weight: w.weight * boost} : w);
     }
     const rarity = overrideRarity && available.includes(overrideRarity)
-      ? overrideRarity
-      : weightedPick(weights);
+      ? overrideRarity : weightedPick(weights);
     const candidates = cards.filter(c => c.rarity === rarity && !used.has(c.id));
     const fallback   = cards.filter(c => c.rarity === rarity);
-    const picked = (candidates.length ? candidates : fallback)[Math.floor(Math.random() * (candidates.length || fallback.length))];
-    used.add(picked.id);
-    return picked;
+    const picked = (candidates.length ? candidates : fallback)[Math.floor(Math.random()*(candidates.length||fallback.length))];
+    used.add(picked.id); return picked;
   }
 
-  // ── God Pack check ────────────────────────────────────────────────────────
-  // SP God Pack: ~1% chance after 500+ total packs — all 5 slots are SP
-  // LR God Pack (BT16/17, EB10-12 only): ~0.5% chance after 1000+ packs
-  //   BT LR God Pack: slots 1-4 = SP, slot 5 = LR (paired mate always comes with it)
-  //   EB LR God Pack: slots 1-3 = SP, slots 4-5 = both LR of the set
+  // ── God Pack logic ──────────────────────────────────────────────────────────
   const tp = typeof totalPacksOpened !== 'undefined' ? totalPacksOpened : 0;
-  const spGodChance  = tp >= 500  ? 0.01 : tp >= 300 ? 0.005 : 0;
-  const lrGodChance  = tp >= 1000 ? 0.005 : tp >= 700 ? 0.002 : 0;
+  const spGodChance  = !isGodPackSlot ? (tp >= 500 ? 0.008 : tp >= 300 ? 0.004 : 0) : 0;
+  const lrGodChance  = !isGodPackSlot ? (tp >= 1000 ? 0.004 : tp >= 700 ? 0.002 : 0) : 0;
 
-  if (hasLR && lrGodChance > 0 && Math.random() < lrGodChance) {
+  const doLRGod = isGodPackSlot === 'LR' || (hasLR && lrGodChance > 0 && Math.random() < lrGodChance);
+  const doSPGod = !doLRGod && (isGodPackSlot === 'SP' || (hasSP && spGodChance > 0 && Math.random() < spGodChance));
+
+  if (doLRGod && hasLR) {
     // LR God Pack
-    const isEB = lrCards.some(c => c.id.startsWith('EB'));
-    if (isEB) {
-      // EB: SP SP SP LR LR
-      const sp1 = hasSP ? spCards[Math.floor(Math.random()*spCards.length)] : normalCPool[0];
-      const sp2 = hasSP ? spCards[Math.floor(Math.random()*spCards.length)] : normalCPool[0];
-      const sp3 = hasSP ? spCards[Math.floor(Math.random()*spCards.length)] : normalCPool[0];
-      const lr1 = lrCards[0], lr2 = lrCards[Math.min(1, lrCards.length-1)];
-      if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'✨',name:'⚡ LR GOD PACK!',rarity:'SP'}), 500);
-      return [sp1, sp2, sp3, lr1, lr2];
+    // BT16/17: all LR cards (up to 6), filled with random SP if fewer than 6 LRs
+    // EB11/12: 3 random SP + both LRs
+    const isEBSet = lrCards[0].id.startsWith('EB');
+    let pack;
+    if (isEBSet) {
+      // EB: SP SP SP LR1 LR2
+      const sp1 = hasSP ? randSP() : normalCPool[0]||cards[0];
+      const sp2 = hasSP ? randSP() : normalCPool[0]||cards[0];
+      const sp3 = hasSP ? randSP() : normalCPool[0]||cards[0];
+      pack = [sp1, sp2, sp3, lrCards[0], lrCards[Math.min(1, lrCards.length-1)]];
     } else {
-      // BT: SP SP SP SP LR
-      const sps = hasSP ? [0,1,2,3].map(i => spCards[i % spCards.length]) : [normalCPool[0],normalCPool[0],normalCPool[0],normalCPool[0]];
-      const lr1 = lrCards[Math.floor(Math.random()*lrCards.length)];
-      if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'✨',name:'⚡ LR GOD PACK!',rarity:'SP'}), 500);
-      return [...sps, lr1];
+      // BT: all 6 LRs
+      pack = [...lrCards];
+      while (pack.length < 6 && hasSP) pack.push(randSP());
+      pack = pack.slice(0, 6);
     }
-  }
-
-  if (hasSP && spGodChance > 0 && Math.random() < spGodChance) {
-    // SP God Pack — all 5 cards are SP
-    const pack = [0,1,2,3,4].map(i => spCards[i % spCards.length]);
-    if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'🌟',name:'✨ SP GOD PACK!',rarity:'SP'}), 500);
+    if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'⚡',name:'LR GOD PACK!',rarity:'SP'}), 500);
     return pack;
   }
 
-  // ── Normal pack ───────────────────────────────────────────────────────────
+  if (doSPGod && hasSP) {
+    // SP God Pack — all 5 random SPs (truly random each slot)
+    const pack = [0,1,2,3,4].map(() => randSP());
+    if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'🌟',name:'SP GOD PACK!',rarity:'SP'}), 500);
+    return pack;
+  }
+
+  // ── Normal pack ─────────────────────────────────────────────────────────────
   const lrBoosted = hasLR && typeof packsSinceLastLR !== 'undefined' && packsSinceLastLR >= 150;
   const rPlusCard = pickRplus(forcedRarity, lrBoosted);
 
   let slot1, slot2, slot3, slot4;
-
   if (variableTrigger) {
-    const isTwoTriggerPack = Math.random() < 0.5;
-    if (isTwoTriggerPack) {
-      slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
-      slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+    if (Math.random() < 0.5) {
+      slot1 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+      slot2 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
       slot3 = pickFrom(trigCPool, normalCPool);
       slot4 = pickFrom(trigCPool, normalCPool);
     } else {
-      slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
-      slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
-      slot3 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+      slot1 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+      slot2 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+      slot3 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
       slot4 = pickFrom(trigCPool, normalCPool);
     }
   } else {
-    slot1 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
-    slot2 = pickFrom(normalCPool, cards.filter(c => c.rarity === 'C'));
+    slot1 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+    slot2 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
     slot3 = pickFrom(trigCPool, normalCPool);
     slot4 = pickFrom(trigCPool, normalCPool);
   }
-
   return [slot1, slot2, slot3, slot4, rPlusCard];
 }
 
+
 // ── Box opening with FIXED rates ─────────────────────────────────────────────
-// BT box (30 packs): 22R + 5RR + 3RRR (one RRR may be replaced by a god pack)
-// EB box (15 packs): 11R + 3RR + 1RRR
+// BT (30 packs): 22R+5RR+3RRR | EB (15 packs): 11R+3RR+1RRR
+// God pack replaces one RRR slot when triggered
 function generateBox5(cards, rplusPool, boxPacks, isEB, variableTrigger) {
   const hasLR = cards.some(c => c.rarity === 'LR');
   const hasSP = cards.some(c => c.rarity === 'SP');
   const tp = typeof totalPacksOpened !== 'undefined' ? totalPacksOpened : 0;
 
-  // God pack in box: replaces one RRR slot. Only if set has SP/LR.
-  // LR god pack takes priority over SP god pack.
+  // God pack in box: replaces one RRR slot
   const lrGodInBox = hasLR && (tp >= 700 ? Math.random() < 0.015 : tp >= 400 ? Math.random() < 0.008 : false);
   const spGodInBox = !lrGodInBox && hasSP && (tp >= 300 ? Math.random() < 0.025 : tp >= 150 ? Math.random() < 0.012 : false);
   const godPackType = lrGodInBox ? 'LR' : spGodInBox ? 'SP' : null;
 
   let rarities = [];
   if (isEB) {
-    const hasSPrarity = hasSP && Math.random() < 0.25;
+    const hasSPslot = hasSP && Math.random() < 0.25;
     rarities = [
-      ...Array(hasSPrarity ? 10 : 11).fill('R'),
+      ...Array(hasSPslot ? 10 : 11).fill('R'),
       ...Array(3).fill('RR'),
       'RRR',
-      ...(hasSPrarity ? ['SP'] : []),
+      ...(hasSPslot ? ['SP'] : []),
     ];
   } else {
-    const hasSPrarity = hasSP && Math.random() < 0.25;
-    // If god pack: use 2 RRR instead of 3 (god pack replaces one)
-    const rrrCount = godPackType ? 2 : (hasSPrarity ? 2 : 3);
+    const hasSPslot = hasSP && Math.random() < 0.25;
+    const rrrCount = godPackType ? 2 : (hasSPslot ? 2 : 3);
     rarities = [
       ...Array(22).fill('R'),
       ...Array(5).fill('RR'),
       ...Array(rrrCount).fill('RRR'),
-      ...(hasSPrarity && !godPackType ? ['SP'] : []),
+      ...(hasSPslot && !godPackType ? ['SP'] : []),
     ];
   }
-
   // Shuffle
   for (let i = rarities.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [rarities[i], rarities[j]] = [rarities[j], rarities[i]];
   }
-
-  // Insert god pack at a random position if triggered
-  let godPackPos = -1;
-  if (godPackType) {
-    godPackPos = Math.floor(Math.random() * boxPacks);
-  }
-
+  // Insert god pack at random position
+  const godPackPos = godPackType ? Math.floor(Math.random() * boxPacks) : -1;
   const allCards = [];
+  let ri = 0;
   for (let i = 0; i < boxPacks; i++) {
     if (i === godPackPos) {
       allCards.push(...generatePack5(cards, rplusPool, null, variableTrigger, godPackType));
     } else {
-      allCards.push(...generatePack5(cards, rplusPool, rarities[Math.min(i - (i > godPackPos ? 1 : 0), rarities.length-1)], variableTrigger));
+      allCards.push(...generatePack5(cards, rplusPool, rarities[ri++] || 'R', variableTrigger));
     }
   }
   return allCards;
 }
+
+
 // G BT01-03 — 7-card, 30pk/box + trigger | SP:1/120 | GR:1/360
 const SLOT_RULES_7_GBT01 = [
   { raritiesAllowed:["R","RR","RRR","SP","GR"], weights:[264, 60, 33, 3, 1] },
