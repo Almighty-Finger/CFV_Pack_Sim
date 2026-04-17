@@ -1101,32 +1101,37 @@ function openZoom(card) {
   zoomCard = card;
   const img = document.getElementById('zoom-img');
   const fallback = document.getElementById('zoom-fallback');
-  img.dataset.tried = '0';
-  img.dataset.id = card.id;
-  img.src = cardImgPath(card.id);
+  
   img.style.display = 'block';
   fallback.style.display = 'none';
-  img.onerror = () => {
-    const tried = parseInt(img.dataset.tried || '0') + 1;
-    img.dataset.tried = tried;
-    const exts = ['png','jpg','jpeg'];
-    if (tried < exts.length) {
-      img.onerror = img.onerror;
-      img.src = cardImgPath(card.id, exts[tried]);
-    } else {
+  
+  const candidates = cardImgCandidates(card.id);
+  let attempt = 0;
+  
+  function tryNext() {
+    if (attempt >= candidates.length) {
       img.style.display = 'none';
       fallback.style.display = 'flex';
       document.getElementById('zoom-icon').textContent = card.icon;
+      return;
     }
-  };
+    img.onerror = () => { attempt++; tryNext(); };
+    img.onload = () => { fallback.style.display = 'none'; };
+    img.src = candidates[attempt];
+    attempt++;
+  }
+  tryNext();
+  
   document.getElementById('zoom-name').textContent = card.name;
   document.getElementById('zoom-sub').textContent = `${card.clan} · Grade ${card.grade} · ${card.rarity}`;
   document.getElementById('zoom-sub').style.color = `var(--rarity-${card.rarity.toLowerCase()})`;
+  
   const owned = collection[card.id]?.count || 0;
   const ttype = getTriggerType(card);
   const unitType = isSentinel(card)?'Sentinel':ttype?`${ttype} Trigger`:card.grade===0?'First Vanguard':`Grade ${card.grade} Unit`;
   const inDeck = deck[card.id]?.count || 0;
   const inFV = fvCard?.id===card.id ? 1 : 0;
+  
   document.getElementById('zoom-extra').innerHTML = `
     <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px">
       <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--surface2);color:var(--text-muted)">📦 Owned: <b style="color:var(--text)">${owned}</b></span>
@@ -1134,30 +1139,13 @@ function openZoom(card) {
       <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--surface2);color:var(--text-muted)">📂 ${card.id.split('_')[0]}</span>
       <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--surface2);color:var(--text-muted)">${unitType}</span>
     </div>`;
+    
   const wb = document.getElementById('zoom-wishlist-btn');
   wb.textContent = wishlist.has(card.id) ? '⭐ On Wishlist' : '☆ Add to Wishlist';
   wb.style.background = wishlist.has(card.id) ? 'rgba(240,180,41,0.2)' : '';
   wb.style.borderColor = wishlist.has(card.id) ? 'var(--gold)' : '';
   document.getElementById('zoom-overlay').classList.add('active');
 }
-function closeZoom(e) {
-  if (e && e.target !== document.getElementById('zoom-overlay')) return;
-  document.getElementById('zoom-overlay').classList.remove('active');
-  zoomCard = null;
-}
-function addToDeckFromZoom() {
-  if (zoomCard) { addToDeck(zoomCard); document.getElementById('zoom-overlay').classList.remove('active'); }
-}
-
-function attachZoomToGrid() {
-  document.querySelectorAll('.card-slot').forEach((slot, i) => {
-    slot.addEventListener('dblclick', (e) => {
-      e.stopPropagation();
-      const inner = slot.querySelector('.card-inner');
-      if (!inner.classList.contains('flipped')) return;
-      if (window._lastRevealedCards && window._lastRevealedCards[i]) {
-        openZoom(window._lastRevealedCards[i]);
-      }
     });
   });
 }
