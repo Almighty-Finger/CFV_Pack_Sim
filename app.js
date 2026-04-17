@@ -632,6 +632,55 @@ function toggleAutoReveal(el) {
   autoReveal = el.checked;
 }
 
+function generateBox5(cards, rplusPool, boxPacks, isEB, variableTrigger) {
+  const hasLR = cards.some(c => c.rarity === 'LR');
+  const hasSP = cards.some(c => c.rarity === 'SP');
+  const tp = typeof totalPacksOpened !== 'undefined' ? totalPacksOpened : 0;
+
+  const lrGodInBox = typeof godPacksEnabled !== 'undefined' && godPacksEnabled && hasLR && (tp >= 700 ? Math.random() < 0.015 : tp >= 400 ? Math.random() < 0.008 : false);
+  const spGodInBox = typeof godPacksEnabled !== 'undefined' && godPacksEnabled && !lrGodInBox && hasSP && (tp >= 300 ? Math.random() < 0.025 : tp >= 150 ? Math.random() < 0.012 : false);
+  const godPackType = lrGodInBox ? 'LR' : (spGodInBox ? 'SP' : null);
+
+  let rarities = [];
+  if (isEB) {
+    const hasSPslot = hasSP && Math.random() < 0.25 && !godPackType;
+    rarities = [
+      ...Array(hasSPslot ? 10 : 11).fill('R'),
+      ...Array(3).fill('RR'),
+      'RRR',
+      ...(hasSPslot ? ['SP'] : []),
+    ];
+  } else {
+    const hasSPslot = hasSP && Math.random() < 0.25 && !godPackType;
+    const rrrCount = godPackType ? 2 : (hasSPslot ? 2 : 3);
+    rarities = [
+      ...Array(22).fill('R'),
+      ...Array(5).fill('RR'),
+      ...Array(rrrCount).fill('RRR'),
+      ...(hasSPslot ? ['SP'] : []),
+    ];
+  }
+  
+  for (let i = rarities.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [rarities[i], rarities[j]] = [rarities[j], rarities[i]];
+  }
+  
+  const godPackPos = godPackType ? Math.floor(Math.random() * boxPacks) : -1;
+  const allCards = [];
+  let ri = 0;
+  
+  for (let i = 0; i < boxPacks; i++) {
+    if (i === godPackPos) {
+      allCards.push(...generatePack5(cards, rplusPool, null, variableTrigger, godPackType));
+    } else {
+      allCards.push(...generatePack5(cards, rplusPool, rarities[ri] || 'R', variableTrigger));
+      ri++;
+    }
+  }
+  return allCards;
+}
+
 function stageBox() {
   const set = SETS[currentSetIdx];
   if (!set) return;
