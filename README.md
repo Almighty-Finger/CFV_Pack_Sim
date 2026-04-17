@@ -23,9 +23,7 @@ All list for OG is done expect for PR and Special sets
 ______________________________________________________________________________________________________________________________
 Bug Fixing:
 
-god pack toggle
-
-EB10 SPs wording
+god pack logic(might take a while)
 
 ______________________________________________________________________________________________________________________________
 Images uploaded till: Everything that exist in the sim
