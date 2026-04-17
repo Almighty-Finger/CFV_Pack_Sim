@@ -631,6 +631,116 @@ let autoReveal = true;
 function toggleAutoReveal(el) {
   autoReveal = el.checked;
 }
+function generatePack5(cards, rplusPool, forcedRarity, variableTrigger, isGodPackSlot) {
+  const used = new Set();
+  const normalCPool = cards.filter(c => c.rarity === 'C' && !c.trigger && !c.sentinel);
+  const trigCPool   = cards.filter(c => c.rarity === 'C' && c.trigger && c.trigger !== 'Sentinel');
+  const lrCards     = cards.filter(c => c.rarity === 'LR');
+  const spCards     = cards.filter(c => c.rarity === 'SP');
+  const hasLR = lrCards.length > 0;
+  const hasSP = spCards.length > 0;
+
+  function pickFrom(pool, fb) {
+    const fresh = pool.filter(c => !used.has(c.id));
+    const src = fresh.length ? fresh : (fb||pool).filter(c => !used.has(c.id));
+    const final = src.length ? src : (fb||pool);
+    const p = final[Math.floor(Math.random()*final.length)];
+    used.add(p.id); return p;
+  }
+  
+  function pickUniqueFrom(pool, count) {
+    const available = pool.filter(c => !used.has(c.id));
+    const shuffled = [...available].sort(() => Math.random() - 0.5);
+    const selected = [];
+    for (let i = 0; i < Math.min(count, available.length); i++) {
+      const card = shuffled[i];
+      used.add(card.id);
+      selected.push(card);
+    }
+    return selected;
+  }
+
+  function randSP() { 
+    const available = spCards.filter(c => !used.has(c.id));
+    if (available.length === 0) return spCards[Math.floor(Math.random()*spCards.length)];
+    return available[Math.floor(Math.random()*available.length)]; 
+  }
+
+  function pickRplus(overrideRarity, lrBoosted) {
+    const allowed = rplusPool.raritiesAllowed;
+    const setRarities = new Set(cards.map(c => c.rarity));
+    const available = allowed.filter(r => setRarities.has(r));
+    let weights = rplusPool.weights
+      ? available.map(r => ({ rarity: r, weight: rplusPool.weights[allowed.indexOf(r)] }))
+      : RARITY_POOL.filter(x => available.includes(x.rarity));
+    if (lrBoosted && hasLR) {
+      const boost = (typeof packsSinceLastLR !== 'undefined' && packsSinceLastLR >= 240) ? 6 : 3;
+      weights = weights.map(w => w.rarity === 'LR' ? {...w, weight: w.weight * boost} : w);
+    }
+    const rarity = overrideRarity && available.includes(overrideRarity)
+      ? overrideRarity : weightedPick(weights);
+    const candidates = cards.filter(c => c.rarity === rarity && !used.has(c.id));
+    const fallback   = cards.filter(c => c.rarity === rarity);
+    const picked = (candidates.length ? candidates : fallback)[Math.floor(Math.random()*(candidates.length||fallback.length))];
+    used.add(picked.id); return picked;
+  }
+
+  const tp = typeof totalPacksOpened !== 'undefined' ? totalPacksOpened : 0;
+  const spGodChance  = !isGodPackSlot ? (tp >= 500 ? 0.008 : tp >= 300 ? 0.004 : 0) : 0;
+  const lrGodChance  = !isGodPackSlot ? (tp >= 1000 ? 0.004 : tp >= 700 ? 0.002 : 0) : 0;
+
+  const doLRGod = typeof godPacksEnabled !== 'undefined' && godPacksEnabled && (isGodPackSlot === 'LR' || (hasLR && lrGodChance > 0 && Math.random() < lrGodChance));
+  const doSPGod = typeof godPacksEnabled !== 'undefined' && godPacksEnabled && !doLRGod && (isGodPackSlot === 'SP' || (hasSP && spGodChance > 0 && Math.random() < spGodChance));
+
+  if (doLRGod && hasLR) {
+    const isEBSet = lrCards[0].id.startsWith('EB');
+    let pack;
+    if (isEBSet) {
+      const spPicks = pickUniqueFrom(spCards, 3);
+      pack = [...spPicks, ...lrCards].slice(0, 5);
+    } else {
+      const lrPicks = pickUniqueFrom(lrCards, 6);
+      pack = [...lrPicks];
+      if (pack.length < 6 && hasSP) {
+        const spPicks = pickUniqueFrom(spCards, 6 - pack.length);
+        pack.push(...spPicks);
+      }
+      pack = pack.slice(0, 6);
+    }
+    if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'⚡', name:'LR GOD PACK!', rarity:'SP'}), 500);
+    return pack;
+  }
+
+  if (doSPGod && hasSP) {
+    const pack = pickUniqueFrom(spCards, 5);
+    if (typeof showToast !== 'undefined') setTimeout(() => showToast({icon:'🌟', name:'SP GOD PACK!', rarity:'SP'}), 500);
+    return pack;
+  }
+
+  const lrBoosted = hasLR && typeof packsSinceLastLR !== 'undefined' && packsSinceLastLR >= 150;
+  const rPlusCard = pickRplus(forcedRarity, lrBoosted);
+
+  let slot1, slot2, slot3, slot4;
+  if (variableTrigger) {
+    if (Math.random() < 0.5) {
+      slot1 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+      slot2 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+      slot3 = pickFrom(trigCPool, normalCPool);
+      slot4 = pickFrom(trigCPool, normalCPool);
+    } else {
+      slot1 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+      slot2 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+      slot3 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+      slot4 = pickFrom(trigCPool, normalCPool);
+    }
+  } else {
+    slot1 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+    slot2 = pickFrom(normalCPool, cards.filter(c=>c.rarity==='C'));
+    slot3 = pickFrom(trigCPool, normalCPool);
+    slot4 = pickFrom(trigCPool, normalCPool);
+  }
+  return [slot1, slot2, slot3, slot4, rPlusCard];
+}
 
 function generateBox5(cards, rplusPool, boxPacks, isEB, variableTrigger) {
   const hasLR = cards.some(c => c.rarity === 'LR');
