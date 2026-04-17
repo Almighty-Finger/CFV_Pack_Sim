@@ -1,27 +1,25 @@
-
-// ==================== STATE ====================
-let currentSetIdx = -1;    // -1 = no set selected / panel closed
-let currentFormat = 'OG';  // 'OG' | 'G'
-let packPanelOpen = false;  // whether the pack area is showing
-let collection = {}; // cardId -> { card, count }
+let currentSetIdx = -1;
+let currentFormat = 'OG';
+let packPanelOpen = false;
+let collection = {};
 let history = [];
 let totalPacks = 0;
-let packsSinceLastRRR = 0;   // pity tracker
-let packsSinceLastLR  = 0;   // LR pity tracker (boosts LR rate after ~5 boxes)
-let totalPacksOpened  = 0;   // lifetime pack count (for god pack thresholds)
-let wishlist = new Set();    // card IDs on wishlist
-let sessionStats = {         // lifetime stats
+let packsSinceLastRRR = 0;
+let packsSinceLastLR = 0;
+let totalPacksOpened = 0;
+let wishlist = new Set();
+let godPacksEnabled = true;
+let sessionStats = {
   totalPulled: 0,
   byRarity: {},
-  bestPull: null,            // rarest card ever pulled
-  packPrice: 350,            // configurable (yen)
+  bestPull: null,
+  packPrice: 350,
   wishlistHits: 0,
 };
 
-// ==================== SETUP ====================
-// ==================== SESSION SAVE / LOAD (JSON file) ====================
-// localStorage doesn't work reliably with file:// protocol.
-// Instead we save to a .json file (download) and load by picking that file.
+function toggleGodPacks(el) {
+  godPacksEnabled = el.checked;
+}
 
 function buildSaveData() {
   return {
@@ -71,7 +69,11 @@ function saveSession() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `vanguard-save-${new Date().toISOString().slice(0,10)}.json`;
+    const defaultName = `vanguard-save-${new Date().toISOString().slice(0,10)}`;
+    const customName = prompt('Enter filename:', defaultName);
+    if (customName === null) { URL.revokeObjectURL(url); return; }
+    const finalName = customName.trim() ? (customName.endsWith('.json') ? customName : customName + '.json') : defaultName + '.json';
+    a.download = finalName;
     a.click();
     URL.revokeObjectURL(url);
     setSaveIndicator('💾 Saved to file');
@@ -91,7 +93,6 @@ function onLoadFileChosen(input) {
       const data = JSON.parse(e.target.result);
       if (!data || typeof data !== 'object') throw new Error('Not a valid save object');
       applySaveData(data);
-      // Ensure TDs always present after load
       addTDsToCollection();
       renderSetButtons();
       renderCollection();
@@ -143,7 +144,6 @@ function setSaveIndicator(msg) {
   if (el) el.textContent = msg;
 }
 
-// ==================== TD AUTO-COLLECTION ====================
 function addTDsToCollection() {
   collectionDirty = true;
   const allCards = getAllSetCards();
@@ -160,14 +160,11 @@ function addTDsToCollection() {
 }
 
 function init() {
-  _buildCardMap(); // build O(1) lookup map once
-  // Pre-load trial deck cards into collection
+  _buildCardMap();
   addTDsToCollection();
 
-  // Start with everything closed — user clicks a set to open
   document.getElementById('pack-area').style.display = 'none';
   document.getElementById('td-decklist-panel').style.display = 'none';
-  // Pack sim panel itself also starts collapsed
   const _psb = document.getElementById('pack-sim-body');
   const _psa = document.getElementById('pack-sim-arrow');
   if (_psb) _psb.classList.add('collapsed');
@@ -181,297 +178,71 @@ function init() {
   setSaveIndicator('✨ New session — TDs pre-loaded');
 }
 
-// TD deck counts (official): cardId -> count in the 50-card deck
 const TD_COUNTS = {
-  // GTD01
   'GTD01_001':2,'GTD01_002':2,'GTD01_003':4,'GTD01_004':2,'GTD01_005':4,
   'GTD01_006':2,'GTD01_007':2,'GTD01_008':2,'GTD01_009':4,'GTD01_010':4,
   'GTD01_011':3,'GTD01_012':2,'GTD01_013':2,'GTD01_014':1,'GTD01_015':4,
   'GTD01_016':2,'GTD01_017':4,'GTD01_018':4,'GTD01_019':2,
-  // GTD02
   'GTD02_001':2,'GTD02_002':2,'GTD02_003':2,'GTD02_004':4,'GTD02_005':4,
   'GTD02_006':2,'GTD02_007':2,'GTD02_008':2,'GTD02_009':4,'GTD02_010':4,
   'GTD02_011':3,'GTD02_012':2,'GTD02_013':2,'GTD02_014':1,'GTD02_015':4,
   'GTD02_016':2,'GTD02_017':4,'GTD02_018':4,'GTD02_019':2,
-  // GTD03
   'GTD03_001':2,'GTD03_002':2,'GTD03_003':4,'GTD03_004':2,'GTD03_005':4,
   'GTD03_006':2,'GTD03_007':2,'GTD03_008':2,'GTD03_009':4,'GTD03_010':4,
   'GTD03_011':2,'GTD03_012':2,'GTD03_013':3,'GTD03_014':1,'GTD03_015':4,
   'GTD03_016':4,'GTD03_017':2,'GTD03_018':4,'GTD03_019':2,
-  'TD01_001':4,
-  'TD01_002':1,
-  'TD01_003':2,
-  'TD01_004':4,
-  'TD01_005':1,
-  'TD01_006':3,
-  'TD01_007':4,
-  'TD01_008':4,
-  'TD01_009':2,
-  'TD01_010':4,
-  'TD01_011':4,
-  'TD01_012':1,
-  'TD01_013':4,
-  'TD01_014':4,
-  'TD01_015':4,
-  'TD01_016':4,
-  'TD02_001':2,
-  'TD02_002':1,
-  'TD02_003':4,
-  'TD02_004':4,
-  'TD02_005':4,
-  'TD02_006':4,
-  'TD02_007':4,
-  'TD02_008':2,
-  'TD02_009':4,
-  'TD02_010':2,
-  'TD02_011':2,
-  'TD02_012':1,
-  'TD02_013':4,
-  'TD02_014':4,
-  'TD02_015':4,
-  'TD02_016':4,
-  'TD03_001':1,
-  'TD03_002':2,
-  'TD03_003':4,
-  'TD03_004':4,
-  'TD03_005':2,
-  'TD03_006':4,
-  'TD03_007':4,
-  'TD03_008':4,
-  'TD03_009':4,
-  'TD03_010':3,
-  'TD03_011':2,
-  'TD03_012':4,
-  'TD03_013':4,
-  'TD03_014':4,
+  'TD01_001':4,'TD01_002':1,'TD01_003':2,'TD01_004':4,'TD01_005':1,'TD01_006':3,'TD01_007':4,
+  'TD01_008':4,'TD01_009':2,'TD01_010':4,'TD01_011':4,'TD01_012':1,'TD01_013':4,'TD01_014':4,
+  'TD01_015':4,'TD01_016':4,
+  'TD02_001':2,'TD02_002':1,'TD02_003':4,'TD02_004':4,'TD02_005':4,'TD02_006':4,'TD02_007':4,
+  'TD02_008':2,'TD02_009':4,'TD02_010':2,'TD02_011':2,'TD02_012':1,'TD02_013':4,'TD02_014':4,
+  'TD02_015':4,'TD02_016':4,
+  'TD03_001':1,'TD03_002':2,'TD03_003':4,'TD03_004':4,'TD03_005':2,'TD03_006':4,'TD03_007':4,
+  'TD03_008':4,'TD03_009':4,'TD03_010':3,'TD03_011':2,'TD03_012':4,'TD03_013':4,'TD03_014':4,
   'TD03_015':4,
-  'TD04_001':4,
-  'TD04_002':1,
-  'TD04_003':2,
-  'TD04_004':4,
-  'TD04_005':4,
-  'TD04_006':2,
-  'TD04_007':4,
-  'TD04_008':4,
-  'TD04_009':4,
-  'TD04_010':2,
-  'TD04_011':3,
-  'TD04_012':4,
-  'TD04_013':4,
-  'TD04_014':4,
+  'TD04_001':4,'TD04_002':1,'TD04_003':2,'TD04_004':4,'TD04_005':4,'TD04_006':2,'TD04_007':4,
+  'TD04_008':4,'TD04_009':4,'TD04_010':2,'TD04_011':3,'TD04_012':4,'TD04_013':4,'TD04_014':4,
   'TD04_015':4,
-  // new sets
-  'TD05_001':1,
-  'TD05_002':2,
-  'TD05_003':4,
-  'TD05_004':4,
-  'TD05_005':1,
-  'TD05_006':4,
-  'TD05_007':2,
-  'TD05_008':4,
-  'TD05_009':4,
-  'TD05_010':2,
-  'TD05_011':2,
-  'TD05_012':2,
-  'TD05_013':1,
-  'TD05_014':1,
-  'TD05_015':4,
-  'TD05_016':4,
-  'TD05_017':4,
-  'TD05_018':4,
-  'TD06_001':1,
-  'TD06_002':2,
-  'TD06_003':4,
-  'TD06_004':4,
-  'TD06_005':4,
-  'TD06_006':1,
-  'TD06_007':2,
-  'TD06_008':4,
-  'TD06_009':4,
-  'TD06_010':2,
-  'TD06_011':1,
-  'TD06_012':2,
-  'TD06_013':2,
-  'TD06_014':1,
-  'TD06_015':4,
-  'TD06_016':4,
-  'TD06_017':4,
-  'TD06_018':4,
-  'TD07_001':1,
-  'TD07_002':2,
-  'TD07_003':4,
-  'TD07_004':4,
-  'TD07_005':1,
-  'TD07_006':2,
-  'TD07_007':4,
-  'TD07_008':4,
-  'TD07_009':4,
-  'TD07_010':2,
-  'TD07_011':1,
-  'TD07_012':2,
-  'TD07_013':2,
-  'TD07_014':1,
-  'TD07_015':4,
-  'TD07_016':4,
-  'TD07_017':4,
-  'TD07_018':4,
-  'TD08_001':1,
-  'TD08_002':2,
-  'TD08_003':4,
-  'TD08_004':4,
-  'TD08_005':1,
-  'TD08_006':1,
-  'TD08_007':2,
-  'TD08_008':4,
-  'TD08_009':4,
-  'TD08_010':4,
-  'TD08_011':4,
-  'TD08_012':2,
-  'TD08_013':1,
-  'TD08_014':4,
-  'TD08_015':4,
-  'TD08_016':4,
-  'TD08_017':4,
-  'TD09_001':1,
-  'TD09_002':4,
-  'TD09_003':2,
-  'TD09_004':4,
-  'TD09_005':1,
-  'TD09_006':1,
-  'TD09_007':2,
-  'TD09_008':4,
-  'TD09_009':4,
-  'TD09_010':4,
-  'TD09_011':4,
-  'TD09_012':2,
-  'TD09_013':1,
-  'TD09_014':4,
-  'TD09_015':4,
-  'TD09_016':4,
-  'TD09_017':4,
-  'TD10_001':1,
-  'TD10_002':2,
-  'TD10_003':4,
-  'TD10_004':4,
-  'TD10_005':1,
-  'TD10_006':1,
-  'TD10_007':4,
-  'TD10_008':2,
-  'TD10_009':4,
-  'TD10_010':4,
-  'TD10_011':4,
-  'TD10_012':2,
-  'TD10_013':1,
-  'TD10_014':4,
-  'TD10_015':4,
-  'TD10_016':4,
-  'TD10_017':4,
-  'TD11_001':1,
-  'TD11_002':4,
-  'TD11_003':2,
-  'TD11_004':4,
-  'TD11_005':1,
-  'TD11_006':1,
-  'TD11_007':4,
-  'TD11_008':2,
-  'TD11_009':4,
-  'TD11_010':4,
-  'TD11_011':4,
-  'TD11_012':2,
-  'TD11_013':1,
-  'TD11_014':4,
-  'TD11_015':4,
-  'TD11_016':4,
-  'TD11_017':4,
-  'TD12_001':1,
-  'TD12_002':2,
-  'TD12_003':4,
-  'TD12_004':4,
-  'TD12_005':1,
-  'TD12_006':1,
-  'TD12_007':4,
-  'TD12_008':2,
-  'TD12_009':4,
-  'TD12_010':4,
-  'TD12_011':2,
-  'TD12_012':4,
-  'TD12_013':1,
-  'TD12_014':4,
-  'TD12_015':4,
-  'TD12_016':4,
-  'TD12_017':4,
-  'TD13_001':1,
-  'TD13_002':2,
-  'TD13_003':4,
-  'TD13_004':4,
-  'TD13_005':2,
-  'TD13_006':1,
-  'TD13_007':4,
-  'TD13_008':4,
-  'TD13_009':2,
-  'TD13_010':1,
-  'TD13_011':4,
-  'TD13_012':4,
-  'TD13_013':1,
-  'TD13_014':4,
-  'TD13_015':4,
-  'TD13_016':4,
-  'TD13_017':4,
-  'TD14_001':1,
-  'TD14_002':2,
-  'TD14_003':4,
-  'TD14_004':4,
-  'TD14_005':1,
-  'TD14_006':1,
-  'TD14_007':4,
-  'TD14_008':2,
-  'TD14_009':4,
-  'TD14_010':4,
-  'TD14_011':4,
-  'TD14_012':2,
-  'TD14_013':1,
-  'TD14_014':4,
-  'TD14_015':4,
-  'TD14_016':4,
-  'TD14_017':4,
-  'TD16_001':1,
-  'TD16_002':4,
-  'TD16_003':2,
-  'TD16_004':4,
-  'TD16_005':1,
-  'TD16_006':1,
-  'TD16_007':4,
-  'TD16_008':2,
-  'TD16_009':4,
-  'TD16_010':4,
-  'TD16_011':4,
-  'TD16_012':2,
-  'TD16_013':1,
-  'TD16_014':4,
-  'TD16_015':4,
-  'TD16_016':4,
-  'TD16_017':4,
-  'TD17_001':1,
-  'TD17_002':4,
-  'TD17_003':2,
-  'TD17_004':4,
-  'TD17_005':1,
-  'TD17_006':1,
-  'TD17_007':2,
-  'TD17_008':4,
-  'TD17_009':4,
-  'TD17_010':4,
-  'TD17_011':4,
-  'TD17_012':2,
-  'TD17_013':1,
-  'TD17_014':4,
-  'TD17_015':4,
-  'TD17_016':4,
-  'TD17_017':4,
+  'TD05_001':1,'TD05_002':2,'TD05_003':4,'TD05_004':4,'TD05_005':1,'TD05_006':4,'TD05_007':2,
+  'TD05_008':4,'TD05_009':4,'TD05_010':2,'TD05_011':2,'TD05_012':2,'TD05_013':1,'TD05_014':1,
+  'TD05_015':4,'TD05_016':4,'TD05_017':4,'TD05_018':4,
+  'TD06_001':1,'TD06_002':2,'TD06_003':4,'TD06_004':4,'TD06_005':4,'TD06_006':1,'TD06_007':2,
+  'TD06_008':4,'TD06_009':4,'TD06_010':2,'TD06_011':1,'TD06_012':2,'TD06_013':2,'TD06_014':1,
+  'TD06_015':4,'TD06_016':4,'TD06_017':4,'TD06_018':4,
+  'TD07_001':1,'TD07_002':2,'TD07_003':4,'TD07_004':4,'TD07_005':1,'TD07_006':2,'TD07_007':4,
+  'TD07_008':4,'TD07_009':4,'TD07_010':2,'TD07_011':1,'TD07_012':2,'TD07_013':2,'TD07_014':1,
+  'TD07_015':4,'TD07_016':4,'TD07_017':4,'TD07_018':4,
+  'TD08_001':1,'TD08_002':2,'TD08_003':4,'TD08_004':4,'TD08_005':1,'TD08_006':1,'TD08_007':2,
+  'TD08_008':4,'TD08_009':4,'TD08_010':4,'TD08_011':4,'TD08_012':2,'TD08_013':1,'TD08_014':4,
+  'TD08_015':4,'TD08_016':4,'TD08_017':4,
+  'TD09_001':1,'TD09_002':4,'TD09_003':2,'TD09_004':4,'TD09_005':1,'TD09_006':1,'TD09_007':2,
+  'TD09_008':4,'TD09_009':4,'TD09_010':4,'TD09_011':4,'TD09_012':2,'TD09_013':1,'TD09_014':4,
+  'TD09_015':4,'TD09_016':4,'TD09_017':4,
+  'TD10_001':1,'TD10_002':2,'TD10_003':4,'TD10_004':4,'TD10_005':1,'TD10_006':1,'TD10_007':4,
+  'TD10_008':2,'TD10_009':4,'TD10_010':4,'TD10_011':4,'TD10_012':2,'TD10_013':1,'TD10_014':4,
+  'TD10_015':4,'TD10_016':4,'TD10_017':4,
+  'TD11_001':1,'TD11_002':4,'TD11_003':2,'TD11_004':4,'TD11_005':1,'TD11_006':1,'TD11_007':4,
+  'TD11_008':2,'TD11_009':4,'TD11_010':4,'TD11_011':4,'TD11_012':2,'TD11_013':1,'TD11_014':4,
+  'TD11_015':4,'TD11_016':4,'TD11_017':4,
+  'TD12_001':1,'TD12_002':2,'TD12_003':4,'TD12_004':4,'TD12_005':1,'TD12_006':1,'TD12_007':4,
+  'TD12_008':2,'TD12_009':4,'TD12_010':4,'TD12_011':2,'TD12_012':4,'TD12_013':1,'TD12_014':4,
+  'TD12_015':4,'TD12_016':4,'TD12_017':4,
+  'TD13_001':1,'TD13_002':2,'TD13_003':4,'TD13_004':4,'TD13_005':2,'TD13_006':1,'TD13_007':4,
+  'TD13_008':4,'TD13_009':2,'TD13_010':1,'TD13_011':4,'TD13_012':4,'TD13_013':1,'TD13_014':4,
+  'TD13_015':4,'TD13_016':4,'TD13_017':4,
+  'TD14_001':1,'TD14_002':2,'TD14_003':4,'TD14_004':4,'TD14_005':1,'TD14_006':1,'TD14_007':4,
+  'TD14_008':2,'TD14_009':4,'TD14_010':4,'TD14_011':4,'TD14_012':2,'TD14_013':1,'TD14_014':4,
+  'TD14_015':4,'TD14_016':4,'TD14_017':4,
+  'TD16_001':1,'TD16_002':4,'TD16_003':2,'TD16_004':4,'TD16_005':1,'TD16_006':1,'TD16_007':4,
+  'TD16_008':2,'TD16_009':4,'TD16_010':4,'TD16_011':4,'TD16_012':2,'TD16_013':1,'TD16_014':4,
+  'TD16_015':4,'TD16_016':4,'TD16_017':4,
+  'TD17_001':1,'TD17_002':4,'TD17_003':2,'TD17_004':4,'TD17_005':1,'TD17_006':1,'TD17_007':2,
+  'TD17_008':4,'TD17_009':4,'TD17_010':4,'TD17_011':4,'TD17_012':2,'TD17_013':1,'TD17_014':4,
+  'TD17_015':4,'TD17_016':4,'TD17_017':4,
 };
 let setGroupCollapsed = {};
 function toggleSetGroup(key) {
-  const opening = setGroupCollapsed[key]; // true = was collapsed, now opening
+  const opening = setGroupCollapsed[key];
   for (const k of ['td','bt','eb','gbt','geb']) setGroupCollapsed[k] = true;
   setGroupCollapsed[key] = !opening;
   renderSetButtons();
@@ -488,7 +259,6 @@ function setFormat(fmt) {
   currentFormat = fmt;
   document.getElementById('fmt-og').classList.toggle('active', fmt==='OG');
   document.getElementById('fmt-g').classList.toggle('active', fmt==='G');
-  // Close pack panel when switching formats
   packPanelOpen = false;
   currentSetIdx = -1;
   selectedTD = null;
@@ -508,7 +278,6 @@ function renderSetButtons() {
   const gbtSets = SETS.map((s,i)=>({s,i})).filter(({s})=>s.id.startsWith('GBT')&&inFmt(s)).sort(numSort);
   const gebSets = SETS.map((s,i)=>({s,i})).filter(({s})=>s.id.startsWith('GEB')&&inFmt(s)).sort(numSort);
   const tdSets  = SETS.filter(s=>s.packSize===50&&inFmt(s)).sort((a,b)=>parseInt(a.id.replace(/\D/g,''))-parseInt(b.id.replace(/\D/g,'')));
-  // Ensure all groups start collapsed by default
   if (setGroupCollapsed['td'] === undefined) setGroupCollapsed['td'] = true;
   if (setGroupCollapsed['bt'] === undefined) setGroupCollapsed['bt'] = true;
   if (setGroupCollapsed['eb']  === undefined) setGroupCollapsed['eb']  = true;
@@ -531,14 +300,12 @@ function renderSetButtons() {
         <span style="font-size:9px;color:${pctColor};margin-left:auto;flex-shrink:0">${pct}%</span>
       </button>`;
     }).join('');
-    // label goes into the headers row; cards go into the body row below
     return {
       header: `<div class="set-group-label" onclick="toggleSetGroup('${key}')">${arrow} ${label}</div>`,
       body:   `<div class="set-group-cards ${collapsed?'collapsed':''}" id="set-group-cards-${key}">${btns}</div>`
     };
   }
 
-  // TD section — same collapsible group style as BT/EB, but each "button" expands an inline decklist
   function tdCardBadge(card) {
     if (isSentinel(card)) return `<span style="font-size:9px;padding:1px 4px;border-radius:3px;background:rgba(240,180,41,0.85);color:#000;font-weight:700">🛡 Sentinel</span>`;
     const t = getTriggerType(card); if (!t) return '';
@@ -616,7 +383,6 @@ function renderSetButtons() {
 let selectedTD = null;
 
 function selectTD(tdId) {
-  // Toggle closed if clicking the already-active TD
   if (selectedTD === tdId && packPanelOpen) {
     packPanelOpen = false;
     selectedTD = null;
@@ -631,12 +397,10 @@ function selectTD(tdId) {
   selectedTD = tdId;
   packPanelOpen = true;
   currentSetIdx = -1;
-  // Hide pack area, show decklist panel
   document.getElementById('pack-area').style.display = 'none';
   document.getElementById('reveal-section').classList.remove('active');
   const td = SETS.find(s => s.id === tdId);
   if (!td) return;
-  // Build decklist HTML
   const maxGselTD = Math.max(4, ...td.cards.map(c=>c.grade));
   const byGrade = {};
   for (let g=0; g<=maxGselTD; g++) byGrade[g]=[];
@@ -671,7 +435,6 @@ function selectTD(tdId) {
   }
   document.getElementById('td-decklist-content').innerHTML = html;
   document.getElementById('td-decklist-panel').style.display = 'block';
-  // Probe box art with multi-format fallback
   const _tdBoxEl = document.getElementById(`td-box-img-${tdId}`);
   if (_tdBoxEl) {
     const p = new Image();
@@ -687,7 +450,6 @@ function selectSet(idx) {
   const set = SETS[idx];
   if (!set) return;
 
-  // Toggle closed if clicking the already-active set
   if (currentSetIdx === idx && packPanelOpen) {
     packPanelOpen = false;
     currentSetIdx = -1;
@@ -702,7 +464,6 @@ function selectSet(idx) {
   selectedTD = null;
   packPanelOpen = true;
 
-  // Show pack area, hide decklist panel
   document.getElementById('pack-area').style.display = '';
   document.getElementById('td-decklist-panel').style.display = 'none';
 
@@ -710,16 +471,13 @@ function selectSet(idx) {
   document.getElementById('pack-label').textContent = set.label;
   document.getElementById('set-title').textContent = set.name;
   document.getElementById('set-desc').textContent = set.desc;
-  // Show LR tag only for sets that contain LR cards
   const lrTag = document.getElementById('lr-legend-tag');
   if (lrTag) lrTag.style.display = set.cards.some(c => c.rarity === 'LR') ? '' : 'none';
   document.getElementById('reveal-section').classList.remove('active');
   const boxImg = document.getElementById('box-img');
   const boxFallback = document.getElementById('box-fallback');
-  // Start hidden; probe each extension with a fresh Image() to avoid cached 404s
   boxImg.style.display = 'none'; boxImg.src = '';
   boxFallback.style.display = 'flex';
-  // Try both padded (box-BT016.webp) and unpadded (box-BT01.webp) — webp only
   const _m = set.id.match(/^([A-Z]+)(\d+)$/);
   const _padId = _m ? `${_m[1]}${_m[2].padStart(3,'0')}` : set.id;
   const _bNames = _padId !== set.id
@@ -738,24 +496,19 @@ function selectSet(idx) {
   preloadSetImages(set);
 }
 
-// ==================== IMAGE PRELOADER ====================
-// When a set is selected, quietly preload all its card images in the background.
-// Uses a small concurrency limit so it doesn't compete with the UI or box art load.
 let _preloadQueue = [];
 let _preloadActive = 0;
 const _PRELOAD_CONCURRENCY = 4;
-let _preloadSetId = null; // track which set is currently preloading
+let _preloadSetId = null;
 
 function preloadSetImages(set) {
   if (!set || !set.cards) return;
-  if (_preloadSetId === set.id) return; // already preloading this set
+  if (_preloadSetId === set.id) return;
   _preloadSetId = set.id;
 
-  // Cancel any previous queue
   _preloadQueue = [];
   _preloadActive = 0;
 
-  // Build list of unique image URLs for this set
   const urls = [];
   for (const card of set.cards) {
     const candidates = cardImgCandidates(card.id);
@@ -763,7 +516,6 @@ function preloadSetImages(set) {
   }
 
   _preloadQueue = urls;
-  // Start up to CONCURRENCY workers
   for (let i = 0; i < _PRELOAD_CONCURRENCY; i++) _preloadNext();
 }
 
@@ -774,10 +526,9 @@ function _preloadNext() {
   const img = new Image();
   img.onload = () => { _preloadActive--; _preloadNext(); };
   img.onerror = () => {
-    // Try next candidate for this card
     if (item.ci < item.candidates.length - 1) {
       item.ci++;
-      _preloadQueue.unshift(item); // retry with next candidate
+      _preloadQueue.unshift(item);
     }
     _preloadActive--; _preloadNext();
   };
@@ -796,7 +547,6 @@ function weightedPick(pool) {
 function pickCardWithRarity(cards, rarity) {
   const matches = cards.filter(c => c.rarity === rarity);
   if (!matches.length) {
-    // fallback: step down through rarity order
     const order = ["C","R","RR","RRR","SP","LR"];
     const idx = order.indexOf(rarity);
     for (let i = idx-1; i >= 0; i--) {
@@ -868,8 +618,6 @@ function generatePack() {
     return slots.map(slot => rollSlot(set.cards, slot, used));
   }
 
-  // variableTrigger = true for early sets (BT01-05, EB01-07): 1 or 2 triggers per pack
-  // false for later sets (BT06+, EB08+): always 2 triggers
   const btNum = isBT ? parseInt(id.replace('BT','')) : 99;
   const ebNum = isEB ? parseInt(id.replace('EB','')) : 99;
   const variableTrigger = (isBT && btNum <= 5) || (isEB && ebNum <= 7);
@@ -880,7 +628,6 @@ function generatePack() {
   return generatePack5(set.cards, RPLUS_BT, null, variableTrigger);
 }
 
-// ==================== OPEN PACK ====================
 let stagedCards = [];
 let autoReveal = true;
 
@@ -901,7 +648,6 @@ function stageBox() {
                  : set.id.startsWith('GEB') ? 12
                  : set.id.startsWith('EB')  ? 15 : 30;
 
-  // 5-card sets: use fixed box rates instead of random per-pack
   const is5card = (set.packSize || 5) === 5;
   if (is5card) {
     const id = set.id;
@@ -922,7 +668,6 @@ function stageBox() {
 function stagePack(count) {
   const set = SETS[currentSetIdx];
   if (!set) return;
-  // Play rip animation only for single pack opens (multi-pack skips for speed)
   if (count === 1) {
     playPackRip(set.icon, set.label, `images/boxes/box-${set.id}`, () => _doStagePack(count));
   } else {
@@ -987,7 +732,7 @@ function revealCards() {
   }
   history.unshift(...packResults.reverse());
 
-  renderReveal(allCards, newCardIds, false); // render then flip
+  renderReveal(allCards, newCardIds, false);
   updateStats();
   updateCollection();
   updateHistory();
@@ -999,8 +744,6 @@ function revealCards() {
   document.getElementById('flip-all-btn').textContent = 'Show All';
   flippedAll = false;
 
-  // flip cards one by one with a stagger + flip sound
-  // For large reveals (box = 150 cards) only play flip sound once per pack to avoid noise spam
   const isBox = allCards.length > packSize;
   const inners = document.querySelectorAll('.card-inner');
   inners.forEach((el, i) => setTimeout(() => {
@@ -1008,14 +751,12 @@ function revealCards() {
     if (!isBox || i % packSize === 0) SFX.cardFlip();
   }, i * 80));
 
-  // toasts for hype pulls + wishlist hits
   const notable = allCards.filter(c => ["RRR","LR","SP"].includes(c.rarity));
   notable.slice(0, 3).forEach((c, i) => {
     setTimeout(() => showToast(c), 500 + i * 400);
     if (i === 0) setTimeout(() => (c.rarity === 'SP') ? SFX.spHit() : SFX.rrrHit(), 300 + i * 400);
   });
 
-  // Session stats
   for (const c of allCards) {
     sessionStats.totalPulled++;
     sessionStats.byRarity[c.rarity] = (sessionStats.byRarity[c.rarity]||0) + 1;
@@ -1028,8 +769,6 @@ function revealCards() {
     }
   }
 
-  // Pity tracker — evaluate per-pack so a hit in one pack doesn't
-  // retroactively clear the dry-streak counter for the packs before it
   for (let pi = 0; pi < packCount; pi++) {
     const packCards = allCards.slice(pi * packSize, (pi + 1) * packSize);
     const hitRRR = packCards.some(c => ["RRR","LR","SP","OR","GR","SCR","SGR"].includes(c.rarity));
@@ -1073,7 +812,6 @@ function clearCollection() {
   document.getElementById('rrr-count').textContent = '0';
   document.getElementById('reveal-section').classList.remove('active');
   updatePityDisplay();
-  // Always re-add TD cards after clearing
   addTDsToCollection();
   updateCollection();
   updateHistory();
@@ -1081,33 +819,26 @@ function clearCollection() {
   showToast({ icon: '🗑️', name: 'Collection cleared (TDs kept)', rarity: 'C' });
 }
 
-// ==================== RENDER CARDS ====================
-// Card image path: id format is already "BT01_001" → images/cards/BT01/BT01_001EN.png
 function cardImgPath(id, ext) {
   ext = ext || 'webp';
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD)/.test(setId);
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
 
-  // GTD sets: GTD01_001 → 2 G/GTD01/GTD01_001EN.png
   if (setId.startsWith('GTD')) {
     return `${base}${setId}/${id}EN.${ext}`;
   }
 
-  // GBT sets: GBT01_001 → GBT01_001EN.png | GBT01_S001 → GBT01_S01EN.png
   if (setId.startsWith('GBT')) {
     const fileId = id.replace(/_S0(\d+)$/, '_S$1');
     return `${base}${setId}/${fileId}EN.${ext}`;
   }
 
-  // GEB sets: geb01_001.png | geb01_s01.png
   if (setId.startsWith('GEB')) {
     const fileId = id.replace(/_S0(\d+)$/, '_S$1').toLowerCase();
     return `${base}${setId}/${fileId}.${ext}`;
   }
 
-  // EB10 Noir/Blanc — IDs: EB10_001B/W, EB10_S001B/W
-  // Image naming: EB10_001ENB.webp / EB10_001ENW.webp (no hyphen, suffix at end)
   if (setId === 'EB10') {
     const m = id.match(/^(EB10_(?:S\d+|\d+))([BW])$/);
     if (m) {
@@ -1115,19 +846,15 @@ function cardImgPath(id, ext) {
     }
   }
 
-  // Legion Rare cards (EB11, EB12, BT16, BT17)
   {
     const lr = id.match(/^([A-Z0-9]+)_LR0*(\d+)$/);
     if (lr) return `${IMG_CARDS}${setId}/${lr[1]}_L${lr[2].padStart(2,'0')}EN.${ext}`;
   }
 
-  // SP cards: strip one leading zero from SP number
   const fileId = id.replace(/_S0(\d+)$/, '_S$1');
-  // TD and BT/EB: try with EN suffix first (handled by fallback chain in setImgSrcWithFallback)
   return `${base}${setId}/${fileId}EN.${ext}`;
 }
 
-// Returns all candidate paths to try for a card id (EN and non-EN variants)
 function cardImgCandidates(id) {
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD)/.test(setId);
@@ -1135,7 +862,6 @@ function cardImgCandidates(id) {
   const fileId = id.replace(/_S0(\d+)$/, '_S$1');
   const fileIdLower = fileId.toLowerCase();
 
-  // EB10 B/W variants — EB10_001B → EB10_001ENB.webp (no hyphen)
   if (setId === 'EB10') {
     const m = id.match(/^(EB10_(?:S\d+|\d+))([BW])$/);
     if (m) {
@@ -1147,7 +873,6 @@ function cardImgCandidates(id) {
     }
   }
 
-  // webp only — try EN suffix, no suffix, lowercase no suffix
   return [
     `${base}${setId}/${fileId}EN.webp`,
     `${base}${setId}/${fileId}.webp`,
@@ -1156,7 +881,6 @@ function cardImgCandidates(id) {
   ];
 }
 
-// Attach onerror fallback that tries all extension/EN variants
 function setImgSrcWithFallback(imgEl, id, onBothFail) {
   const candidates = cardImgCandidates(id);
   let attempt = 0;
@@ -1167,12 +891,11 @@ function setImgSrcWithFallback(imgEl, id, onBothFail) {
   }
   next();
 }
-// Separate asset folder paths
-const IMG_CARDS_OG = 'images/cards/1 OG/';  // OG series: BT, EB, TD
-const IMG_CARDS_G  = 'images/cards/2 G/';   // G series: GBT, GEB, GTD
-const IMG_CARDS    = IMG_CARDS_OG;           // legacy default (OG sets)
-const IMG_ASSETS  = 'images/assets/';  // card-back.png, VGE-logo.png etc.
-const IMG_BOXES   = 'images/boxes/';   // box-BT01.png etc.
+const IMG_CARDS_OG = 'images/cards/1 OG/';
+const IMG_CARDS_G  = 'images/cards/2 G/';
+const IMG_CARDS    = IMG_CARDS_OG;
+const IMG_ASSETS  = 'images/assets/';
+const IMG_BOXES   = 'images/boxes/';
 
 function renderReveal(cards, newCardIds, faceDown) {
   const grid = document.getElementById('cards-grid');
@@ -1229,9 +952,7 @@ function flipAll() {
   document.getElementById('flip-all-btn').textContent = flippedAll ? 'Hide All' : 'Show All';
 }
 
-// ==================== STATS ====================
 function updateStats() {
-  // Exclude TD cards from header stats — only count pulled booster cards
   const allCards = Object.values(collection).filter(x => !x.card.id.startsWith('TD') && !x.card.id.startsWith('GTD'));
   const totalCards = allCards.reduce((s,x) => s+x.count, 0);
   const rrrPlus = allCards.filter(x => ["RRR","SP"].includes(x.card.rarity)).reduce((s,x)=>s+x.count,0);
@@ -1239,13 +960,11 @@ function updateStats() {
   document.getElementById('rrr-count').textContent = rrrPlus;
 }
 
-// ==================== COLLECTION ====================
 function renderCollection() { updateCollection(); }
 function updateCollection() {
   const search = (document.getElementById('coll-search')?.value||'').toLowerCase();
   let allCards = Object.values(collection);
 
-  // Exclude TDs from stats
   const boosterCards = allCards.filter(x => !x.card.id.startsWith('TD') && !x.card.id.startsWith('GTD'));
   const total = boosterCards.reduce((s,x) => s+x.count, 0);
   const unique = boosterCards.length;
@@ -1274,13 +993,11 @@ function updateCollection() {
     return;
   }
 
-  // Exclude TD cards from the collection list
   allCards = allCards.filter(({card}) => !card.id.startsWith('TD'));
   if (search) allCards = allCards.filter(({card}) => card.name.toLowerCase().includes(search) || card.clan.toLowerCase().includes(search));
 
   const sortMode = document.getElementById('coll-sort')?.value || 'rarity';
 
-  // Build a shared card row renderer
   function collRow(card, count) {
     const badge = (() => {
       if (isSentinel(card)) return '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(240,180,41,0.85);color:#000;font-weight:700">🛡 Sentinel</span>';
@@ -1328,7 +1045,6 @@ function updateCollection() {
   document.getElementById('collection-list-container').innerHTML = html;
 }
 
-// ==================== HISTORY ====================
 function renderHistory() { updateHistory(); }
 let historyExpanded = new Set();
 function toggleHistoryEntry(i) {
@@ -1371,7 +1087,6 @@ function formatTime(d) {
   return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 
-// ==================== TABS ====================
 function switchTab(name) {
   const tabs = ['collection','history','missing'];
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', tabs[i]===name));
@@ -1381,7 +1096,6 @@ function switchTab(name) {
   if (name === 'missing') renderMissing();
 }
 
-// ==================== ZOOM MODAL ====================
 let zoomCard = null;
 function openZoom(card) {
   zoomCard = card;
@@ -1408,7 +1122,6 @@ function openZoom(card) {
   document.getElementById('zoom-name').textContent = card.name;
   document.getElementById('zoom-sub').textContent = `${card.clan} · Grade ${card.grade} · ${card.rarity}`;
   document.getElementById('zoom-sub').style.color = `var(--rarity-${card.rarity.toLowerCase()})`;
-  // Extra info row
   const owned = collection[card.id]?.count || 0;
   const ttype = getTriggerType(card);
   const unitType = isSentinel(card)?'Sentinel':ttype?`${ttype} Trigger`:card.grade===0?'First Vanguard':`Grade ${card.grade} Unit`;
@@ -1421,7 +1134,6 @@ function openZoom(card) {
       <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--surface2);color:var(--text-muted)">📂 ${card.id.split('_')[0]}</span>
       <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:var(--surface2);color:var(--text-muted)">${unitType}</span>
     </div>`;
-  // Wishlist btn
   const wb = document.getElementById('zoom-wishlist-btn');
   wb.textContent = wishlist.has(card.id) ? '⭐ On Wishlist' : '☆ Add to Wishlist';
   wb.style.background = wishlist.has(card.id) ? 'rgba(240,180,41,0.2)' : '';
@@ -1437,14 +1149,12 @@ function addToDeckFromZoom() {
   if (zoomCard) { addToDeck(zoomCard); document.getElementById('zoom-overlay').classList.remove('active'); }
 }
 
-// ── Wire up card grid clicks to zoom ──
 function attachZoomToGrid() {
   document.querySelectorAll('.card-slot').forEach((slot, i) => {
     slot.addEventListener('dblclick', (e) => {
       e.stopPropagation();
       const inner = slot.querySelector('.card-inner');
-      if (!inner.classList.contains('flipped')) return; // only zoom revealed cards
-      // find card data from rendered order
+      if (!inner.classList.contains('flipped')) return;
       if (window._lastRevealedCards && window._lastRevealedCards[i]) {
         openZoom(window._lastRevealedCards[i]);
       }
@@ -1452,15 +1162,14 @@ function attachZoomToGrid() {
   });
 }
 
-// ==================== GALLERY ====================
 let galleryRarityFilter = 'ALL';
 let galleryClanFilter = 'ALL';
 let galleryTypeFilter = 'ALL';
 let galleryGradeFilter = 'ALL';
 let gallerySetFilter = 'ALL';
 let _galRenderEpoch = 0;
-let galleryFormat = 'OG';   // 'OG' | 'G'
-let deckPoolFormat = 'OG';  // 'OG' | 'G'
+let galleryFormat = 'OG';
+let deckPoolFormat = 'OG';
 
 let galleryFiltersOpen = false;
 function toggleGalleryFilters() {
@@ -1501,12 +1210,9 @@ function buildGalleryFilters() {
   ).join('');
   const maxGrade = Math.max(...getAllSetCards().map(c=>c.grade));
   const grades = ['ALL',...Array.from({length:maxGrade+1},(_,i)=>String(i))];
-  // Add a G Units shortcut if G4+ cards exist
-  // Always show Grade N label; G Units get a separate toggle via type filter
   const gradeButtons = grades.map(g =>
     `<button class="filter-btn ${g===galleryGradeFilter?'active':''}" onclick="setGalleryGrade('${g}')">${g==='ALL'?'All Grades':'G'+g}</button>`
   );
-  // Add a G Units shortcut if any gUnit cards exist in collection
   const hasGUnits = getAllSetCards().some(c=>isGUnit(c));
   const gUnitBtn = hasGUnits
     ? `<button class="filter-btn ${'GUNITS'===galleryGradeFilter?'active':''}" onclick="setGalleryGrade('GUNITS')">✨ G Units</button>`
@@ -1527,25 +1233,18 @@ function setGalleryType(t) { galleryTypeFilter=t; buildGalleryFilters(); renderG
 function setGalleryGrade(g) { galleryGradeFilter=g; buildGalleryFilters(); renderGallery(); }
 function setGallerySet(s) { gallerySetFilter=s; buildGalleryFilters(); renderGallery(); }
 
-// getAllSetCards() → see CARD_MAP section above
-
 function renderGallery() {
   const search = document.getElementById('gallery-search').value.toLowerCase();
   const ownedOnly = document.getElementById('gallery-owned-only').checked;
 
-  // Pre-build set lookup for the active set filter (O(1) instead of O(n) per card)
   const setFilterIds = gallerySetFilter === 'ALL' ? null
     : new Set((SETS.find(s => s.id === gallerySetFilter)?.cards || []).map(c => c.id));
 
-  // Format filter: only show cards belonging to the active OG/G tab
   const _galIsG = id => { const s = SETS.find(x => x.id === id.split('_')[0]); return !!(s && s.format === 'G'); };
 
   const filtered = getAllSetCards().filter(card => {
-    // Format must match active tab
     if (galleryFormat === 'G' ? !_galIsG(card.id) : _galIsG(card.id)) return false;
-    // Owned-only: strictly hide unowned cards
     if (ownedOnly && !(collection[card.id]?.count > 0)) return false;
-    // Set filter
     if (setFilterIds && !setFilterIds.has(card.id)) return false;
     if (galleryRarityFilter !== 'ALL') { const rMatch = galleryRarityFilter === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR') : card.rarity === galleryRarityFilter; if (!rMatch) return false; }
     if (galleryClanFilter !== 'ALL' && card.clan !== galleryClanFilter) return false;
@@ -1585,13 +1284,12 @@ function renderGallery() {
     </div>`;
   }
 
-  // Render first 80 immediately, then append the rest in idle chunks
   const CHUNK = 80;
   const _myGalEpoch = ++_galRenderEpoch;
   grid.innerHTML = filtered.slice(0, CHUNK).map(makeGalleryCard).join('');
   let idx = CHUNK;
   function appendChunk() {
-    if (_myGalEpoch !== _galRenderEpoch) return; // stale render, abort
+    if (_myGalEpoch !== _galRenderEpoch) return;
     if (idx >= filtered.length) return;
     const frag = document.createDocumentFragment();
     const div = document.createElement('div');
@@ -1604,22 +1302,12 @@ function renderGallery() {
   requestIdleCallback ? requestIdleCallback(appendChunk) : setTimeout(appendChunk, 16);
 }
 
-// getAllCardById() → see CARD_MAP section above
-
-// ==================== DECK BUILDER ====================
-let deck = {}; // cardId -> { card, count }
+let deck = {};
 
 const DECK_MAX = 50;
 const CARD_MAX_COPIES = 4;
 
-// ── Card type helpers ──
-// ── Sentinels: Grade 1 with [CONT] Sentinel (max 4 per deck total) ──
-// ── Trigger / Sentinel detection ─────────────────────────────────────────────
-// Uses the trigger field on each card object (set during data generation).
-// Falls back to hardcoded ID sets for cards that predate trigger-field generation.
-
 const SENTINEL_IDS = new Set([
-  // BT01-05, EB01-05, TDs, GTDs — cards whose trigger field may be missing
   'BT01_011','BT01_015','BT01_019',
   'BT02_010','BT02_014','BT02_019',
   'BT03_011','BT03_016','BT03_017',
@@ -1632,9 +1320,7 @@ const SENTINEL_IDS = new Set([
 ]);
 
 function _getCardTrigger(card) {
-  // Primary: read the trigger field set during card data generation
   if (card.trigger) return card.trigger;
-  // Fallback for SP parallels: check base card
   if (card.rarity === 'SP' || card.rarity === 'TD') {
     const base = resolveBaseCard(card);
     if (base && base.trigger) return base.trigger;
@@ -1678,11 +1364,8 @@ function isHeal(card) {
 }
 
 function isSentinel(card) {
-  // Check trigger field first
   if (_getCardTrigger(card) === 'Sentinel') return true;
-  // Fallback to hardcoded set
   if (SENTINEL_IDS.has(card.id)) return true;
-  // SP parallel fallback
   if (card.rarity === 'SP') {
     const base = resolveBaseCard(card);
     if (base && (_getCardTrigger(base) === 'Sentinel' || SENTINEL_IDS.has(base.id))) return true;
@@ -1702,17 +1385,13 @@ function resolveBaseCard(card) {
   return getAllSetCards().find(c => c.name === baseName && c.grade === card.grade && c.rarity !== 'SP') || null;
 }
 
-// ── Get the single clan currently in the deck ──
 function getDeckClan() {
-  // Grade 1-3 non-G-Unit cards define the clan (G Units are format-agnostic)
   for (const {card} of Object.values(deck)) {
     if (card.grade >= 1 && !isGUnit(card)) return card.clan;
   }
-  // G0 triggers in main deck
   for (const {card} of Object.values(deck)) {
     if (!isGUnit(card)) return card.clan;
   }
-  // SVG defines clan if nothing else in deck yet
   if (fvCard) return fvCard.clan;
   return null;
 }
@@ -1726,7 +1405,7 @@ function openDeckBuilder() {
 function closeDeckBuilder() { document.getElementById('deck-overlay').classList.remove('active'); }
 
 let deckPoolClanFilter = 'ALL';
-let _dpRenderEpoch = 0; // incremented each render to cancel stale async chunks
+let _dpRenderEpoch = 0;
 let deckPoolTypeFilter = 'ALL';
 let deckPoolGradeFilter = 'ALL';
 let deckPoolSetFilter = 'ALL';
@@ -1769,7 +1448,6 @@ function setDeckPoolRarity(r) { deckPoolRarityFilter=r; buildDeckPoolFilters(); 
 
 function renderDeckPool() {
   const deckSearch = (document.getElementById('deck-search')?.value||'').toLowerCase();
-  // Build set lookup once for O(1) per-card check
   const dpSetFilterIds = deckPoolSetFilter === 'ALL' ? null
     : new Set((SETS.find(s => s.id === deckPoolSetFilter)?.cards || []).map(c => c.id));
 
@@ -1797,7 +1475,6 @@ function renderDeckPool() {
     return true;
   });
 
-  // Sort by owned count if toggle is on
   if (document.getElementById('deck-sort-owned')?.checked) {
     allCards.sort((a,b) => (collection[b.id]?.count||0) - (collection[a.id]?.count||0));
   }
@@ -1819,7 +1496,6 @@ function renderDeckPool() {
     const noMoreCopies = (inDeck + fvUsesThisId) >= owned;
     const deckClanNow = getDeckClan();
     const wrongClan = !isClanAllowed(card, deckClanNow);
-    // Hide wrong-clan cards once a clan is established (except G Units which are always shown)
     if (wrongClan && deckClanNow && !isGUnit(card)) return null;
     const addBlocked = deckFull || nameMaxed || noMoreCopies;
     let dimReason = nameMaxed ? `Max 4 copies of "${card.name}"` : noMoreCopies ? 'No spare copies' : deckFull ? 'Deck full' : '';
@@ -1846,7 +1522,7 @@ function renderDeckPool() {
   dpGrid.innerHTML = allCards.slice(0, DP_CHUNK).map(makeDeckCard).filter(Boolean).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Open packs to get cards first!</div>';
   let dpIdx = DP_CHUNK;
   function appendDpChunk() {
-    if (_myEpoch !== _dpRenderEpoch) return; // stale — a newer render started
+    if (_myEpoch !== _dpRenderEpoch) return;
     if (dpIdx >= allCards.length) return;
     const frag = document.createDocumentFragment();
     const div = document.createElement('div');
@@ -1859,35 +1535,26 @@ function renderDeckPool() {
   if (allCards.length > DP_CHUNK) requestIdleCallback ? requestIdleCallback(appendDpChunk) : setTimeout(appendDpChunk, 16);
 }
 
-// SVG counts as 1 of the 50-card deck (1 SVG + 49 main)
 let fvCard = null;
 
-// Cross-clan exceptions:
-// Blaster Dark (Shadow Paladin) can be played in a Royal Paladin deck that contains Majesty Lord Blaster.
-// Majesty Lord Blaster is itself Royal Paladin, so no exception needed for it.
-// We allow Blaster Dark in Royal Paladin unconditionally (trusting the player knows the ruling).
 const CROSS_CLAN_ALLOW = {
   'Blaster Dark': ['Royal Paladin'],
-  // Majesty Lord Blaster is Royal Paladin — no cross-clan entry needed
 };
 
 function isClanAllowed(card, deckClan) {
-  if (isGUnit(card)) return true; // G Units go in G Zone, no clan restriction
-  if (card.crayElemental) return true; // Cray Elementals are neutral — any clan
+  if (isGUnit(card)) return true;
+  if (card.crayElemental) return true;
   if (!deckClan || card.clan === deckClan) return true;
   const exceptions = CROSS_CLAN_ALLOW[card.name];
   return exceptions && exceptions.includes(deckClan);
 }
 
-// Count total copies of a card NAME across the whole deck (SVG + main deck, all rarities)
 function isGUnit(card) {
   return !!(card && card.gUnit);
 }
 
 function getDeckName(card) {
   if (!card) return "";
-  // For EB10 B/W variants: strip the (Noir)/(Blanc) suffix so both variants
-  // share the same 4-copy limit (they are the same card in different art).
   return card.name.replace(/ \(Noir\)$/, '').replace(/ \(Blanc\)$/, '');
 }
 function countByName(name) {
@@ -1898,7 +1565,6 @@ function countByName(name) {
   return n;
 }
 
-// Total cards in deck including SVG slot
 function getDeckTotal() {
   const svgCount = fvCard ? 1 : 0;
   return svgCount + Object.values(deck).reduce((s, x) => s + (isGUnit(x.card) ? 0 : x.count), 0);
@@ -1909,51 +1575,42 @@ function getGZoneTotal() {
 
 function addToDeck(card) {
   if (!card) return;
-  // SP parallels ARE allowed; the 4-copy-by-name rule below handles deduplication
   const owned = collection[card.id]?.count || 0;
   if (!owned) { showToast({icon:'⚠️',name:'You don\'t own this card',rarity:'C'}); return; }
 
-  // 1-clan rule (with cross-clan exceptions)
   const deckClan = getDeckClan();
   if (!isClanAllowed(card, deckClan)) {
     showToast({icon:'⚠️',name:`Deck must be 1 clan only (${deckClan})`,rarity:'C'}); return;
   }
 
-  // G Zone limit: max 16 G Units (separate from main deck)
   if (isGUnit(card)) {
     if (getGZoneTotal() >= 16) { showToast({icon:'⚠️',name:'G Zone is full (max 16 G Units)',rarity:'C'}); return; }
   } else {
-    // Main deck limit: 50 cards (excl. G Units)
     if (getDeckTotal() >= DECK_MAX) { showToast({icon:'⚠️',name:'Deck is full (50 cards incl. FV)',rarity:'C'}); return; }
   }
 
-  // Max 4 copies by name across all rarities + SVG slot
   const deckNameKey = getDeckName(card);
   const nameTotal = countByName(deckNameKey);
   if (nameTotal >= CARD_MAX_COPIES) {
     showToast({icon:'⚠️',name:`Max 4 copies of "${deckNameKey}" across all rarities`,rarity:'C'}); return;
   }
 
-  // Can't use more of this specific ID than you own
   const inDeck = deck[card.id]?.count || 0;
   const fvUsesThisId = fvCard && fvCard.id === card.id ? 1 : 0;
   if (inDeck + fvUsesThisId >= owned) {
     showToast({icon:'⚠️',name:`No more copies of ${card.id} available`,rarity:'C'}); return;
   }
 
-  // Sentinel limit: max 4 total sentinels
   if (isSentinel(card)) {
     const sentinelCount = Object.values(deck).filter(x=>isSentinel(x.card)).reduce((s,x)=>s+x.count,0);
     if (sentinelCount >= 4) { showToast({icon:'⚠️',name:'Max 4 sentinels in a deck',rarity:'C'}); return; }
   }
 
-  // Heal limit: max 4 heals
   if (isHeal(card)) {
     const healCount = Object.values(deck).filter(x=>isHeal(x.card)).reduce((s,x)=>s+x.count,0);
     if (healCount >= 4) { showToast({icon:'⚠️',name:'Max 4 heal triggers in a deck',rarity:'C'}); return; }
   }
 
-  // Trigger limit: max 16 total (main deck + FV)
   if (isTrigger(card)) {
     const triggerCount = Object.values(deck).filter(x=>isTrigger(x.card)).reduce((s,x)=>s+x.count,0);
     const fvTrigger = (fvCard && isTrigger(fvCard)) ? 1 : 0;
@@ -1962,21 +1619,16 @@ function addToDeck(card) {
 
   if (!deck[card.id]) deck[card.id] = { card, count: 0 };
   deck[card.id].count++;
-  // Refresh only the affected card in the pool (avoid full re-render)
   _refreshPoolCard(card.id);
   renderDeckPanel();
 }
 
-// Update a single pool card's badge + blocked state without re-rendering the whole pool
 function _refreshPoolCard(cardId) {
-  // Find all pool-card elements for this id and nearby cards that share the same name
-  // (nameMaxed state may change for cards with the same base name)
   const affected = new Set();
   affected.add(cardId);
   const card = getAllCardById(cardId);
   if (card) {
     const baseName = getDeckName(card);
-    // Also refresh cards sharing the same base name (copy-limit affects them all)
     for (const {card:c} of Object.values(deck)) {
       if (getDeckName(c) === baseName) affected.add(c.id);
     }
@@ -1984,7 +1636,6 @@ function _refreshPoolCard(cardId) {
       if (getDeckName(c) === baseName && collection[c.id]) affected.add(c.id);
     }
   }
-  // Re-render only those elements
   const deckClanNow = getDeckClan();
   for (const id of affected) {
     const el = document.querySelector(`.pool-card img[data-id="${id}"]`)?.closest('.pool-card');
@@ -2026,23 +1677,19 @@ function setFirstVanguard(card) {
     showToast({icon:'⚠️',name:`First Vanguard must be ${deckClan} clan`,rarity:'C'}); return;
   }
 
-  // If replacing old SVG, first "free" that slot then check
   const oldFV = fvCard;
 
-  // Count how many of this card name are in the deck excluding the current SVG contribution
   const nameCountExSVG = countByName(getDeckName(card)) - (oldFV && getDeckName(oldFV) === getDeckName(card) ? 1 : 0);
   if (nameCountExSVG >= CARD_MAX_COPIES) {
     showToast({icon:'⚠️',name:`Already have 4 copies of "${card.name}" in deck`,rarity:'C'}); return;
   }
 
-  // Check you physically have a spare copy (main deck usage of this id + new SVG <= owned)
   const inDeckMain = deck[card.id]?.count || 0;
   const oldFVUsesThisId = oldFV && oldFV.id === card.id ? 1 : 0;
   if (inDeckMain + 1 - oldFVUsesThisId > owned) {
     showToast({icon:'⚠️',name:`Not enough copies of ${card.name} (need 1 spare for SVG)`,rarity:'C'}); return;
   }
 
-  // If no SVG yet, deck would grow by 1 — check total
   if (!oldFV && getDeckTotal() >= DECK_MAX) {
     showToast({icon:'⚠️',name:'Deck is at 50 — remove a card before setting SVG',rarity:'C'}); return;
   }
@@ -2078,7 +1725,7 @@ function renderDeckPanel() {
   const total = getDeckTotal();
   const pct = Math.min(100, (total/DECK_MAX)*100);
   const barColor = total > DECK_MAX ? 'var(--red)' : total === DECK_MAX ? 'var(--green)' : 'var(--accent)';
-  document.getElementById('ds-total').textContent = total;  // SVG included in total
+  document.getElementById('ds-total').textContent = total;
   document.getElementById('ds-bar').style.width = pct+'%';
   document.getElementById('ds-bar').style.background = barColor;
 
@@ -2125,7 +1772,6 @@ function renderDeckPanel() {
   const trigHealEl = document.getElementById('ds-trig-heal');
   if (trigHealEl) trigHealEl.textContent = heals;
 
-  // Validation checks
   const checks = [
     { ok: total === DECK_MAX,        warn: total > 0 && total < DECK_MAX,  msg: `Main Deck: ${total}/50` },
     { ok: !!fvCard,                 warn: false,                           msg: `First Vanguard (FV): ${fvCard ? '★ '+fvCard.name : 'Not set — right-click a G0'}` },
@@ -2140,7 +1786,6 @@ function renderDeckPanel() {
     return `<div class="val-row"><div class="val-dot ${cls}"></div><span style="color:${c.ok?'var(--text)':'var(--text-muted)'}">${c.msg}</span></div>`;
   }).join('');
 
-  // Deck list: SVG first, then grade 3 down to 0
   const maxG = Math.max(4, ...Object.values(deck).map(x=>x.card.grade));
   const byGrade = {};
   for (let g=0; g<=maxG; g++) byGrade[g]=[];
@@ -2157,10 +1802,9 @@ function renderDeckPanel() {
       <button class="dcr-remove" onclick="clearFV()" title="Remove FV">−</button>
     </div>`;
   }
-  const gradeLabel = g => `Grade ${g}`;  // label set per-card type in sections below
+  const gradeLabel = g => `Grade ${g}`;
   for (const g of Array.from({length:maxG+1},(_,i)=>maxG-i)) {
     if (!byGrade[g].length) continue;
-    // Check if all cards in this grade bucket are G Units
     const allGUnits = byGrade[g].every(x=>isGUnit(x.card));
     const anyGUnits = byGrade[g].some(x=>isGUnit(x.card));
     const secLabel = allGUnits ? `G Units (Grade ${g})` : `Grade ${g}`;
@@ -2179,7 +1823,6 @@ function renderDeckPanel() {
 }
 
 
-// ==================== EXPORT ====================
 function exportDeck() {
   const name = document.getElementById('deck-name-input').value || 'My Deck';
   const total = getDeckTotal();
@@ -2221,21 +1864,17 @@ async function exportDeckImage() {
   const deckClan = getDeckClan() || 'N/A';
   const total    = getDeckTotal();
 
-  // Build grade groups
   const maxGimg = Math.max(4, ...Object.values(deck).map(x=>x.card.grade));
   const byGrade = {};
   for (let g=0; g<=maxGimg; g++) byGrade[g]=[];
   for (const {card,count} of Object.values(deck)) byGrade[card.grade].push({card,count});
   for (let g=0; g<=maxGimg; g++) byGrade[g].sort((a,b)=>a.card.name.localeCompare(b.card.name));
 
-  // ── Layout constants — high resolution ──
-  // Use larger card size and scale canvas by 2x for crisp output
-  const SCALE = 2;               // render at 2x then canvas CSS size stays logical
+  const SCALE = 2;
   const CARD_W = 120, CARD_H = 175, GAP = 10, COLS = 10;
   const SECTION_HEADER_H = 36, TOP_H = 150, BOTTOM_PAD = 32;
   const COL_W = CARD_W + GAP;
 
-  // Count rows needed per grade section
   function gradeRows(g) {
     const cards = byGrade[g];
     if (!cards.length) return 0;
@@ -2260,7 +1899,6 @@ async function exportDeckImage() {
   const ctx = canvas.getContext('2d');
   ctx.scale(SCALE, SCALE);
 
-  // Background
   ctx.fillStyle = '#14171f';
   ctx.fillRect(0, 0, WIDTH, totalHeight);
   ctx.strokeStyle = 'rgba(255,255,255,0.03)';
@@ -2268,7 +1906,6 @@ async function exportDeckImage() {
   for (let x = 0; x < WIDTH; x += 20) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,totalHeight); ctx.stroke(); }
   for (let y2 = 0; y2 < totalHeight; y2 += 20) { ctx.beginPath(); ctx.moveTo(0,y2); ctx.lineTo(WIDTH,y2); ctx.stroke(); }
 
-  // Header bar
   const grad = ctx.createLinearGradient(0,0,WIDTH,0);
   grad.addColorStop(0,'#4f8ef7'); grad.addColorStop(1,'#7c3aed');
   ctx.fillStyle = grad;
@@ -2282,7 +1919,6 @@ async function exportDeckImage() {
   ctx.font = '15px Arial';
   ctx.fillText(`${deckClan}  ·  ${total} / 50 cards`, GAP*2+12, 82);
 
-  // Trigger bar
   const trigCounts = {Critical:0,Draw:0,Stand:0,Heal:0};
   if (fvCard) { const t=getTriggerType(fvCard); if(t&&trigCounts[t]!==undefined) trigCounts[t]++; }
   for (const {card,count} of Object.values(deck)) { const t=getTriggerType(card); if(t&&trigCounts[t]!==undefined) trigCounts[t]+=count; }
@@ -2295,7 +1931,6 @@ async function exportDeckImage() {
     ctx.fillText(`${t}  ${cnt}x`, tx+10, 119); tx += 128;
   }
 
-  // Card sections
   let y = TOP_H;
   async function loadImg(src) {
     return new Promise(res => { const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>res(img); img.onerror=()=>res(null); img.src=src; });
@@ -2344,7 +1979,6 @@ async function exportDeckImage() {
 
 
 
-// Helper: rounded rectangle path (supports per-corner radii object or single number)
 function roundRect(ctx, x, y, w, h, r) {
   if (typeof r === 'object') {
     const {tl=0,tr=0,br=0,bl=0} = r;
@@ -2371,9 +2005,7 @@ function copyExport() {
 }
 
 
-// ==================== TOAST ====================
 function showToast(card) {
-  // System messages (icon+name only, no "Nice pull!" prefix)
   const isSystem = ['✅','❌','⚠️','🗑️','📋'].includes(card.icon);
   const msgs = { RRR: '🌟 RRR Pull!', SP: '✨ SP Parallel!' };
   if (card._wishlistHit) { toast.className = 'toast rrr'; toast.textContent = `⭐ Wishlist Hit! ${card.name}`; document.getElementById('toast-container').appendChild(toast); setTimeout(() => toast.remove(), 4000); return; }
@@ -2391,14 +2023,12 @@ function showToast(card) {
 }
 
 
-// Horizontal scroll with mouse wheel on filter rows
 document.addEventListener('wheel', function(e) {
   const row = e.target.closest('.gallery-filter-row, .deck-filter-row');
   if (row) { e.preventDefault(); row.scrollLeft += e.deltaY + e.deltaX; }
 }, { passive: false });
 
 
-// ==================== PITY TRACKER ====================
 function updatePityDisplay() {
   const el = document.getElementById('pity-count');
   const wrap = document.getElementById('pity-display');
@@ -2406,11 +2036,9 @@ function updatePityDisplay() {
   el.textContent = packsSinceLastRRR;
   const hot = packsSinceLastRRR >= 8;
   el.style.color = hot ? 'var(--gold)' : packsSinceLastRRR >= 5 ? 'var(--rarity-rr)' : 'var(--accent)';
-  // Pulse the open buttons when getting unlucky
   document.querySelectorAll('.open-btns .btn').forEach(b => b.classList.toggle('pity-hot', hot));
 }
 
-// ==================== WISHLIST ====================
 function toggleWishlist(cardId) {
   if (!cardId) return;
   if (wishlist.has(cardId)) {
@@ -2424,17 +2052,14 @@ function toggleWishlist(cardId) {
   renderDeckPool();
 }
 
-// ==================== QUICK-ADD FROM REVEAL ====================
 function quickAddFromReveal(cardId) {
   const card = getAllCardById(cardId);
   if (!card) return;
-  // Open deck builder if not open
   const overlay = document.getElementById('deck-overlay');
   if (!overlay.classList.contains('active')) openDeckBuilder();
   addToDeck(card);
 }
 
-// ==================== STATS MODAL ====================
 function openStats() {
   renderStats();
   document.getElementById('stats-overlay').classList.add('active');
@@ -2453,7 +2078,6 @@ function renderStats() {
   const rarityOrder = ["SP","RRR","RR","R","C"];
   const rarityColors = {SP:'var(--rarity-sp)',RRR:'var(--rarity-rrr)',RR:'var(--rarity-rr)',R:'var(--rarity-r)',C:'var(--rarity-c)'};
 
-  // Set completion
   const boosterSets = SETS.filter(s=>s.id.startsWith('BT')||s.id.startsWith('EB'));
   const setRows = boosterSets.map(s => {
     const cards = s.cards.filter(c=>c.rarity!=='TD');
@@ -2521,9 +2145,7 @@ function renderStats() {
   `;
 }
 
-// ==================== KEYBOARD SHORTCUTS ====================
 document.addEventListener('keydown', e => {
-  // Don't fire when typing in an input
   if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
   const key = e.key;
   const anyOverlay = document.querySelector('.zoom-overlay.active, .gallery-overlay.active, .deck-overlay.active, .export-overlay.active');
@@ -2534,13 +2156,12 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('deck-overlay')?.classList.contains('active')) { closeDeckBuilder(); return; }
     if (document.getElementById('export-overlay')?.classList.contains('active')) { closeExport(); return; }
   }
-  if (anyOverlay) return; // don't fire pack shortcuts when modal open
+  if (anyOverlay) return;
   if (key === ' ' || key === 'Enter') { e.preventDefault(); stagePack(1); }
   if (key === 'r' || key === 'R') { const btn = document.getElementById('reveal-btn'); if (btn && btn.style.display !== 'none') revealCards(); }
   if (key === 'a' || key === 'A') { const btn = document.getElementById('flip-all-btn'); if (btn && btn.style.display !== 'none') flipAll(); }
 });
 
-// ==================== SAVE/LOAD — extend for wishlist & stats ====================
 const _origBuildSaveData = buildSaveData;
 buildSaveData = function() {
   const data = _origBuildSaveData();
@@ -2563,13 +2184,11 @@ applySaveData = function(data) {
 };
 
 
-// ==================== MISSING CARD LIST ====================
 function renderMissing() {
   const setFilter = document.getElementById('missing-set-filter')?.value || 'ALL';
   const container = document.getElementById('missing-list-container');
   if (!container) return;
 
-  // Populate set filter options on first run
   const sel = document.getElementById('missing-set-filter');
   if (sel && sel.options.length <= 1) {
     const boosterSets = SETS.filter(s => !s.id.startsWith('TD'));
@@ -2589,7 +2208,7 @@ function renderMissing() {
   for (const set of setsToCheck) {
     for (const card of set.cards) {
       if (card.rarity === 'TD') continue;
-      if (card.rarity === 'SP') continue; // SP parallels optional
+      if (card.rarity === 'SP') continue;
       if (!collection[card.id] || collection[card.id].count === 0) {
         missing.push(card);
       }
@@ -2601,7 +2220,6 @@ function renderMissing() {
     return;
   }
 
-  // Group by set then rarity
   missing.sort((a,b) => {
     const si = rarityOrder.indexOf(a.rarity), sj = rarityOrder.indexOf(b.rarity);
     if (si !== sj) return si - sj;
@@ -2642,7 +2260,6 @@ function copyMissingList() {
   showToast({icon:'📋', name:'Missing list copied!', rarity:'R'});
 }
 
-// ==================== SOUND ====================
 let soundEnabled = true;
 function toggleSound(el) {
   soundEnabled = el.checked;
@@ -2651,7 +2268,6 @@ function toggleSound(el) {
 }
 
 const SFX = (() => {
-  // Tiny synthesized sounds via Web Audio API — no external files
   let ctx = null;
   function getCtx() {
     if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -2710,7 +2326,6 @@ const SFX = (() => {
   };
 })();
 
-// ==================== PACK RIP ANIMATION ====================
 function playPackRip(icon, setLabel, boxSrc, callback) {
   const overlay = document.getElementById('pack-rip-overlay');
   const top     = document.getElementById('pack-rip-top');
@@ -2718,10 +2333,9 @@ function playPackRip(icon, setLabel, boxSrc, callback) {
   const flash   = document.getElementById('rip-flash');
   if (!overlay) { callback(); return; }
 
-  const H = 232; // half-height of the pack image display
+  const H = 232;
   const cy = window.innerHeight / 2;
 
-  // Load box image into both halves; fallback to emoji if missing
   function setupRipImg(imgId, fbId, iconId) {
     const img = document.getElementById(imgId);
     const fb  = document.getElementById(fbId);
@@ -2743,11 +2357,9 @@ function playPackRip(icon, setLabel, boxSrc, callback) {
   setupRipImg('rip-img-top','rip-fallback-top','rip-icon-top');
   setupRipImg('rip-img-bot','rip-fallback-bot','rip-icon-bot');
 
-  // Position: top half sits just above centre, bottom half starts at centre
   top.style.top = (cy - H) + 'px';
   bot.style.top = cy + 'px';
 
-  // Reset to closed position (no animation yet)
   top.style.transition = 'none';
   bot.style.transition = 'none';
   top.style.transform = 'translateX(-50%) translateY(0)';
@@ -2758,7 +2370,6 @@ function playPackRip(icon, setLabel, boxSrc, callback) {
 
   SFX.packRip();
 
-  // Brief pause so image loads, then tear apart
   requestAnimationFrame(() => requestAnimationFrame(() => {
     top.style.transition = 'transform 0.42s cubic-bezier(0.4,0,0.2,1)';
     bot.style.transition = 'transform 0.42s cubic-bezier(0.4,0,0.2,1)';
@@ -2777,5 +2388,4 @@ function playPackRip(icon, setLabel, boxSrc, callback) {
   }));
 }
 
-// ==================== GO ====================
 init();
