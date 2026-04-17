@@ -900,7 +900,13 @@ function renderReveal(cards, newCardIds, faceDown) {
   const grid = document.getElementById('cards-grid');
   const set = SETS[currentSetIdx];
   const packSize = set ? (set.packSize || 5) : 5;
-  grid.className = packSize === 7 ? 'cards-grid pack-7' : 'cards-grid';
+  const isLRGodPack = cards.length === 6 && cards.every(c => c.rarity === 'LR' || c.rarity === 'SP');
+  
+  if (isLRGodPack) {
+    grid.className = 'cards-grid pack-6';
+  } else {
+    grid.className = packSize === 7 ? 'cards-grid pack-7' : 'cards-grid';
+  }
   grid.innerHTML = '';
   cards.forEach((card, i) => {
     const isNew = newCardIds.includes(card.id);
