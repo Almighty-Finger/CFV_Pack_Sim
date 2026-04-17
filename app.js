@@ -479,10 +479,7 @@ function selectSet(idx) {
   boxImg.style.display = 'none'; boxImg.src = '';
   boxFallback.style.display = 'flex';
   const _m = set.id.match(/^([A-Z]+)(\d+)$/);
-  const _padId = _m ? `${_m[1]}${_m[2].padStart(3,'0')}` : set.id;
-  const _bNames = _padId !== set.id
-    ? [`box-${_padId}.webp`, `box-${set.id}.webp`]
-    : [`box-${set.id}.webp`];
+  const _bNames = [`box-${set.id}.webp`];
   let _bTry = 0;
   (function _tryBox() {
     if (_bTry >= _bNames.length) return;
