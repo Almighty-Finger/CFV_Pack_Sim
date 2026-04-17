@@ -1146,9 +1146,6 @@ function openZoom(card) {
   wb.style.borderColor = wishlist.has(card.id) ? 'var(--gold)' : '';
   document.getElementById('zoom-overlay').classList.add('active');
 }
-    });
-  });
-}
 
 let galleryRarityFilter = 'ALL';
 let galleryClanFilter = 'ALL';
