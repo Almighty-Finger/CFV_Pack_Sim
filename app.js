@@ -860,20 +860,24 @@ function cardImgCandidates(id) {
   const isGSeries = /^G(BT|EB|TD)/.test(setId);
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
   
-  const fileId = id.replace(/_S0(\d+)/, '_S$1');
-  const fileIdLower = fileId.toLowerCase();
-
+  // Use the ID exactly as is - it already has EN suffix
+  const fileId = id;
+  
   if (setId === 'EB10') {
     const m = id.match(/^(EB10_(?:S\d+|\d+)EN)-([BW])$/);
     if (m) {
       return [
         `${base}${setId}/${m[1]}-${m[2]}.webp`,
         `${base}${setId}/${m[1]}${m[2]}.webp`,
-        `${base}${setId}/${m[1]}.webp`,
       ];
     }
   }
 
+  // Just use the exact ID with .webp
+  return [
+    `${base}${setId}/${fileId}.webp`,
+  ];
+}
   return [
     `${base}${setId}/${fileId}.webp`,
     `${base}${setId}/${fileIdLower}.webp`,
