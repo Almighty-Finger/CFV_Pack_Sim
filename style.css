@@ -17,6 +17,7 @@
     --rarity-rr: #9b59f7;
     --rarity-rrr: #f0b429;
     --rarity-sp: #ef4565;
+    --rarity-lr: #00e5ff;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -225,6 +226,9 @@
   }
   .cards-grid.pack-7 {
     grid-template-columns: repeat(7, var(--card-w));
+  }
+  .cards-grid.pack-6 {
+    grid-template-columns: repeat(6, var(--card-w));
   }
 
   /* CARD */
