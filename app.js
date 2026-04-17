@@ -826,33 +826,26 @@ function cardImgPath(id, ext) {
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
 
   if (setId.startsWith('GTD')) {
-    return `${base}${setId}/${id}EN.${ext}`;
+    return `${base}${setId}/${id}.${ext}`;
   }
 
   if (setId.startsWith('GBT')) {
-    const fileId = id.replace(/_S0(\d+)$/, '_S$1');
-    return `${base}${setId}/${fileId}EN.${ext}`;
+    return `${base}${setId}/${id}.${ext}`;
   }
 
   if (setId.startsWith('GEB')) {
-    const fileId = id.replace(/_S0(\d+)$/, '_S$1').toLowerCase();
-    return `${base}${setId}/${fileId}.${ext}`;
+    return `${base}${setId}/${id.toLowerCase()}.${ext}`;
   }
 
   if (setId === 'EB10') {
-    const m = id.match(/^(EB10_(?:S\d+|\d+))([BW])$/);
+    const m = id.match(/^(EB10_(?:S\d+|\d+)EN)-([BW])$/);
     if (m) {
-      return `${IMG_CARDS}${setId}/${m[1]}EN${m[2]}.${ext}`;
+      return `${base}${setId}/${m[1]}-${m[2]}.${ext}`;
     }
   }
 
-  {
-    const lr = id.match(/^([A-Z0-9]+)_LR0*(\d+)$/);
-    if (lr) return `${IMG_CARDS}${setId}/${lr[1]}_L${lr[2].padStart(2,'0')}EN.${ext}`;
-  }
-
-  const fileId = id.replace(/_S0(\d+)$/, '_S$1');
-  return `${base}${setId}/${fileId}EN.${ext}`;
+  // For all OG sets (BT, EB, TD), just use the ID as-is
+  return `${base}${setId}/${id}.${ext}`;
 }
 
 function cardImgCandidates(id) {
@@ -882,7 +875,6 @@ function cardImgCandidates(id) {
     `${base}${setId}/${fileId}.webp`,
     `${base}${setId}/${fileIdLower}.webp`,
   ];
-}
 
 function setImgSrcWithFallback(imgEl, id, onBothFail) {
   const candidates = cardImgCandidates(id);
