@@ -1004,7 +1004,7 @@ const SETS = [
     desc:"【VGE-BT10】 Cardfight!! Vanguard Booster Pack Vol.10 | Featured Clans: Gold Paladin, Royal Paladin, Narukami, Nova Grappler, Spike Brothers",
     packSize:5,
     guaranteedTrigger:true,
-    cards:
+    cards:[
       {id:"BT10_001EN",name:"Pure Heart Jewel Knight, Ashlei",grade:3,clan:"Royal Paladin",rarity:"RRR",icon:"⚔️"},
       {id:"BT10_002EN",name:"Leading Jewel Knight, Salome",grade:3,clan:"Royal Paladin",rarity:"RRR",icon:"⚔️"},
       {id:"BT10_003EN",name:"Liberator of the Round Table, Alfred",grade:3,clan:"Gold Paladin",rarity:"RRR",icon:"🛡️"},
