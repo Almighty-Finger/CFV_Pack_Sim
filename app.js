@@ -859,25 +859,24 @@ function cardImgCandidates(id) {
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD)/.test(setId);
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
-  const fileId = id.replace(/_S0(\d+)$/, '_S$1');
+  
+  const fileId = id.replace(/_S0(\d+)/, '_S$1');
   const fileIdLower = fileId.toLowerCase();
 
   if (setId === 'EB10') {
-    const m = id.match(/^(EB10_(?:S\d+|\d+))([BW])$/);
+    const m = id.match(/^(EB10_(?:S\d+|\d+)EN)-([BW])$/);
     if (m) {
       return [
-        `${base}${setId}/${m[1]}EN${m[2]}.webp`,
-        `${base}${setId}/${m[1]}EN-${m[2]}.webp`,
+        `${base}${setId}/${m[1]}-${m[2]}.webp`,
+        `${base}${setId}/${m[1]}${m[2]}.webp`,
         `${base}${setId}/${m[1]}.webp`,
       ];
     }
   }
 
   return [
-    `${base}${setId}/${fileId}EN.webp`,
     `${base}${setId}/${fileId}.webp`,
     `${base}${setId}/${fileIdLower}.webp`,
-    `${base}${setId}/${fileIdLower}EN.webp`,
   ];
 }
 
@@ -1145,6 +1144,19 @@ function openZoom(card) {
   wb.style.background = wishlist.has(card.id) ? 'rgba(240,180,41,0.2)' : '';
   wb.style.borderColor = wishlist.has(card.id) ? 'var(--gold)' : '';
   document.getElementById('zoom-overlay').classList.add('active');
+}
+
+function closeZoom(e) {
+  if (e && e.target !== document.getElementById('zoom-overlay')) return;
+  document.getElementById('zoom-overlay').classList.remove('active');
+  zoomCard = null;
+}
+
+function addToDeckFromZoom() {
+  if (zoomCard) { 
+    addToDeck(zoomCard); 
+    document.getElementById('zoom-overlay').classList.remove('active'); 
+  }
 }
 
 let galleryRarityFilter = 'ALL';
