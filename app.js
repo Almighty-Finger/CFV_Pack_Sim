@@ -889,6 +889,7 @@ function renderReveal(cards, newCardIds, faceDown) {
   const grid = document.getElementById('cards-grid');
   const set = SETS[currentSetIdx];
   const packSize = set ? (set.packSize || 5) : 5;
+  
   const isLRGodPack = cards.length === 6 && cards.every(c => c.rarity === 'LR' || c.rarity === 'SP');
   
   if (isLRGodPack) {
