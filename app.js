@@ -871,10 +871,6 @@ function cardImgCandidates(id) {
     `${base}${setId}/${fileId}.webp`,
   ];
 }
-  return [
-    `${base}${setId}/${fileId}.webp`,
-    `${base}${setId}/${fileIdLower}.webp`,
-  ];
 
 function setImgSrcWithFallback(imgEl, id, onBothFail) {
   const candidates = cardImgCandidates(id);
