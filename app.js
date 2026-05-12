@@ -243,7 +243,7 @@ const TD_COUNTS = {
 let setGroupCollapsed = {};
 function toggleSetGroup(key) {
   const opening = setGroupCollapsed[key];
-  for (const k of ['td','bt','eb','gbt','geb']) setGroupCollapsed[k] = true;
+  for (const k of ['td','bt','eb','gbt','geb','gcb']) setGroupCollapsed[k] = true;
   setGroupCollapsed[key] = !opening;
   renderSetButtons();
 }
@@ -277,12 +277,14 @@ function renderSetButtons() {
   const ebSets  = SETS.map((s,i)=>({s,i})).filter(({s})=>/^EB/.test(s.id)&&inFmt(s)).sort(numSort);
   const gbtSets = SETS.map((s,i)=>({s,i})).filter(({s})=>s.id.startsWith('GBT')&&inFmt(s)).sort(numSort);
   const gebSets = SETS.map((s,i)=>({s,i})).filter(({s})=>s.id.startsWith('GEB')&&inFmt(s)).sort(numSort);
+  const gcbSets = SETS.map((s,i)=>({s,i})).filter(({s})=>s.id.startsWith('GCB')&&inFmt(s)).sort(numSort);
   const tdSets  = SETS.filter(s=>s.packSize===50&&inFmt(s)).sort((a,b)=>parseInt(a.id.replace(/\D/g,''))-parseInt(b.id.replace(/\D/g,'')));
   if (setGroupCollapsed['td'] === undefined) setGroupCollapsed['td'] = true;
   if (setGroupCollapsed['bt'] === undefined) setGroupCollapsed['bt'] = true;
   if (setGroupCollapsed['eb']  === undefined) setGroupCollapsed['eb']  = true;
   if (setGroupCollapsed['gbt'] === undefined) setGroupCollapsed['gbt'] = true;
   if (setGroupCollapsed['geb'] === undefined) setGroupCollapsed['geb'] = true;
+  if (setGroupCollapsed['gcb'] === undefined) setGroupCollapsed['gcb'] = true;
   for (const td of tdSets) {
     const k = 'td_'+td.id;
     if (setGroupCollapsed[k] === undefined) setGroupCollapsed[k] = true;
@@ -362,11 +364,12 @@ function renderSetButtons() {
   if (currentFormat === 'G') {
     const gbtG = groupHtml('gbt','G Boosters (GBT)',gbtSets);
     const gebG = groupHtml('geb','G Extra Boosters (GEB)',gebSets);
+    const gcbG = groupHtml('gcb','G Clan Boosters (GCB)',gcbSets);
     el.innerHTML = `
       <div class="set-group-headers">
-        ${tdG.header}${gbtG.header}${gebG.header}
+        ${tdG.header}${gbtG.header}${gebG.header}${gcbG.header}
       </div>
-      ${tdG.body}${gbtG.body}${gebG.body}
+      ${tdG.body}${gbtG.body}${gebG.body}${gcbG.body}
     `;
   } else {
     const btG  = groupHtml('bt','Booster Sets (BT)',btSets);
@@ -589,7 +592,7 @@ function generatePack() {
   const isGEB = id.startsWith('GEB');
   const isEB  = id.startsWith('EB') || isGEB;
   const isBT  = id.startsWith('BT');
-  const isTwoSlot = sub === 'clan' || sub === 'technical' || sub === 'character'
+  const isTwoSlot = sub === 'clan' || sub === 'technical' || sub === 'character' || id.startsWith('GCB')
                  || (isGBT && parseInt(id.replace('GBT','')) >= 11);
   const isGEBOld  = isGEB && (sub === 'geb_old' || parseInt(id.replace('GEB','')) <= 1);
 
@@ -801,6 +804,7 @@ function stageBox() {
   const boxPacks = isClanStyle ? 12
                  : isGBT11plus ? 16
                  : isGEBOld    ? 15
+                 : set.id.startsWith('GCB') ? 12
                  : set.id.startsWith('GEB') ? 12
                  : set.id.startsWith('EB')  ? 15 : 30;
 
@@ -989,8 +993,8 @@ function cardImgPath(id, ext) {
     return `${base}${setId}/${id}.${ext}`;
   }
 
-  if (setId.startsWith('GEB')) {
-    return `${base}${setId}/${id.toLowerCase()}.${ext}`;
+  if (setId.startsWith('GEB') || setId.startsWith('GCB')) {
+    return `${base}${setId}/${id}.${ext}`;
   }
 
   if (setId === 'EB10') {
@@ -1022,7 +1026,7 @@ function cardImgCandidates(id) {
     }
   }
 
-  // Just use the exact ID with .webp
+  // Try exact ID, then lowercase (GEB uses lowercase filenames)
   return [
     `${base}${setId}/${fileId}.webp`,
   ];
