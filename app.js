@@ -982,7 +982,7 @@ function clearCollection() {
 function cardImgPath(id, ext) {
   ext = ext || 'webp';
   const setId = id.split('_')[0];
-  const isGSeries = /^G(BT|EB|TD)/.test(setId);
+  const isGSeries = /^G(BT|EB|TD|CB)/.test(setId);
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
 
   if (setId.startsWith('GTD')) {
@@ -1010,7 +1010,7 @@ function cardImgPath(id, ext) {
 
 function cardImgCandidates(id) {
   const setId = id.split('_')[0];
-  const isGSeries = /^G(BT|EB|TD)/.test(setId);
+  const isGSeries = /^G(BT|EB|TD|CB)/.test(setId);
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
   
   // Use the ID exactly as is - it already has EN suffix
