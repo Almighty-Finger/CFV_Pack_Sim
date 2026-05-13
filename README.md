@@ -22,6 +22,10 @@ i will have everything at some point
 All list for OG is done expect for PR and Special sets
 
 adding the rest of G
+
+adding hand sample
+
+adding a "get whole set" button
 ______________________________________________________________________________________________________________________________
 Bug Fixing:
 
