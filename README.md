@@ -20,10 +20,12 @@ Progress atm:
 i will have everything at some point
 
 All list for OG is done expect for PR and Special sets
+
+adding the rest of G
 ______________________________________________________________________________________________________________________________
 Bug Fixing:
 
-god pack logic(might take a while)
+god pack logic(might take a while)[still not fixed😭]
 
 ______________________________________________________________________________________________________________________________
 Images uploaded till: Everything that exist in the sim
