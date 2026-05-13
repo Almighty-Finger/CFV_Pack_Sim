@@ -1105,3 +1105,72 @@
     --card-h: calc(var(--card-w) * 200 / 137);
   }
 }
+
+.hand-overlay { display: none; }
+.hand-overlay.active { display: flex; }
+
+.hand-card {
+  position: relative;
+  width: var(--card-w);
+  height: var(--card-h);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+.hand-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  border-radius: 8px;
+  display: block;
+  border: 2px solid var(--border);
+  transition: border-color 0.15s;
+}
+.hand-card.selected img {
+  border-color: #f87171;
+  box-shadow: 0 0 12px rgba(248,113,113,0.6);
+}
+.hand-card.selected::after {
+  content: '↩';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(248,113,113,0.9);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.hand-card.new-card img {
+  border-color: #4f8ef7;
+  box-shadow: 0 0 12px rgba(79,142,247,0.6);
+}
+.hand-card.new-card::after {
+  content: 'NEW';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(79,142,247,0.9);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.hand-card .hand-card-label {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  font-size: 9px;
+  text-align: center;
+  padding: 3px 4px;
+  border-radius: 0 0 6px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
