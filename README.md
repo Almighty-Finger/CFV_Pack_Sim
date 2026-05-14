@@ -23,9 +23,11 @@ All list for OG is done expect for PR and Special sets
 
 adding the rest of G
 
-adding hand sample
+Revamp the deckbuilder
 
-adding a "get whole set" button
+-adding hand sample-
+
+-adding a "get whole set" button-
 ______________________________________________________________________________________________________________________________
 Bug Fixing:
 
