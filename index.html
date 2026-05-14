@@ -250,37 +250,102 @@
     <div class="deck-pool">
       <div class="deck-pool-grid" id="deck-pool-grid"></div>
     </div>
-    <div class="deck-panel">
-      <div class="section-title">Deck Stats</div>
-      <div class="deck-stats-grid">
-        <div class="deck-stat-box">
-          <div class="dsn" id="ds-total" style="color:var(--accent)">0</div>
-          <div class="dsl">Cards / 50</div>
-          <div class="deck-count-bar"><div class="deck-count-fill" id="ds-bar" style="width:0%;background:var(--accent)"></div></div>
+    <div class="deck-panel dd2-panel">
+
+      <!-- ── Top header bar: name + deck count + actions ── -->
+      <div class="dd2-header">
+        <div class="dd2-header-left">
+          <span class="dd2-format-badge">G FORMAT</span>
+          <input id="deck-name-input" placeholder="Deck Name" class="dd2-name-input" value="My Deck">
         </div>
-        <div class="deck-stat-box"><div class="dsn" id="ds-g0" style="color:var(--rarity-c)">0</div><div class="dsl">Grade 0</div></div>
-        <div class="deck-stat-box"><div class="dsn" id="ds-g1" style="color:var(--rarity-r)">0</div><div class="dsl">Grade 1</div></div>
-        <div class="deck-stat-box"><div class="dsn" id="ds-g2" style="color:var(--rarity-rr)">0</div><div class="dsl">Grade 2</div></div>
-        <div class="deck-stat-box"><div class="dsn" id="ds-g3" style="color:var(--rarity-rrr)">0</div><div class="dsl">Grade 3</div></div>
-        <div class="deck-stat-box" id="ds-g4-box"><div class="dsn" id="ds-g4" style="color:var(--rarity-lr)">0<span style="font-size:11px;opacity:0.6">/16</span></div><div class="dsl">G Zone</div></div>
-        <div class="deck-stat-box"><div class="dsn" id="ds-trig-total" style="color:var(--gold)">0</div><div class="dsl">Triggers /16</div></div>
-        <div class="deck-stat-box"><div class="dsn" id="ds-trig-crit" style="color:#f87171">0</div><div class="dsl">🗡 Critical</div></div>
-        <div class="deck-stat-box"><div class="dsn" id="ds-trig-draw" style="color:#fb923c">0</div><div class="dsl">🃏 Draw</div></div>
-        <div class="deck-stat-box"><div class="dsn" id="ds-trig-stand" style="color:#60a5fa">0</div><div class="dsl">🔄 Stand</div></div>
-        <div class="deck-stat-box"><div class="dsn" id="ds-trig-heal" style="color:var(--green)">0</div><div class="dsl">💚 Heal</div></div>
+        <div class="dd2-header-right">
+          <span class="dd2-count-badge">
+            DECK <span id="ds-total" style="color:var(--accent)">0</span><span style="opacity:0.5">/50</span>
+          </span>
+          <div class="deck-count-bar" style="width:80px"><div class="deck-count-fill" id="ds-bar" style="width:0%;background:var(--accent)"></div></div>
+          <span class="dd2-count-badge" style="color:#a78bfa">
+            G ZONE <span id="ds-g4">0</span><span style="opacity:0.5">/16</span>
+          </span>
+        </div>
       </div>
-      <div class="deck-validation" id="deck-validation"></div>
-      <div class="deck-list-section">
-        <div class="section-title" style="margin-bottom:8px">Deck List</div>
-        <div class="deck-list" id="deck-list"></div>
-      </div>
+
+      <!-- ── Main body: visual deck + side mini-stats ── -->
+      <div class="dd2-body">
+
+        <!-- Left: visual card sections -->
+        <div class="dd2-deck-visual" id="dd2-deck-visual">
+
+          <!-- Ride Deck (FV) -->
+          <div class="dd2-section">
+            <div class="dd2-section-header">
+              <span class="dd2-section-icon">🃏</span>
+              <span class="dd2-section-title">RIDE DECK</span>
+              <span class="dd2-section-count" id="dd2-fv-count">0</span>
+            </div>
+            <div class="dd2-ride-row" id="dd2-fv-row">
+              <div class="dd2-empty-slot" onclick="showToast({icon:'ℹ️',name:'Right-click a Grade 0 card in the pool to set as First Vanguard',rarity:'C'})">
+                <span style="font-size:20px;opacity:0.3">+</span>
+                <span style="font-size:9px;opacity:0.3;text-align:center">Right-click G0<br>to set FV</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- G Zone -->
+          <div class="dd2-section" id="dd2-gzone-section">
+            <div class="dd2-section-header">
+              <span class="dd2-section-icon">✨</span>
+              <span class="dd2-section-title">G ZONE</span>
+              <span class="dd2-section-count" id="dd2-gz-count">0 / 16</span>
+            </div>
+            <div class="dd2-card-grid" id="dd2-gzone-grid"></div>
+          </div>
+
+          <!-- Main Deck by grade -->
+          <div class="dd2-section">
+            <div class="dd2-section-header">
+              <span class="dd2-section-icon">📦</span>
+              <span class="dd2-section-title">MAIN DECK</span>
+              <span class="dd2-section-count" id="dd2-main-count">0 / 50</span>
+            </div>
+            <div id="dd2-main-deck"></div>
+          </div>
+
+        </div><!-- /dd2-deck-visual -->
+
+        <!-- Right: mini stats -->
+        <div class="dd2-sidebar">
+          <div class="dd2-mini-stat-group">
+            <div class="dd2-mini-label">GRADE</div>
+            <div class="dd2-mini-row"><span class="dd2-g-badge g0">G0</span><span id="ds-g0" class="dd2-mini-val">0</span></div>
+            <div class="dd2-mini-row"><span class="dd2-g-badge g1">G1</span><span id="ds-g1" class="dd2-mini-val">0</span></div>
+            <div class="dd2-mini-row"><span class="dd2-g-badge g2">G2</span><span id="ds-g2" class="dd2-mini-val">0</span></div>
+            <div class="dd2-mini-row"><span class="dd2-g-badge g3">G3</span><span id="ds-g3" class="dd2-mini-val">0</span></div>
+          </div>
+          <div class="dd2-divider"></div>
+          <div class="dd2-mini-stat-group">
+            <div class="dd2-mini-label">TRIGGERS <span id="ds-trig-total" style="color:var(--gold)">0</span>/16</div>
+            <div class="dd2-mini-row"><span style="color:#f87171">🗡</span><span id="ds-trig-crit" class="dd2-mini-val">0</span></div>
+            <div class="dd2-mini-row"><span style="color:#fb923c">🃏</span><span id="ds-trig-draw" class="dd2-mini-val">0</span></div>
+            <div class="dd2-mini-row"><span style="color:#60a5fa">🔄</span><span id="ds-trig-stand" class="dd2-mini-val">0</span></div>
+            <div class="dd2-mini-row"><span style="color:var(--green)">💚</span><span id="ds-trig-heal" class="dd2-mini-val">0</span></div>
+          </div>
+          <div class="dd2-divider"></div>
+          <div class="dd2-validation-mini" id="deck-validation"></div>
+        </div>
+
+      </div><!-- /dd2-body -->
+
+      <!-- ── Bottom actions ── -->
       <div class="deck-actions">
-        <button class="btn btn-primary" style="font-size:13px;padding:9px" onclick="exportDeck()">📋 Export Text</button>
-        <button class="btn btn-primary" style="font-size:13px;padding:9px;background:linear-gradient(135deg,#7c3aed,#4f8ef7)" onclick="exportDeckImage()">🖼 Export Image</button>
-        <button class="btn btn-secondary" style="font-size:13px;padding:9px" onclick="openImportDeck()">📥 Import Text</button>
-        <button class="btn btn-secondary" style="font-size:13px;padding:9px" onclick="openHandSample()">🖐 Hand Sample</button>
-        <button class="btn btn-danger" style="font-size:13px;padding:9px" onclick="clearDeck()">🗑 Clear Deck</button>
+        <button class="btn btn-primary" style="font-size:12px;padding:7px 10px" onclick="exportDeck()">📋 Export</button>
+        <button class="btn btn-primary" style="font-size:12px;padding:7px 10px;background:linear-gradient(135deg,#7c3aed,#4f8ef7)" onclick="exportDeckImage()">🖼 Image</button>
+        <button class="btn btn-secondary" style="font-size:12px;padding:7px 10px" onclick="openImportDeck()">📥 Import</button>
+        <button class="btn btn-secondary" style="font-size:12px;padding:7px 10px" onclick="openHandSample()">🖐 Hand</button>
+        <button class="btn btn-danger" style="font-size:12px;padding:7px 10px" onclick="clearDeck()">🗑 Clear</button>
       </div>
+
+      <!-- hidden deck-list for export compatibility -->
+      <div id="deck-list" style="display:none"></div>
     </div>
   </div>
 </div>

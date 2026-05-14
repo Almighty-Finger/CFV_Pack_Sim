@@ -1086,7 +1086,7 @@ function renderReveal(cards, newCardIds, faceDown) {
           <div class="card-footer">
             <div class="card-name">${card.name}</div>
             <div class="card-meta">
-              <span class="card-grade">G${card.grade} · ${card.clan}</span>
+              <span class="card-grade">G${card.grade} · ${card.clan} · <span style="opacity:0.65">${getCardNum(card.id)}</span></span>
               <span class="rarity-badge ${card.rarity}">${card.rarity}</span>
             </div>
           </div>
@@ -1168,7 +1168,7 @@ function updateCollection() {
       <div class="coll-info">
         <div class="coll-name">${card.name}</div>
         <div class="coll-sub" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-          <span>${card.clan} · G${card.grade}</span>${badge}
+          <span>${card.clan} · G${card.grade} · <span style="font-family:monospace;opacity:0.65">${getCardNum(card.id)}</span></span>${badge}
         </div>
       </div>
       <span class="coll-count ${count>=3?'highlight':''}">${count}x</span>
@@ -1434,6 +1434,7 @@ function renderGallery() {
       <div class="gc-fallback" style="display:none"><span style="font-size:32px">${card.icon}</span><span style="font-size:9px;color:var(--text-muted);text-align:center;padding:0 4px">${card.name}</span></div>
       ${count>0?`<span class="gc-count">${count}x</span>`:''}
       <span class="gc-rarity rarity-badge ${card.rarity}">${card.rarity}</span>
+      <span style="position:absolute;bottom:22px;right:3px;background:rgba(0,0,0,0.65);color:rgba(255,255,255,0.75);font-size:7px;font-family:monospace;padding:1px 3px;border-radius:2px;z-index:4;pointer-events:none">${getCardNum(card.id)}</span>
       ${isSentinel(card)?'<div style="position:absolute;bottom:22px;left:0;right:0;background:rgba(240,180,41,0.85);color:#000;font-size:7px;font-weight:700;text-align:center;padding:1px">🛡 Sentinel</div>':card.grade===0&&isTrigger(card)?`<div style="position:absolute;bottom:22px;left:0;right:0;background:${getTriggerColor(getTriggerType(card))};color:#fff;font-size:7px;font-weight:700;text-align:center;padding:1px">${getTriggerType(card)==='Heal'?'💚 Heal':getTriggerType(card)||''}</div>`:''}
       <button class="gc-add-deck" onclick="event.stopPropagation();addToDeck(getAllCardById('${card.id}'))" title="Add to deck">+</button>
     </div>`;
@@ -1495,9 +1496,12 @@ const SENTINEL_IDS = new Set([
   'EB12_007EN','EB12_008EN',
   // G Trial Decks
   'GTD01_013EN','GTD02_013EN','GTD03_012EN',
+  'GTD04_012EN','GTD05_011EN','GTD06_012EN',
   // G Boosters / G Extra
   'GBT01_011EN','GBT01_013EN','GBT01_016EN','GBT01_018EN','GBT01_021EN',
+  'GBT02_014EN','GBT02_018EN','GBT02_020EN','GBT02_021EN',
   'GEB01_007EN',
+  'GCB01_011EN',
 ]);
 
 function _getCardTrigger(card) {
@@ -1531,6 +1535,12 @@ function getTriggerColor(type) {
     'Stand':    'rgba(59,130,246,0.85)',
     'Heal':     'rgba(61,191,127,0.85)',
   }[type] || 'rgba(0,0,0,0.65)';
+}
+
+function getCardNum(id) {
+  // e.g. "BT01_011EN" → "011EN", "GBT01_021EN" → "021EN", "EB10_007EN-B" → "007EN-B"
+  const m = id.match(/_(\d+[A-Z]*(?:-[A-Z])?)$/);
+  return m ? m[1] : id;
 }
 
 function isFirstVanguard(card) { return card.grade === 0; }
@@ -1695,6 +1705,7 @@ function renderDeckPool() {
       <button class="wishlist-btn ${wishlist.has(card.id)?'active':''}" onclick="event.stopPropagation();toggleWishlist('${card.id}')" title="${wishlist.has(card.id)?'Remove from wishlist':'Add to wishlist'}">⭐</button>
       ${isSentinel(card)?'<div style="position:absolute;bottom:22px;left:0;right:0;background:rgba(240,180,41,0.85);color:#000;font-size:7px;font-weight:700;text-align:center;padding:1px">🛡 Sentinel</div>':''}
       ${card.grade===0&&isTrigger(card)?`<div style="position:absolute;bottom:18px;left:0;right:0;background:${getTriggerColor(getTriggerType(card))};color:#fff;font-size:7px;font-weight:700;text-align:center;padding:1px">${getTriggerType(card)==='Heal'?'💚 Heal':getTriggerType(card)||''}</div>`:''}
+      <span style="position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,0.6);color:rgba(255,255,255,0.7);font-size:6px;font-family:monospace;padding:1px 3px;border-radius:2px;pointer-events:none">${getCardNum(card.id)}</span>
     </div>`;
   }
 
@@ -1934,15 +1945,13 @@ function renderDeckPanel() {
     else if (tt === 'Draw')  draws  += count;
     else if (tt === 'Stand') stands += count;
   }
+
   document.getElementById('ds-g0').textContent = grades[0]||0;
   document.getElementById('ds-g1').textContent = grades[1]||0;
   document.getElementById('ds-g2').textContent = grades[2]||0;
   document.getElementById('ds-g3').textContent = grades[3]||0;
   const g4el = document.getElementById('ds-g4');
-  if (g4el) {
-    g4el.innerHTML = `${gUnits||0}<span style="font-size:11px;opacity:0.6">/16</span>`;
-    g4el.style.color = gUnits >= 16 ? 'var(--green)' : gUnits > 0 ? 'var(--rarity-lr)' : 'var(--rarity-lr)';
-  }
+  if (g4el) g4el.textContent = gUnits||0;
   const trigTotalEl = document.getElementById('ds-trig-total');
   if (trigTotalEl) trigTotalEl.textContent = triggers;
   const trigCritEl = document.getElementById('ds-trig-crit');
@@ -1954,55 +1963,110 @@ function renderDeckPanel() {
   const trigHealEl = document.getElementById('ds-trig-heal');
   if (trigHealEl) trigHealEl.textContent = heals;
 
+  // Section counts
+  const fvCountEl = document.getElementById('dd2-fv-count');
+  if (fvCountEl) fvCountEl.textContent = fvCard ? 1 : 0;
+  const gzCountEl = document.getElementById('dd2-gz-count');
+  if (gzCountEl) gzCountEl.textContent = gUnits + ' / 16';
+  const mainCountEl = document.getElementById('dd2-main-count');
+  if (mainCountEl) mainCountEl.textContent = total + ' / 50';
+
+  // Validation dots (with tooltips, text hidden in sidebar, visible as dots)
   const checks = [
-    { ok: total === DECK_MAX,        warn: total > 0 && total < DECK_MAX,  msg: `Main Deck: ${total}/50` },
-    { ok: !!fvCard,                 warn: false,                           msg: `First Vanguard (FV): ${fvCard ? '★ '+fvCard.name : 'Not set — right-click a G0'}` },
-    { ok: !!getDeckClan(),           warn: false,                           msg: `Clan: ${getDeckClan()||'None yet'}` },
-    { ok: triggers === 16, warn: triggers > 0 && triggers < 16, msg: `Triggers: ${triggers}/16 (🗡${crits} 🃏${draws} 🔄${stands} 💚${heals} 🛡${sentinels})` },
-    { ok: heals <= 4,                warn: heals > 0 && heals < 4,         msg: `Heal triggers: ${heals}/4 max` },
-    { ok: sentinels <= 4,            warn: sentinels > 0 && sentinels < 4, msg: `Sentinels: ${sentinels}/4 max` },
-    { ok: gUnits === 16,               warn: gUnits > 0 && gUnits < 16,       msg: `G Zone: ${gUnits}/16` },
+    { ok: total === DECK_MAX,        warn: total > 0 && total < DECK_MAX,  msg: 'Main ' + total + '/50' },
+    { ok: !!fvCard,                  warn: false,                           msg: 'FV: ' + (fvCard ? '★ ' + fvCard.name : 'Not set — right-click G0') },
+    { ok: !!getDeckClan(),           warn: false,                           msg: 'Clan: ' + (getDeckClan()||'None yet') },
+    { ok: triggers === 16,           warn: triggers > 0 && triggers < 16,  msg: 'Triggers ' + triggers + '/16' },
+    { ok: heals <= 4,                warn: heals > 0 && heals < 4,         msg: 'Heal ' + heals + '/4 max' },
+    { ok: sentinels <= 4,            warn: sentinels > 0 && sentinels < 4, msg: 'Sentinel ' + sentinels + '/4 max' },
+    { ok: gUnits === 16,             warn: gUnits > 0 && gUnits < 16,      msg: 'G Zone ' + gUnits + '/16' },
   ];
   document.getElementById('deck-validation').innerHTML = checks.map(c => {
     const cls = c.ok ? 'ok' : c.warn ? 'warn' : 'err';
-    return `<div class="val-row"><div class="val-dot ${cls}"></div><span style="color:${c.ok?'var(--text)':'var(--text-muted)'}">${c.msg}</span></div>`;
+    return '<div class="val-row" title="' + c.msg + '"><div class="val-dot ' + cls + '"></div><span style="color:' + (c.ok?'var(--text)':'var(--text-muted)') + '">' + c.msg + '</span></div>';
   }).join('');
 
-  const maxG = Math.max(4, ...Object.values(deck).map(x=>x.card.grade));
-  const byGrade = {};
-  for (let g=0; g<=maxG; g++) byGrade[g]=[];
-  for (const {card,count} of Object.values(deck)) byGrade[card.grade].push({card,count});
-  for (let g=0; g<=maxG; g++) byGrade[g].sort((a,b)=>a.card.name.localeCompare(b.card.name));
-
-  let html = '';
-  if (fvCard) {
-    html += `<div class="section-title" style="margin-bottom:4px;color:var(--accent)">First Vanguard</div>`;
-    html += `<div class="deck-card-row">
-      <span style="font-size:14px">${fvCard.icon}</span>
-      <span class="dcr-name">${fvCard.name}</span>
-      <span class="dcr-count" style="color:var(--accent)">★</span>
-      <button class="dcr-remove" onclick="clearFV()" title="Remove FV">−</button>
-    </div>`;
-  }
-  const gradeLabel = g => `Grade ${g}`;
-  for (const g of Array.from({length:maxG+1},(_,i)=>maxG-i)) {
-    if (!byGrade[g].length) continue;
-    const allGUnits = byGrade[g].every(x=>isGUnit(x.card));
-    const anyGUnits = byGrade[g].some(x=>isGUnit(x.card));
-    const secLabel = allGUnits ? `G Units (Grade ${g})` : `Grade ${g}`;
-    html += `<div class="section-title" style="margin-bottom:4px;margin-top:8px">${secLabel}</div>`;
-    for (const {card,count} of byGrade[g]) {
-      const tag = isHeal(card)?'💚':isSentinel(card)?'🛡️':isTrigger(card)?'⚡':isGUnit(card)?'✨':'';
-      html += `<div class="deck-card-row">
-        <span style="font-size:14px">${card.icon}</span>
-        <span class="dcr-name">${card.name} ${tag}</span>
-        <span class="dcr-count">${count}x</span>
-        <button class="dcr-remove" onclick="removeFromDeck('${card.id}')" title="Remove one">−</button>
-      </div>`;
+  // ── DD2 visual: Ride Deck (FV) ──
+  const fvRow = document.getElementById('dd2-fv-row');
+  if (fvRow) {
+    if (fvCard) {
+      fvRow.innerHTML =
+        '<div class="dd2-mini-card r' + fvCard.rarity + '" onclick="openZoom(getAllCardById(\'' + fvCard.id + '\'))" title="' + fvCard.name + ' — First Vanguard">' +
+          '<img src="' + cardImgPath(fvCard.id) + '" alt="' + fvCard.name + '" data-id="' + fvCard.id + '"' +
+          ' onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display=\'none\';}})(this)">' +
+          '<button class="dd2-remove-btn" onclick="event.stopPropagation();clearFV()">✕</button>' +
+          '<div class="dd2-count-overlay">★FV</div>' +
+          (isSentinel(fvCard) ? '<div class="dd2-sentinel-tag">🛡</div>' : '') +
+        '</div>' +
+        '<div style="padding:4px 0 0 8px;font-size:10px;color:var(--text-muted);flex:1;line-height:1.4">' +
+          '<div style="font-weight:700;font-size:12px;color:var(--text)">' + fvCard.name + '</div>' +
+          '<div>' + fvCard.clan + '</div>' +
+          '<div style="color:var(--accent)">G' + fvCard.grade + ' · ' + fvCard.rarity + ' · ' + getCardNum(fvCard.id) + '</div>' +
+          (isSentinel(fvCard) ? '<div style="color:var(--gold);font-size:9px">🛡 Sentinel</div>' : '') +
+        '</div>';
+    } else {
+      fvRow.innerHTML =
+        '<div class="dd2-empty-slot" onclick="showToast({icon:\'ℹ️\',name:\'Right-click a Grade 0 card in the pool to set as First Vanguard\',rarity:\'C\'})">' +
+          '<span style="font-size:20px;opacity:0.3">+</span>' +
+          '<span style="font-size:9px;opacity:0.3;text-align:center">Right-click G0<br>to set FV</span>' +
+        '</div>';
     }
   }
-  document.getElementById('deck-list').innerHTML = html || '<div style="color:var(--text-muted);font-size:12px;padding:8px 0">No cards added yet</div>';
+
+  // ── DD2 visual: G Zone grid ──
+  const gzGrid = document.getElementById('dd2-gzone-grid');
+  if (gzGrid) {
+    const gUnitsArr = Object.values(deck).filter(x => isGUnit(x.card));
+    if (gUnitsArr.length === 0) {
+      gzGrid.innerHTML = '<div style="color:var(--text-muted);font-size:10px;padding:6px 0">No G Units added</div>';
+    } else {
+      gzGrid.innerHTML = gUnitsArr.map(function(xu) { return miniCard(xu.card, xu.count); }).join('');
+    }
+  }
+
+  // ── DD2 visual: Main Deck by grade ──
+  const mainDeck = document.getElementById('dd2-main-deck');
+  if (mainDeck) {
+    const nonGUnits = Object.values(deck).filter(x => !isGUnit(x.card));
+    const maxG = nonGUnits.length ? Math.max(...nonGUnits.map(x => x.card.grade)) : 3;
+    const gradeColors = { 0:'var(--rarity-c)', 1:'var(--rarity-r)', 2:'var(--rarity-rr)', 3:'var(--rarity-rrr)' };
+    let html = '';
+    for (let g = Math.max(3, maxG); g >= 0; g--) {
+      const cards = nonGUnits.filter(x => x.card.grade === g);
+      if (!cards.length) continue;
+      const gc = gradeColors[g] || 'var(--text-muted)';
+      const cardTotal = cards.reduce(function(s,x){return s+x.count;}, 0);
+      const sorted = cards.slice().sort(function(a,b){return a.card.name.localeCompare(b.card.name);});
+      html += '<div class="dd2-grade-block">' +
+        '<div class="dd2-grade-label">' +
+          '<span style="color:' + gc + '">G' + g + '</span>' +
+          '<span style="color:var(--text-muted)"> — ' + cards.length + ' type' + (cards.length!==1?'s':'') + ' · ' + cardTotal + ' cards</span>' +
+        '</div>' +
+        '<div class="dd2-card-grid">' + sorted.map(function(xu){return miniCard(xu.card, xu.count);}).join('') + '</div>' +
+      '</div>';
+    }
+    mainDeck.innerHTML = html || '<div style="color:var(--text-muted);font-size:10px;padding:8px">No main deck cards yet</div>';
+  }
+
+  // Legacy hidden list for export compat
+  const legacyList = document.getElementById('deck-list');
+  if (legacyList) legacyList.innerHTML = '';
 }
+
+function miniCard(card, count) {
+  var sentinel = isSentinel(card);
+  var trigType = getTriggerType(card);
+  var trigColor = trigType ? getTriggerColor(trigType) : null;
+  return '<div class="dd2-mini-card r' + card.rarity + '" onclick="openZoom(getAllCardById(\'' + card.id + '\'))" title="' + card.name.replace(/'/g,"&#39;") + ' (' + card.id + ') — ' + count + 'x">' +
+    '<img src="' + cardImgPath(card.id) + '" alt="' + card.name.replace(/"/g,'') + '" data-id="' + card.id + '"' +
+    ' onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display=\'none\';}})(this)">' +
+    '<div class="dd2-count-overlay">×' + count + '</div>' +
+    '<button class="dd2-remove-btn" onclick="event.stopPropagation();removeFromDeck(\'' + card.id + '\')">✕</button>' +
+    (sentinel ? '<div class="dd2-sentinel-tag">🛡</div>' : '') +
+    (trigType && !sentinel ? '<div style="position:absolute;bottom:0;left:0;right:0;background:' + trigColor + ';color:#fff;font-size:5px;font-weight:700;text-align:center;padding:1px">' + trigType[0] + '</div>' : '') +
+  '</div>';
+}
+
 
 
 function exportDeck() {

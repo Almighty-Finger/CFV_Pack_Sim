@@ -606,13 +606,15 @@
   }
   .pool-card.maxed { opacity: 0.4; pointer-events: none; }
 
-  .deck-panel { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .deck-panel { overflow: hidden; display: flex; flex-direction: column; gap: 0; padding: 0; }
+  /* DD2 body takes remaining height */
+  .dd2-body { flex: 1; min-height: 0; }
   .deck-stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
   .deck-stat-box { background: var(--surface2); border-radius: 8px; padding: 10px; text-align: center; }
   .deck-stat-box .dsn { font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; }
   .deck-stat-box .dsl { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-  .deck-count-bar { height: 6px; border-radius: 3px; background: var(--surface2); overflow: hidden; margin-top: 6px; }
-  .deck-count-fill { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; }
+  .deck-count-bar { height: 4px; border-radius: 2px; background: var(--surface2); overflow: hidden; }
+  .deck-count-fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; }
   .deck-validation { background: var(--surface2); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
   .pool-card.svg-selected { outline: 2px solid var(--accent); box-shadow: 0 0 8px rgba(79,142,247,0.6); }
   .save-indicator { font-size:11px; color:var(--text-muted); padding: 4px 8px; }
