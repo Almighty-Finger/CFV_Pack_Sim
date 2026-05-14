@@ -321,32 +321,7 @@
   .card-front.R .card-art { background: linear-gradient(160deg, #0d1a2e, #0a1220); }
   .card-front.RR { border-color: var(--rarity-rr); box-shadow: 0 0 16px rgba(155,89,247,0.3); }
   .card-front.RR .card-art { background: linear-gradient(160deg, #150d28, #0f0a1e); }
-  .card-front.RRR {
-    border-color: var(--rarity-rrr);
-    box-shadow: 0 0 24px rgba(240,180,41,0.4);
-    animation: rrr-glow 2s ease-in-out infinite alternate;
-  }
-  .card-front.RRR .card-art { background: linear-gradient(160deg, #1e1400, #120d00); }
-  @keyframes rrr-glow {
-    from { box-shadow: 0 0 20px rgba(240,180,41,0.35); }
-    to { box-shadow: 0 0 35px rgba(240,180,41,0.6); }
-  }
-  .card-front.SP {
-    border-color: var(--rarity-sp);
-    box-shadow: 0 0 28px rgba(239,69,101,0.5);
-    animation: sp-glow 1.8s ease-in-out infinite alternate;
-  }
-  .card-front.SP .card-art { background: linear-gradient(160deg, #200818, #160410); }
-  @keyframes sp-glow {
-    from { box-shadow: 0 0 20px rgba(239,69,101,0.4); }
-    to { box-shadow: 0 0 40px rgba(239,69,101,0.7); }
-  }
-  
-  
-  @keyframes or-glow {
-    from { box-shadow: 0 0 24px rgba(255,123,0,0.5); }
-    to { box-shadow: 0 0 48px rgba(255,123,0,0.8); }
-  }
+  /* RRR, SP, GR card-front styles are defined in the CARD SHINE SYSTEM above */
 
   .rarity-badge { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
   .rarity-badge.C { color: var(--rarity-c); }
@@ -719,35 +694,223 @@
   @keyframes pity-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(240,180,41,0)} 50%{box-shadow:0 0 12px 4px rgba(240,180,41,0.5)} }
   .pity-hot { animation: pity-pulse 1.5s infinite; border-color:var(--gold) !important; }
 
-  /* ── Foil shimmer on RRR / SP cards (reveal, gallery, deck pool) ── */
-  .card-front.RRR::after, .card-front.SP::after, 
-  .card-front.SP::after, .rarity-card-SP::after {
-    background: linear-gradient(
-      115deg,
-      transparent 15%,
-      rgba(239,69,101,0.12) 30%,
-      rgba(255,200,220,0.28) 45%,
-      rgba(239,69,101,0.12) 58%,
-      transparent 72%
-    );
-    background-size: 250% 250%;
-    animation: foil-shimmer 1.8s ease-in-out infinite;
-  }
-  
+  /* ══════════════════════════════════════════════════════════
+     CARD SHINE SYSTEM — each rarity gets its own distinct pattern
+     ══════════════════════════════════════════════════════════ */
+
   @keyframes foil-shimmer {
     0%   { background-position: 200% 50%; }
     100% { background-position: -50% 50%; }
   }
-
-  /* ── Rainbow holographic shimmer on the card art for RRR+ ── */
-  .card-front.RRR .card-art::after,
-  .card-front.SP .card-art::after,
-  
   @keyframes holo-shift {
     0%   { background-position: 0% 50%; }
     50%  { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
+
+  /* ── RRR — Diagonal gold streaks, like a championship trophy ── */
+  .card-front.RRR {
+    border-color: var(--rarity-rrr);
+    box-shadow: 0 0 24px rgba(240,180,41,0.4);
+    animation: rrr-glow 2s ease-in-out infinite alternate;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-front.RRR .card-art { background: linear-gradient(160deg, #1e1400, #120d00); }
+  @keyframes rrr-glow {
+    from { box-shadow: 0 0 18px rgba(240,180,41,0.35); border-color: rgba(240,180,41,0.7); }
+    to   { box-shadow: 0 0 38px rgba(240,180,41,0.7), 0 0 60px rgba(255,210,80,0.2); border-color: #f0b429; }
+  }
+  /* Multi-stripe diagonal gold foil — like real holofoil cards */
+  .card-front.RRR::after {
+    content: '';
+    position: absolute; inset: 0; border-radius: inherit;
+    background: repeating-linear-gradient(
+      65deg,
+      transparent 0px,
+      transparent 12px,
+      rgba(255,220,80,0.06) 12px,
+      rgba(255,235,120,0.18) 14px,
+      rgba(255,220,80,0.06) 16px,
+      transparent 16px,
+      transparent 28px
+    ),
+    linear-gradient(
+      115deg,
+      transparent 20%,
+      rgba(255,230,100,0.0) 35%,
+      rgba(255,240,160,0.3) 48%,
+      rgba(240,180,41,0.15) 55%,
+      transparent 70%
+    );
+    background-size: 100% 100%, 250% 250%;
+    animation: rrr-sweep 2.4s ease-in-out infinite;
+    pointer-events: none; z-index: 3;
+  }
+  @keyframes rrr-sweep {
+    0%   { background-position: 0 0, 200% 50%; opacity: 0.7; }
+    50%  { opacity: 1; }
+    100% { background-position: 0 0, -50% 50%; opacity: 0.7; }
+  }
+  /* Gold dust sparkle overlay on the art */
+  .card-front.RRR .card-art::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 40%, rgba(255,230,80,0.18) 0%, transparent 55%),
+                radial-gradient(ellipse at 75% 65%, rgba(255,200,40,0.12) 0%, transparent 45%);
+    animation: rrr-dust 3s ease-in-out infinite alternate;
+    pointer-events: none; z-index: 2;
+  }
+  @keyframes rrr-dust {
+    0%   { opacity: 0.6; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.04); }
+  }
+
+  /* ── SP — Rotating prismatic rainbow, like a signature parallel ── */
+  .card-front.SP {
+    border-color: var(--rarity-sp);
+    box-shadow: 0 0 28px rgba(239,69,101,0.5);
+    animation: sp-glow 1.8s ease-in-out infinite alternate;
+    position: relative; overflow: hidden;
+  }
+  .card-front.SP .card-art { background: linear-gradient(160deg, #200818, #160410); }
+  @keyframes sp-glow {
+    0%   { box-shadow: 0 0 20px rgba(239,69,101,0.4), 0 0 0 1px rgba(239,69,101,0.5); border-color: rgba(239,69,101,0.8); }
+    33%  { box-shadow: 0 0 32px rgba(180,60,255,0.5), 0 0 0 1px rgba(200,80,255,0.6); border-color: #b44dff; }
+    66%  { box-shadow: 0 0 36px rgba(60,160,255,0.5), 0 0 0 1px rgba(80,180,255,0.6); border-color: #4fb4ff; }
+    100% { box-shadow: 0 0 28px rgba(239,69,101,0.55), 0 0 0 1px rgba(239,69,101,0.7); border-color: var(--rarity-sp); }
+  }
+  /* Full-card prismatic spin — iridescent like a chrome SP */
+  .card-front.SP::after {
+    content: '';
+    position: absolute; inset: 0; border-radius: inherit;
+    background: conic-gradient(
+      from 0deg,
+      rgba(255,80,120,0.12) 0deg,
+      rgba(255,180,80,0.14) 60deg,
+      rgba(80,255,180,0.12) 120deg,
+      rgba(80,160,255,0.14) 180deg,
+      rgba(180,80,255,0.12) 240deg,
+      rgba(255,80,120,0.14) 300deg,
+      rgba(255,80,120,0.12) 360deg
+    );
+    animation: sp-spin 3s linear infinite;
+    pointer-events: none; z-index: 3;
+  }
+  /* Bright sweep on top of the conic */
+  .card-front.SP::before {
+    content: '';
+    position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(
+      125deg,
+      transparent 15%,
+      rgba(255,255,255,0.0) 32%,
+      rgba(255,255,255,0.22) 45%,
+      rgba(255,200,255,0.1) 52%,
+      transparent 68%
+    );
+    background-size: 250% 250%;
+    animation: sp-sheen 2s ease-in-out infinite;
+    pointer-events: none; z-index: 4;
+  }
+  @keyframes sp-spin {
+    from { transform: rotate(0deg) scale(1.5); }
+    to   { transform: rotate(360deg) scale(1.5); }
+  }
+  @keyframes sp-sheen {
+    0%   { background-position: 200% 50%; }
+    100% { background-position: -50% 50%; }
+  }
+  /* Colour-shifting art glow */
+  .card-front.SP .card-art::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,80,160,0.14) 0%, rgba(80,140,255,0.14) 50%, rgba(160,80,255,0.14) 100%);
+    background-size: 200% 200%;
+    animation: sp-art-shift 2.5s ease-in-out infinite alternate;
+    pointer-events: none; z-index: 2;
+  }
+  @keyframes sp-art-shift {
+    0%   { background-position: 0% 0%; opacity: 0.7; }
+    100% { background-position: 100% 100%; opacity: 1; }
+  }
+
+  /* ── GR — Generation Rare: deep space aurora, evolving purple-blue corona ── */
+  .card-front.GR {
+    background: linear-gradient(160deg, #1a0533, #0d1a3a, #1a0533);
+    box-shadow: 0 0 0 2px #9b4dca, 0 0 20px 4px rgba(155,77,202,0.55), 0 0 40px 10px rgba(80,40,180,0.3);
+    animation: gr-pulse 2.5s ease-in-out infinite;
+    position: relative; overflow: hidden;
+  }
+  .card-front.GR .card-art { background: linear-gradient(160deg, #2d0a4e, #0a1535); }
+  @keyframes gr-pulse {
+    0%,100% { box-shadow: 0 0 0 2px #9b4dca, 0 0 18px 4px rgba(155,77,202,0.5), 0 0 36px 8px rgba(80,40,180,0.25); }
+    33%     { box-shadow: 0 0 0 2px #c77dff, 0 0 28px 8px rgba(199,125,255,0.7), 0 0 52px 14px rgba(100,50,200,0.4); }
+    66%     { box-shadow: 0 0 0 2px #7b9fff, 0 0 22px 6px rgba(123,159,255,0.6), 0 0 44px 10px rgba(60,80,200,0.35); }
+  }
+  /* Aurora curtain — horizontal ripples like the northern lights */
+  .card-front.GR::after {
+    content: '';
+    position: absolute; inset: 0; border-radius: inherit;
+    background:
+      linear-gradient(0deg,
+        transparent 0%,
+        rgba(120,60,220,0.08) 20%,
+        rgba(180,100,255,0.18) 35%,
+        rgba(80,120,255,0.08) 50%,
+        rgba(160,80,240,0.14) 65%,
+        rgba(100,60,200,0.08) 80%,
+        transparent 100%
+      ),
+      linear-gradient(115deg,
+        transparent 20%,
+        rgba(200,130,255,0.0) 38%,
+        rgba(220,160,255,0.22) 50%,
+        rgba(150,100,255,0.1) 58%,
+        transparent 72%
+      );
+    background-size: 100% 200%, 250% 250%;
+    animation: gr-aurora 3s ease-in-out infinite;
+    pointer-events: none; z-index: 3;
+  }
+  /* Separate ::before for a slow floating light blob */
+  .card-front.GR::before {
+    content: '';
+    position: absolute; inset: -20% -20%; border-radius: 50%;
+    background: radial-gradient(ellipse at center, rgba(160,80,255,0.15) 0%, rgba(80,100,255,0.08) 45%, transparent 70%);
+    animation: gr-blob 4s ease-in-out infinite alternate;
+    pointer-events: none; z-index: 2;
+  }
+  @keyframes gr-aurora {
+    0%   { background-position: 0 0, 200% 50%; opacity: 0.8; }
+    50%  { background-position: 0 -30px, 0% 50%; opacity: 1; }
+    100% { background-position: 0 0, -50% 50%; opacity: 0.8; }
+  }
+  @keyframes gr-blob {
+    0%   { transform: translate(-15%, -15%) scale(0.9); opacity: 0.6; }
+    100% { transform: translate(15%, 15%) scale(1.1); opacity: 1; }
+  }
+  /* Art nebula glow */
+  .card-front.GR .card-art::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 40% 40%, rgba(180,80,255,0.2) 0%, transparent 55%),
+                radial-gradient(ellipse at 70% 70%, rgba(80,120,255,0.15) 0%, transparent 45%);
+    animation: gr-nebula 3.5s ease-in-out infinite alternate;
+    pointer-events: none; z-index: 2;
+  }
+  @keyframes gr-nebula {
+    0%   { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+
+  /* rarity-card-* gallery / pool wrappers */
+  .rarity-card-RRR, .rarity-card-SP, .rarity-card-GR {
+    position: relative;
+  }
+  .rarity-card-RRR { box-shadow: 0 0 18px rgba(240,180,41,0.35); border-radius: 8px; }
+  .rarity-card-SP  { box-shadow: 0 0 18px rgba(239,69,101,0.4);  border-radius: 8px; }
+  .rarity-card-GR  { box-shadow: 0 0 18px rgba(155,77,202,0.45); border-radius: 8px; }
 
   /* ── Missing tab ── */
   .missing-card-row {
@@ -759,38 +922,10 @@
   .missing-rarity { font-size: 8px; font-weight: 700; width: 28px; text-align: center; flex-shrink: 0; }
 
 
-  /* rarity-card-* wrappers need position:relative for ::after to work */
-  .rarity-card-RRR, .rarity-card-SP {
-    position: relative;
-  }
-  .rarity-card-RRR { box-shadow: 0 0 18px rgba(240,180,41,0.35); border-radius: 8px; }
-  .rarity-card-SP  { box-shadow: 0 0 18px rgba(239,69,101,0.4);  border-radius: 8px; }
-  
-  /* make ::after cover the whole card thumbnail */
-  .rarity-card-RRR::after, .rarity-card-SP::after::after {
-    border-radius: 8px;
-    z-index: 2;
-    pointer-events: none;
-  }
+  /* ── LR thumbnail shine in gallery/pool ── */
 
 
-  /* ── Legion Rare (LR) — EB11/EB12 ── */
-  :root { --rarity-lr: #00e5ff; }
-  .card-front.GR {
-    background: linear-gradient(160deg, #1a0533, #0d1a3a, #1a0533);
-    box-shadow: 0 0 0 2px #9b4dca, 0 0 16px 4px rgba(155,77,202,0.5), 0 0 32px 8px rgba(100,40,180,0.3);
-    animation: grPulse 2.5s ease-in-out infinite;
-  }
-  .card-front.GR .card-art { background: linear-gradient(160deg, #2d0a4e, #0a1535); }
-  .card-front.GR::after {
-    content: ''; position: absolute; inset: 0; border-radius: 8px;
-    background: linear-gradient(135deg, transparent 30%, rgba(180,80,255,0.15) 50%, transparent 70%);
-    animation: lrSheen 3s ease-in-out infinite;
-  }
-  @keyframes grPulse {
-    0%,100% { box-shadow: 0 0 0 2px #9b4dca, 0 0 16px 4px rgba(155,77,202,0.5); }
-    50%      { box-shadow: 0 0 0 2px #c77dff, 0 0 28px 8px rgba(155,77,202,0.8); }
-  }
+  /* ── LR — Legion Rare: cyan electric pulse ── */
   .card-front.LR {
     border-color: var(--rarity-lr);
     box-shadow: 0 0 28px rgba(0,229,255,0.45);

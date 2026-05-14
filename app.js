@@ -36,10 +36,9 @@ function buildSaveData() {
 
 function applySaveData(data) {
   collectionDirty = true; SET_COMPLETION_CACHE.clear();
-  const _isG = c => { const s = SETS.find(x=>x.id===c.id.split('_')[0]); return !!(s && s.format==='G'); };
-  const allCards = getAllSetCards().filter(c => galleryFormat === 'G' ? _isG(c) : !_isG(c));
+  // Build cardMap from ALL cards (both OG and G format) so saves always load correctly
   const cardMap = {};
-  for (const c of allCards) cardMap[c.id] = c;
+  for (const c of getAllSetCards()) cardMap[c.id] = c;
 
   collection = {};
   if (data.collection) {
@@ -1645,7 +1644,7 @@ function renderDeckPool() {
     const owned = collection[card.id]?.count || 0;
     const inDeck = deckCounts[card.id] || 0;
     const isTheFV = fvCard && fvCard.id === card.id;
-    const deckFull = getDeckTotal() >= DECK_MAX;
+    const deckFull = isGUnit(card) ? getGZoneTotal() >= 16 : getDeckTotal() >= DECK_MAX;
     const nameCopies = countByName(getDeckName(card));
     const nameMaxed = nameCopies >= CARD_MAX_COPIES;
     const fvUsesThisId = isTheFV ? 1 : 0;
@@ -2022,6 +2021,95 @@ function exportDeck() {
 }
 function closeExport() { document.getElementById('export-overlay').classList.remove('active'); }
 
+// ==================== DECK IMPORT ====================
+function openImportDeck() {
+  document.getElementById('import-textarea').value = '';
+  document.getElementById('import-preview').textContent = '';
+  document.getElementById('import-overlay').classList.add('active');
+}
+function closeImportDeck() { document.getElementById('import-overlay').classList.remove('active'); }
+
+function doImportDeck() {
+  const raw = document.getElementById('import-textarea').value.trim();
+  if (!raw) return;
+
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  let importedName = null;
+  let newDeck = {};
+  let newFV = null;
+  let isFVSection = false;
+  let skipped = [], added = [], noOwn = [];
+
+  // Parse format: "Nx Card Name (SET_NUM) [RRR] [tag]"
+  // Also handle "──...──" section headers and "===== name =====" title lines
+  const lineRe = /^(\d+)x\s+(.+?)\s+\(([A-Z0-9_]+)\)\s+\[([A-Z]+)\]/i;
+
+  for (const line of lines) {
+    // Deck name
+    if (/^={3,}/.test(line)) {
+      const m = line.match(/={3,}\s+(.+?)\s+={3,}/);
+      if (m) importedName = m[1];
+      continue;
+    }
+    // Section headers
+    if (/^──/.test(line) || /^─{2,}/.test(line)) {
+      isFVSection = line.toLowerCase().includes('vanguard');
+      continue;
+    }
+    // Card lines
+    const m = line.match(lineRe);
+    if (!m) continue;
+
+    const count = parseInt(m[1]);
+    const cardId = m[3];
+    const card = getAllCardById(cardId);
+
+    if (!card) { skipped.push(cardId); continue; }
+
+    const owned = collection[cardId]?.count || 0;
+    if (!owned) { noOwn.push(card.name); continue; }
+
+    if (isFVSection && card.grade === 0) {
+      newFV = card;
+      isFVSection = false;
+      added.push(card.name + ' (FV)');
+      continue;
+    }
+
+    const safeCount = Math.min(count, owned, CARD_MAX_COPIES);
+    if (safeCount > 0) {
+      newDeck[cardId] = { card, count: safeCount };
+      added.push(`${safeCount}x ${card.name}`);
+    }
+  }
+
+  if (!added.length && !newFV) {
+    document.getElementById('import-preview').innerHTML =
+      `<span style="color:var(--red)">⚠️ Nothing could be imported. Check your collection or paste format.</span>`;
+    return;
+  }
+
+  // Confirm and apply
+  const msg = [
+    added.length ? `✅ ${added.length} entries imported` : '',
+    noOwn.length ? `⚠️ ${noOwn.length} cards skipped (not owned)` : '',
+    skipped.length ? `❌ ${skipped.length} IDs not recognised` : '',
+  ].filter(Boolean).join(' · ');
+
+  if (!confirm(`${msg}\n\nThis will replace your current deck. Continue?`)) return;
+
+  deck = newDeck;
+  fvCard = newFV;
+  if (importedName) {
+    const dn = document.getElementById('deck-name-input');
+    if (dn) dn.value = importedName;
+  }
+  renderDeckPool();
+  renderDeckPanel();
+  closeImportDeck();
+  showToast({ icon: '📥', name: `Deck imported! ${msg}`, rarity: 'RR' });
+}
+
 async function exportDeckImage() {
   const deckName = document.getElementById('deck-name-input').value || 'My Deck';
   const deckClan = getDeckClan() || 'N/A';
@@ -2083,8 +2171,9 @@ async function exportDeckImage() {
   ctx.fillText(`${deckClan}  ·  ${total} / 50 cards`, GAP*2+12, 82);
 
   const trigCounts = {Critical:0,Draw:0,Stand:0,Heal:0};
-  if (fvCard) { const t=getTriggerType(fvCard); if(t&&trigCounts[t]!==undefined) trigCounts[t]++; }
-  for (const {card,count} of Object.values(deck)) { const t=getTriggerType(card); if(t&&trigCounts[t]!==undefined) trigCounts[t]+=count; }
+  let sentinelCount = 0, gUnitCount = getGZoneTotal();
+  if (fvCard) { const t=getTriggerType(fvCard); if(t&&trigCounts[t]!==undefined) trigCounts[t]++; if(isSentinel(fvCard)) sentinelCount++; }
+  for (const {card,count} of Object.values(deck)) { const t=getTriggerType(card); if(t&&trigCounts[t]!==undefined) trigCounts[t]+=count; if(isSentinel(card)) sentinelCount+=count; }
   const trigColors = {Critical:'#f0b429',Draw:'#e67820',Stand:'#3b82f6',Heal:'#3dbf7f'};
   let tx = GAP*2;
   for (const [t,cnt] of Object.entries(trigCounts)) {
@@ -2092,6 +2181,17 @@ async function exportDeckImage() {
     ctx.fillStyle = trigColors[t]+'33'; roundRect(ctx,tx,102,120,26,6); ctx.fill();
     ctx.fillStyle = trigColors[t]; ctx.font='bold 12px Arial';
     ctx.fillText(`${t}  ${cnt}x`, tx+10, 119); tx += 128;
+  }
+  // Sentinel + G Unit counts
+  if (sentinelCount > 0) {
+    ctx.fillStyle = 'rgba(240,180,41,0.18)'; roundRect(ctx,tx,102,130,26,6); ctx.fill();
+    ctx.fillStyle = '#f0b429'; ctx.font='bold 12px Arial';
+    ctx.fillText(`🛡 Sentinel  ${sentinelCount}x`, tx+10, 119); tx += 138;
+  }
+  if (gUnitCount > 0) {
+    ctx.fillStyle = 'rgba(167,139,250,0.18)'; roundRect(ctx,tx,102,120,26,6); ctx.fill();
+    ctx.fillStyle = '#a78bfa'; ctx.font='bold 12px Arial';
+    ctx.fillText(`✨ G Zone  ${gUnitCount}/16`, tx+10, 119); tx += 128;
   }
 
   let y = TOP_H;
@@ -2133,8 +2233,12 @@ async function exportDeckImage() {
   ctx.fillText('Generated by Vanguard Pack Simulator', WIDTH - GAP*2, totalHeight-10);
   ctx.textAlign='left';
 
+  const defaultImgName = `${deckName.replace(/[^a-z0-9]/gi,'_')}_deck`;
+  const promptedImgName = prompt('Save deck image as:', defaultImgName);
+  if (promptedImgName === null) { showToast({icon:'❌',name:'Export cancelled',rarity:'C'}); return; }
+  const finalImgName = (promptedImgName.trim() || defaultImgName).replace(/\.png$/i,'') + '.png';
   const link = document.createElement('a');
-  link.download = `${deckName.replace(/[^a-z0-9]/gi,'_')}_deck.png`;
+  link.download = finalImgName;
   link.href = canvas.toDataURL('image/png');
   link.click();
   showToast({icon:'🖼',name:'Deck image exported!',rarity:'C'});
@@ -2172,9 +2276,9 @@ function copyExport() {
 function showToast(card) {
   const isSystem = ['✅','❌','⚠️','🗑️','📋'].includes(card.icon);
   const msgs = { RRR: '🌟 RRR Pull!', SP: '✨ SP Parallel!' };
-  if (card._wishlistHit) { toast.className = 'toast rrr'; toast.textContent = `⭐ Wishlist Hit! ${card.name}`; document.getElementById('toast-container').appendChild(toast); setTimeout(() => toast.remove(), 4000); return; }
   const classes = { RRR: 'rrr', SP: 'sp' };
   const toast = document.createElement('div');
+  if (card._wishlistHit) { toast.className = 'toast rrr'; toast.textContent = `⭐ Wishlist Hit! ${card.name}`; document.getElementById('toast-container').appendChild(toast); setTimeout(() => toast.remove(), 4000); return; }
   toast.className = `toast ${classes[card.rarity]||''}`;
   if (isSystem) {
     toast.textContent = `${card.icon} ${card.name}`;
@@ -2239,24 +2343,43 @@ function renderStats() {
   const packs = Math.round(totalPacks);
   const spent = packs * price;
   const byR = sessionStats.byRarity;
-  const rarityOrder = ["SP","RRR","RR","R","C"];
-  const rarityColors = {SP:'var(--rarity-sp)',RRR:'var(--rarity-rrr)',RR:'var(--rarity-rr)',R:'var(--rarity-r)',C:'var(--rarity-c)'};
+  const rarityOrder = ["SP","RRR","RR","R","C","LR","GR","SCR","SGR"];
+  const rarityColors = {SP:'var(--rarity-sp)',RRR:'var(--rarity-rrr)',RR:'var(--rarity-rr)',R:'var(--rarity-r)',C:'var(--rarity-c)',LR:'var(--rarity-lr)',GR:'#9b4dca',SCR:'var(--rarity-scr)',SGR:'var(--rarity-sgr)'};
 
-  const boosterSets = SETS.filter(s=>s.id.startsWith('BT')||s.id.startsWith('EB'));
+  // Per-set pack counts from history
+  const setPackCounts = {};
+  const setRRRCounts = {};
+  for (const entry of history) {
+    const setId = entry.set;
+    if (!setId) continue;
+    setPackCounts[setId] = (setPackCounts[setId]||0) + 1;
+    const rrrInPack = entry.cards.filter(c=>['RRR','SP','LR','GR','SCR','SGR'].includes(c.rarity)).length;
+    setRRRCounts[setId] = (setRRRCounts[setId]||0) + rrrInPack;
+  }
+
+  // Completion for all booster sets
+  const boosterSets = SETS.filter(s => !s.id.startsWith('TD'));
   const setRows = boosterSets.map(s => {
-    const cards = s.cards.filter(c=>c.rarity!=='TD');
+    const cards = s.cards.filter(c=>c.rarity!=='TD'&&c.rarity!=='SP');
     const uniqueNames = [...new Set(cards.map(c=>c.name))];
-    const owned = uniqueNames.filter(name => cards.some(c=>c.name===name && collection[c.id]?.count>0));
-    const pct = uniqueNames.length ? Math.round((owned.length/uniqueNames.length)*100) : 0;
+    const ownedNames = uniqueNames.filter(name => cards.some(c=>c.name===name && collection[c.id]?.count>0));
+    const pct = uniqueNames.length ? Math.round((ownedNames.length/uniqueNames.length)*100) : 0;
     const barColor = pct===100?'var(--green)':pct>=50?'var(--gold)':'var(--accent)';
-    return `<div style="margin-bottom:6px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
-        <span>${s.label} – ${s.name}</span>
-        <span style="color:${barColor}">${owned.length}/${uniqueNames.length} (${pct}%)</span>
+    const packsThisSet = setPackCounts[s.label] || 0;
+    const rrrThisSet = setRRRCounts[s.label] || 0;
+    const rrrRate = packsThisSet > 0 ? (rrrThisSet / packsThisSet * 100).toFixed(1) : null;
+    return `<div style="margin-bottom:8px;background:var(--surface2);border-radius:6px;padding:7px 10px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <span style="font-size:11px;font-weight:600;color:var(--text)">${s.label} <span style="font-weight:400;color:var(--text-muted)">– ${s.name}</span></span>
+        <span style="font-size:10px;color:${barColor};font-weight:700">${ownedNames.length}/${uniqueNames.length} (${pct}%)</span>
       </div>
-      <div style="height:4px;background:var(--surface2);border-radius:2px">
-        <div style="height:4px;width:${pct}%;background:${barColor};border-radius:2px;transition:width 0.3s"></div>
+      <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:2px;margin-bottom:5px">
+        <div style="height:4px;width:${pct}%;background:${barColor};border-radius:2px;transition:width 0.4s"></div>
       </div>
+      ${packsThisSet > 0 ? `<div style="display:flex;gap:10px;font-size:10px;color:var(--text-muted)">
+        <span>📦 <b style="color:var(--text)">${packsThisSet}</b> packs opened</span>
+        <span>🌟 <b style="color:var(--rarity-rrr)">${rrrThisSet}</b> rares (${rrrRate}%/pack)</span>
+      </div>` : ''}
     </div>`;
   }).join('');
 
@@ -2295,7 +2418,7 @@ function renderStats() {
         return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
           <span class="rarity-badge ${r}" style="font-size:9px;width:28px;text-align:center">${r}</span>
           <div style="flex:1;height:6px;background:var(--surface2);border-radius:3px">
-            <div style="height:6px;width:${pct2}%;background:${rarityColors[r]};border-radius:3px"></div>
+            <div style="height:6px;width:${pct2}%;background:${rarityColors[r]||'var(--accent)'};border-radius:3px"></div>
           </div>
           <span style="font-size:10px;color:var(--text-muted);width:60px;text-align:right">${byR[r]} (${pct2}%)</span>
         </div>`;
@@ -2303,8 +2426,8 @@ function renderStats() {
     </div>
 
     <div>
-      <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Set Completion</div>
-      ${setRows}
+      <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Per-Set Pull Stats & Completion</div>
+      ${setRows || '<div style="font-size:12px;color:var(--text-muted)">Open some packs to see per-set stats!</div>'}
     </div>
   `;
 }
@@ -2315,6 +2438,7 @@ document.addEventListener('keydown', e => {
   const anyOverlay = document.querySelector('.zoom-overlay.active, .gallery-overlay.active, .deck-overlay.active, .export-overlay.active');
   if (key === 'Escape') {
     if (document.getElementById('stats-overlay')?.classList.contains('active')) { closeStats(); return; }
+    if (document.getElementById('import-overlay')?.classList.contains('active')) { closeImportDeck(); return; }
     if (document.getElementById('zoom-overlay')?.classList.contains('active')) { document.getElementById('zoom-overlay').classList.remove('active'); return; }
     if (document.getElementById('gallery-overlay')?.classList.contains('active')) { closeGallery(); return; }
     if (document.getElementById('deck-overlay')?.classList.contains('active')) { closeDeckBuilder(); return; }
