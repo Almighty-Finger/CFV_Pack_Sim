@@ -1150,7 +1150,7 @@ function updateCollection() {
     return;
   }
 
-  allCards = allCards.filter(({card}) => !card.id.startsWith('TD'));
+  allCards = allCards.filter(({card}) => !card.id.startsWith('TD') && !card.id.startsWith('GTD'));
   if (search) allCards = allCards.filter(({card}) => card.name.toLowerCase().includes(search) || card.clan.toLowerCase().includes(search));
 
   const sortMode = document.getElementById('coll-sort')?.value || 'rarity';
@@ -1412,7 +1412,7 @@ function renderGallery() {
       else if (galleryTypeFilter === 'Draw' || galleryTypeFilter === '🃏 Draw') { if (getTriggerType(card) !== 'Draw') return false; }
       else if (galleryTypeFilter === 'Stand' || galleryTypeFilter === '🔄 Stand') { if (getTriggerType(card) !== 'Stand') return false; }
       else if (galleryTypeFilter === '💚 Heal') { if (!isHeal(card)) return false; }
-      else if (galleryTypeFilter === 'Normal' && (card.grade === 0 || isSentinel(card))) return false;
+      else if (galleryTypeFilter === 'Normal' && (isTrigger(card) || isSentinel(card) || isGUnit(card))) return false;
     }
     if (galleryGradeFilter === 'GUNITS') { if (!isGUnit(card)) return false; }
     else if (galleryGradeFilter !== 'ALL' && card.grade !== parseInt(galleryGradeFilter)) return false;
@@ -1463,15 +1463,41 @@ const DECK_MAX = 50;
 const CARD_MAX_COPIES = 4;
 
 const SENTINEL_IDS = new Set([
-  'BT01_011','BT01_015','BT01_019',
-  'BT02_010','BT02_014','BT02_019',
-  'BT03_011','BT03_016','BT03_017',
-  'BT04_011','BT04_014','BT04_017',
-  'BT05_011','BT05_013',
-  'EB02_007',
-  'GTD01_013','GTD02_013','GTD03_012',
-  'EB04_007','EB05_007','EB06_007','EB07_007','EB08_008','EB09_008',
-  'EB10_007B','EB10_007W','EB10_008B','EB10_008W','EB11_008','EB12_007','EB12_008',
+  // BT01-05
+  'BT01_011EN','BT01_015EN','BT01_019EN',
+  'BT02_010EN','BT02_014EN','BT02_019EN',
+  'BT03_011EN','BT03_016EN','BT03_017EN',
+  'BT04_011EN','BT04_014EN','BT04_017EN',
+  'BT05_011EN','BT05_013EN',
+  // BT06-17
+  'BT06_012EN','BT06_017EN','BT06_020EN',
+  'BT07_012EN',
+  'BT08_019EN',
+  'BT09_014EN','BT09_016EN',
+  'BT10_010EN','BT10_011EN','BT10_015EN','BT10_017EN','BT10_020EN',
+  'BT11_009EN','BT11_011EN','BT11_015EN','BT11_020EN',
+  'BT12_011EN','BT12_014EN','BT12_017EN','BT12_020EN',
+  'BT13_011EN','BT13_013EN','BT13_014EN',
+  'BT14_011EN','BT14_012EN','BT14_013EN','BT14_016EN','BT14_020EN',
+  'BT15_010EN','BT15_015EN','BT15_017EN','BT15_020EN',
+  'BT16_014EN','BT16_015EN','BT16_017EN','BT16_021EN','BT16_022EN','BT16_025EN','BT16_026EN',
+  'BT17_013EN','BT17_014EN','BT17_016EN','BT17_018EN','BT17_020EN','BT17_022EN','BT17_024EN','BT17_026EN',
+  // EB sets (incl. SP versions)
+  'EB02_007EN',
+  'EB04_007EN','EB05_007EN','EB06_007EN','EB07_007EN',
+  'EB08_008EN','EB08_S04EN',
+  'EB09_008EN',
+  'EB10_007EN-B','EB10_007EN-W','EB10_008EN-B','EB10_008EN-W',
+  'EB10_S07EN-B','EB10_S07EN-W','EB10_S08EN-B','EB10_S08EN-W',
+  // old-style IDs (legacy saves)
+  'EB10_007B','EB10_007W','EB10_008B','EB10_008W',
+  'EB11_008EN','EB11_S04EN',
+  'EB12_007EN','EB12_008EN',
+  // G Trial Decks
+  'GTD01_013EN','GTD02_013EN','GTD03_012EN',
+  // G Boosters / G Extra
+  'GBT01_011EN','GBT01_013EN','GBT01_016EN','GBT01_018EN','GBT01_021EN',
+  'GEB01_007EN',
 ]);
 
 function _getCardTrigger(card) {
@@ -1618,7 +1644,7 @@ function renderDeckPool() {
       if ((deckPoolTypeFilter === 'Trigger') && !isTrigger(card)) return false;
       else if (deckPoolTypeFilter === 'Sentinel' && !isSentinel(card)) return false;
       else if (deckPoolTypeFilter === 'Heal' || deckPoolTypeFilter === '💚 Heal') { if (!isHeal(card)) return false; }
-      else if (deckPoolTypeFilter === 'Normal' && (card.grade === 0 || isSentinel(card))) return false;
+      else if (deckPoolTypeFilter === 'Normal' && (isTrigger(card) || isSentinel(card) || isGUnit(card))) return false;
       else if (deckPoolTypeFilter === '🗡 Critical') { if (getTriggerType(card) !== 'Critical') return false; }
       else if (deckPoolTypeFilter === '🃏 Draw') { if (getTriggerType(card) !== 'Draw') return false; }
       else if (deckPoolTypeFilter === '🔄 Stand') { if (getTriggerType(card) !== 'Stand') return false; }
@@ -2810,4 +2836,77 @@ function drawForTurn() {
 }
 
 
+// ==================== REAL FOIL CARD EFFECT ====================
+// Tracks mouse over RRR/SP/GR/LR cards and shifts the holo pattern
+// like physical foil cards do under light
+(function initFoilEffect() {
+  const FOIL_RARITIES = new Set(['RRR','SP','GR','LR','SCR','SGR']);
+
+  function getFoilEl(target) {
+    // Walk up to find card-front or gallery-card with a foil rarity
+    let el = target;
+    for (let i = 0; i < 6; i++) {
+      if (!el) return null;
+      for (const r of FOIL_RARITIES) {
+        if (el.classList?.contains('card-front') && el.classList?.contains(r)) return el;
+        if (el.classList?.contains(`rarity-card-${r}`)) return el;
+      }
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  function applyFoil(card, mx, my) {
+    const rect = card.getBoundingClientRect();
+    const x = (mx - rect.left) / rect.width;   // 0..1
+    const y = (my - rect.top) / rect.height;    // 0..1
+    const cx = (x - 0.5) * 2;   // -1..1
+    const cy = (y - 0.5) * 2;
+
+    // Tilt (subtle perspective)
+    const tiltX = cy * 8;
+    const tiltY = cx * -8;
+
+    // Holo position (maps mouse to gradient offset)
+    const hx = Math.round(x * 100);
+    const hy = Math.round(y * 100);
+
+    // Shine intensity based on distance from centre
+    const dist = Math.sqrt(cx*cx + cy*cy);
+    const shine = Math.max(0, 1 - dist * 0.6);
+
+    card.style.setProperty('--foil-x', `${hx}%`);
+    card.style.setProperty('--foil-y', `${hy}%`);
+    card.style.setProperty('--foil-shine', shine);
+    card.style.setProperty('--foil-tilt-x', `${tiltX}deg`);
+    card.style.setProperty('--foil-tilt-y', `${tiltY}deg`);
+    card.classList.add('foil-active');
+  }
+
+  function resetFoil(card) {
+    card.style.removeProperty('--foil-x');
+    card.style.removeProperty('--foil-y');
+    card.style.removeProperty('--foil-shine');
+    card.style.removeProperty('--foil-tilt-x');
+    card.style.removeProperty('--foil-tilt-y');
+    card.classList.remove('foil-active');
+  }
+
+  let _lastFoil = null;
+  document.addEventListener('mousemove', e => {
+    const card = getFoilEl(e.target);
+    if (card) {
+      if (_lastFoil && _lastFoil !== card) resetFoil(_lastFoil);
+      applyFoil(card, e.clientX, e.clientY);
+      _lastFoil = card;
+    } else if (_lastFoil) {
+      resetFoil(_lastFoil);
+      _lastFoil = null;
+    }
+  }, { passive: true });
+
+  document.addEventListener('mouseleave', () => {
+    if (_lastFoil) { resetFoil(_lastFoil); _lastFoil = null; }
+  }, { passive: true });
+})();
 init();
