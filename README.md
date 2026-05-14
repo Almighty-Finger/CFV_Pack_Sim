@@ -25,9 +25,9 @@ adding the rest of G
 
 Revamp the deckbuilder
 
--adding hand sample-
+~~adding hand sample~~
 
--adding a "get whole set" button-
+~~adding a "get whole set" button~~
 ______________________________________________________________________________________________________________________________
 Bug Fixing:
 
