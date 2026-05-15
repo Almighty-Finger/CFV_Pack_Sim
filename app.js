@@ -1388,6 +1388,21 @@ function setGalleryType(t) { galleryTypeFilter=t; buildGalleryFilters(); renderG
 function setGalleryGrade(g) { galleryGradeFilter=g; buildGalleryFilters(); renderGallery(); }
 function setGallerySet(s) { gallerySetFilter=s; buildGalleryFilters(); renderGallery(); }
 
+// ── Debounced search triggers ──
+let _galSearchTimer = null, _dpSearchTimer = null, _collSearchTimer = null;
+function _renderGalleryDebounced() {
+  clearTimeout(_galSearchTimer);
+  _galSearchTimer = setTimeout(renderGallery, 120);
+}
+function _renderDeckPoolDebounced() {
+  clearTimeout(_dpSearchTimer);
+  _dpSearchTimer = setTimeout(renderDeckPool, 120);
+}
+function _renderCollDebounced() {
+  clearTimeout(_collSearchTimer);
+  _collSearchTimer = setTimeout(updateCollection, 120);
+}
+
 function renderGallery() {
   const search = document.getElementById('gallery-search').value.toLowerCase();
   const ownedOnly = document.getElementById('gallery-owned-only').checked;
@@ -1595,6 +1610,49 @@ function openDeckBuilder() {
 }
 function closeDeckBuilder() { document.getElementById('deck-overlay').classList.remove('active'); }
 
+// ── Left panel card hover preview ──
+let _previewTimer = null;
+function previewCard(id) {
+  clearTimeout(_previewTimer);
+  const card = getAllCardById(id);
+  if (!card) return;
+  const panel = document.getElementById('deck-preview-panel');
+  if (!panel) return;
+  const imgEl = document.getElementById('dp-preview-img');
+  const fallEl = document.getElementById('dp-preview-fallback');
+  const nameEl = document.getElementById('dp-preview-name');
+  const subEl  = document.getElementById('dp-preview-sub');
+  const extraEl = document.getElementById('dp-preview-extra');
+  if (imgEl) {
+    imgEl.src = cardImgPath(card.id);
+    imgEl.style.display = 'block';
+    imgEl.onerror = function() {
+      imgEl.style.display = 'none';
+      if (fallEl) { fallEl.style.display = 'flex'; fallEl.textContent = card.icon; }
+    };
+    if (fallEl) fallEl.style.display = 'none';
+  }
+  if (nameEl) nameEl.textContent = card.name;
+  if (subEl)  subEl.textContent = card.clan + ' · G' + card.grade + ' · ' + card.rarity + ' · ' + getCardNum(card.id);
+  const badges = [];
+  if (isSentinel(card)) badges.push('<span style="background:rgba(240,180,41,0.85);color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px">🛡 Sentinel</span>');
+  const tt = getTriggerType(card);
+  if (tt) { const bg = {Critical:'rgba(240,180,41,.8)',Draw:'rgba(230,120,40,.8)',Stand:'rgba(59,130,246,.8)',Heal:'rgba(61,191,127,.8)'}[tt]||'#555'; badges.push(`<span style="background:${bg};color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px">${tt} Trigger</span>`); }
+  if (isGUnit(card)) badges.push('<span style="background:rgba(167,139,250,.2);color:#a78bfa;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px">✨ G Unit</span>');
+  const owned = collection[card.id]?.count || 0;
+  const inDeck = Object.values(deck).find(x=>x.card.id===card.id)?.count || 0;
+  badges.push(`<span style="background:rgba(255,255,255,.08);color:var(--text-muted);font-size:9px;padding:1px 5px;border-radius:3px">Owned: ${owned}</span>`);
+  if (inDeck) badges.push(`<span style="background:rgba(79,142,247,.2);color:var(--accent);font-size:9px;padding:1px 5px;border-radius:3px">In deck: ${inDeck}</span>`);
+  if (extraEl) extraEl.innerHTML = badges.join(' ');
+  panel.classList.add('has-card');
+}
+function clearPreview() {
+  _previewTimer = setTimeout(() => {
+    const panel = document.getElementById('deck-preview-panel');
+    if (panel) panel.classList.remove('has-card');
+  }, 80);
+}
+
 let deckPoolClanFilter = 'ALL';
 let _dpRenderEpoch = 0;
 let deckPoolTypeFilter = 'ALL';
@@ -1695,7 +1753,8 @@ function renderDeckPool() {
       ? `${card.name} — Click: add trigger | Right-click: set as SVG${dimReason?' ('+dimReason+')':''}`
       : `${card.name}${dimReason?' — '+dimReason:''}`;
     return `<div class="pool-card rarity-card-${card.rarity} ${addBlocked?'maxed':''} ${isTheFV?'svg-selected':''}"
-      onclick="addToDeck(getAllCardById('${card.id}'))" ${svgHandler} title="${titleTip}">
+      onclick="addToDeck(getAllCardById('${card.id}'))" ${svgHandler} title="${titleTip}"
+      onmouseenter="previewCard('${card.id}')" onmouseleave="clearPreview()">
       <img data-id="${card.id}" alt="${card.name}" src="${cardImgPath(card.id)}"
            loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display=\'flex\');}})(this)">
       <div class="pc-fallback" style="display:none"><span>${card.icon}</span><span style="font-size:8px;text-align:center;padding:0 4px;color:var(--text-muted)">${card.name}</span></div>
@@ -2051,6 +2110,59 @@ function renderDeckPanel() {
   // Legacy hidden list for export compat
   const legacyList = document.getElementById('deck-list');
   if (legacyList) legacyList.innerHTML = '';
+
+  // ── Col 3: Compact scrollable deck list ──
+  const dclBody = document.getElementById('deck-list-col-body');
+  const dclCount = document.getElementById('dcl-count');
+  if (dclCount) dclCount.textContent = total + '/50';
+  if (dclBody) {
+    let dclHtml = '';
+    // FV first
+    if (fvCard) {
+      dclHtml += '<div class="dcl-section-header" style="color:var(--accent)">Ride Deck</div>';
+      dclHtml += `<div class="dcl-row" onclick="openZoom(getAllCardById('${fvCard.id}'))">
+        <span style="font-size:10px">${fvCard.icon}</span>
+        <span class="dcl-name">${fvCard.name}</span>
+        <span class="dcl-badge">FV</span>
+        <button class="dcl-remove" onclick="event.stopPropagation();clearFV()" title="Remove FV">✕</button>
+      </div>`;
+    }
+    // G Zone
+    const gZoneCards = Object.values(deck).filter(x => isGUnit(x.card));
+    if (gZoneCards.length) {
+      dclHtml += `<div class="dcl-section-header" style="color:#a78bfa">G Zone (${gUnits}/16)</div>`;
+      gZoneCards.sort((a,b)=>a.card.name.localeCompare(b.card.name)).forEach(({card,count}) => {
+        dclHtml += `<div class="dcl-row" onclick="openZoom(getAllCardById('${card.id}'))">
+          <span style="font-size:10px">${card.icon}</span>
+          <span class="dcl-name">${card.name}</span>
+          <span class="dcl-cnt">${count}×</span>
+          <button class="dcl-remove" onclick="event.stopPropagation();removeFromDeck('${card.id}')" title="Remove one">−</button>
+        </div>`;
+      });
+    }
+    // Main deck by grade descending
+    const gradeColors = {0:'var(--rarity-c)',1:'var(--rarity-r)',2:'var(--rarity-rr)',3:'var(--rarity-rrr)'};
+    for (let g = 3; g >= 0; g--) {
+      const cards = Object.values(deck).filter(x => x.card.grade === g && !isGUnit(x.card));
+      if (!cards.length) continue;
+      const gc = gradeColors[g] || 'var(--text-muted)';
+      const gTotal = cards.reduce((s,x)=>s+x.count,0);
+      dclHtml += `<div class="dcl-section-header"><span style="color:${gc}">G${g}</span> <span style="font-weight:400">(${gTotal})</span></div>`;
+      cards.sort((a,b)=>a.card.name.localeCompare(b.card.name)).forEach(({card,count}) => {
+        const tag = isSentinel(card) ? '<span class="dcl-badge">🛡</span>' :
+                    isHeal(card)     ? '<span class="dcl-badge" style="background:rgba(61,191,127,.2);color:var(--green)">💚</span>' :
+                    isTrigger(card)  ? '<span class="dcl-badge" style="background:rgba(240,180,41,.15);color:var(--gold)">⚡</span>' : '';
+        dclHtml += `<div class="dcl-row" onclick="openZoom(getAllCardById('${card.id}'))">
+          <span style="font-size:10px">${card.icon}</span>
+          <span class="dcl-name">${card.name}</span>
+          ${tag}
+          <span class="dcl-cnt">${count}×</span>
+          <button class="dcl-remove" onclick="event.stopPropagation();removeFromDeck('${card.id}')" title="Remove one">−</button>
+        </div>`;
+      });
+    }
+    dclBody.innerHTML = dclHtml || '<div style="color:var(--text-muted);font-size:10px;padding:12px 8px">No cards yet</div>';
+  }
 }
 
 function miniCard(card, count) {

@@ -581,41 +581,129 @@
     font-family: 'Rajdhani', sans-serif; font-weight: 600; outline: none; width: 200px;
   }
   .deck-name-input:focus { border-color: var(--accent); }
-  .deck-body { flex: 1; overflow: hidden; display: grid; grid-template-columns: 1fr 300px; }
-  .deck-pool { overflow-y: auto; padding: 16px 20px; border-right: 1px solid var(--border); }
-  .deck-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, var(--pool-w)); gap: 10px; }
-  .pool-card {
-    position: relative; cursor: pointer; transition: transform 0.15s;
-    border-radius: 7px; overflow: hidden;
+
+  /* ══ 3-COLUMN DECK BUILDER LAYOUT ══ */
+  --pool-w: clamp(56px, 5.5vw, 76px);
+  --pool-h: calc(var(--pool-w) * 146 / 100);
+
+  .deck-body {
+    flex: 1; overflow: hidden;
+    display: grid;
+    grid-template-columns: 160px 1fr 185px;
   }
-  .pool-card:hover { transform: translateY(-2px); }
+
+  /* Col 1 — Card hover preview */
+  .deck-preview-col {
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden; background: rgba(0,0,0,0.18);
+  }
+  .dp-empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 8px; height: 100%; padding: 12px; text-align: center;
+  }
+  .dp-preview-content { display: none; width: 100%; }
+  .deck-preview-col.has-card .dp-empty-state { display: none; }
+  .deck-preview-col.has-card .dp-preview-content { display: block; }
+  .dp-preview-img-wrap { width: 100%; aspect-ratio: 137/200; overflow: hidden; background: var(--surface2); }
+  .dp-preview-img-wrap img { width: 100%; height: 100%; object-fit: fill; display: block; }
+
+  /* Col 2 — Pool + visual deck stacked */
+  .deck-center-col { display: flex; flex-direction: column; overflow: hidden; }
+  .deck-pool { flex: 0 0 auto; max-height: 55%; overflow-y: auto; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .deck-pool-grid { display: grid; grid-template-columns: repeat(auto-fill, var(--pool-w)); gap: 6px; }
+
+  /* Col 3 — Compact scrollable deck list */
+  .deck-list-col { display: flex; flex-direction: column; overflow: hidden; border-left: 1px solid var(--border); background: rgba(0,0,0,0.12); }
+  .deck-list-col-header { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.25); flex-shrink: 0; }
+  .deck-list-col-body { flex: 1; overflow-y: auto; padding: 2px 0; }
+  .deck-list-col-body::-webkit-scrollbar { width: 3px; }
+  .deck-list-col-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .dcl-section-header { font-size: 9px; font-weight: 700; letter-spacing: .06em; color: var(--text-muted); padding: 5px 8px 2px; text-transform: uppercase; background: rgba(255,255,255,.03); margin-top: 2px; }
+  .dcl-row { display: flex; align-items: center; gap: 4px; padding: 2px 4px 2px 8px; cursor: pointer; transition: background .1s; }
+  .dcl-row:hover { background: rgba(255,255,255,0.05); }
+  .dcl-name { font-size: 9px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); line-height: 1.3; }
+  .dcl-cnt { font-size: 10px; font-weight: 700; font-family: 'Rajdhani', sans-serif; color: var(--accent); flex-shrink: 0; }
+  .dcl-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 10px; padding: 0 2px; flex-shrink: 0; opacity: 0; transition: opacity .1s; line-height: 1; }
+  .dcl-row:hover .dcl-remove { opacity: 1; }
+  .dcl-badge { font-size: 7px; background: rgba(240,180,41,.2); color: var(--gold); padding: 0px 3px; border-radius: 2px; flex-shrink: 0; }
+
+  /* Pool card */
+  .pool-card { position: relative; cursor: pointer; transition: transform 0.12s; border-radius: 6px; overflow: hidden; }
+  .pool-card:hover { transform: translateY(-2px) scale(1.05); z-index: 4; }
   .pool-card img { width: var(--pool-w); height: var(--pool-h); object-fit: fill; display: block; }
-  .pool-card .pc-fallback {
-    width: var(--pool-w); height: var(--pool-h); background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 7px; display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 4px; font-size: 24px;
-  }
-  .pool-card .pc-count-badge {
-    position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.8);
-    color: var(--gold); font-size: 10px; font-weight: 700; padding: 1px 5px; border-radius: 3px;
-  }
-  .pool-card .pc-in-deck {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    background: rgba(79,142,247,0.85); color: white;
-    font-size: 10px; font-weight: 700; text-align: center; padding: 2px;
-  }
+  .pool-card .pc-fallback { width: var(--pool-w); height: var(--pool-h); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 20px; }
+  .pool-card .pc-count-badge { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.85); color: var(--gold); font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 3px; }
+  .pool-card .pc-in-deck { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(79,142,247,0.85); color: white; font-size: 9px; font-weight: 700; text-align: center; padding: 2px; }
   .pool-card.maxed { opacity: 0.4; pointer-events: none; }
 
+  /* ══ DD2 VISUAL DECK PANEL ══ */
   .deck-panel { overflow: hidden; display: flex; flex-direction: column; gap: 0; padding: 0; }
-  /* DD2 body takes remaining height */
-  .dd2-body { flex: 1; min-height: 0; }
-  .deck-stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
-  .deck-stat-box { background: var(--surface2); border-radius: 8px; padding: 10px; text-align: center; }
-  .deck-stat-box .dsn { font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; }
-  .deck-stat-box .dsl { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .dd2-body { flex: 1; min-height: 0; display: flex; }
   .deck-count-bar { height: 4px; border-radius: 2px; background: var(--surface2); overflow: hidden; }
   .deck-count-fill { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; }
-  .deck-validation { background: var(--surface2); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .deck-validation { display: flex; flex-direction: column; gap: 4px; }
+
+  /* DD2 header bar */
+  .dd2-panel { display: flex; flex-direction: column; background: var(--surface); overflow: hidden; }
+  .dd2-header { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); gap: 6px; flex-shrink: 0; }
+  .dd2-header-left, .dd2-header-right { display: flex; align-items: center; gap: 6px; }
+  .dd2-format-badge { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .1em; padding: 2px 6px; border-radius: 3px; background: linear-gradient(135deg,#7c3aed,#4f46e5); color: #fff; flex-shrink: 0; }
+  .dd2-count-badge { font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; }
+
+  /* DD2 deck visual scroll area */
+  .dd2-deck-visual { flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+  .dd2-deck-visual::-webkit-scrollbar { width: 3px; }
+  .dd2-deck-visual::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Section blocks */
+  .dd2-section { background: rgba(0,0,0,0.2); border-radius: 6px; overflow: hidden; }
+  .dd2-section-header { display: flex; align-items: center; gap: 5px; padding: 4px 7px; background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .dd2-section-icon { font-size: 11px; }
+  .dd2-section-title { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: var(--text-muted); flex: 1; }
+  .dd2-section-count { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; color: var(--accent); }
+
+  /* Ride Deck row */
+  .dd2-ride-row { display: flex; gap: 6px; padding: 5px 6px; flex-wrap: wrap; min-height: 66px; align-items: center; }
+  .dd2-empty-slot { width: 44px; height: 61px; border-radius: 4px; border: 1px dashed rgba(255,255,255,0.15); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: border-color .15s; }
+  .dd2-empty-slot:hover { border-color: rgba(255,255,255,0.35); }
+
+  /* Card grid */
+  .dd2-card-grid { display: flex; flex-wrap: wrap; gap: 3px; padding: 5px 6px; }
+  .dd2-grade-block { padding: 3px 6px 5px; }
+  .dd2-grade-label { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 3px; }
+
+  /* Mini cards in DD2 visual */
+  .dd2-mini-card { position: relative; width: 44px; height: 61px; border-radius: 4px; cursor: pointer; transition: transform .12s; flex-shrink: 0; overflow: hidden; }
+  .dd2-mini-card:hover { transform: translateY(-3px) scale(1.07); z-index: 5; }
+  .dd2-mini-card img { width: 100%; height: 100%; object-fit: fill; border-radius: 4px; display: block; border: 1px solid rgba(255,255,255,0.1); }
+  .dd2-count-overlay { position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.82); color: #fff; font-size: 8px; font-weight: 700; padding: 1px 3px; border-radius: 2px; font-family: 'Rajdhani',sans-serif; }
+  .dd2-remove-btn { position: absolute; top: 1px; right: 1px; background: rgba(239,68,68,0.88); color: #fff; border: none; font-size: 7px; font-weight: 700; padding: 1px 3px; border-radius: 2px; cursor: pointer; opacity: 0; transition: opacity .12s; line-height: 1; }
+  .dd2-mini-card:hover .dd2-remove-btn { opacity: 1; }
+  .dd2-sentinel-tag { position: absolute; bottom: 10px; left: 0; right: 0; background: rgba(240,180,41,0.9); color: #000; font-size: 5px; font-weight: 700; text-align: center; padding: 1px 0; }
+  .dd2-mini-card.rRRR img { border-color: var(--rarity-rrr); }
+  .dd2-mini-card.rSP  img { border-color: var(--rarity-sp); }
+  .dd2-mini-card.rGR  img { border-color: #9b4dca; }
+  .dd2-mini-card.rLR  img { border-color: var(--rarity-lr); }
+
+  /* DD2 sidebar stats */
+  .dd2-sidebar { width: 58px; flex-shrink: 0; display: flex; flex-direction: column; padding: 6px 4px; gap: 3px; overflow-y: auto; border-left: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+  .dd2-sidebar::-webkit-scrollbar { display: none; }
+  .dd2-mini-stat-group { display: flex; flex-direction: column; gap: 3px; }
+  .dd2-mini-label { font-size: 7px; font-weight: 700; letter-spacing: .05em; color: var(--text-muted); text-transform: uppercase; text-align: center; }
+  .dd2-mini-row { display: flex; align-items: center; justify-content: space-between; padding: 0 2px; }
+  .dd2-mini-val { font-size: 12px; font-weight: 700; font-family: 'Rajdhani',sans-serif; color: var(--text); }
+  .dd2-g-badge { font-size: 7px; font-weight: 700; padding: 1px 3px; border-radius: 2px; font-family: 'Rajdhani',sans-serif; }
+  .dd2-g-badge.g0 { background: rgba(138,147,168,.25); color: var(--rarity-c); }
+  .dd2-g-badge.g1 { background: rgba(79,142,247,.2);   color: var(--rarity-r); }
+  .dd2-g-badge.g2 { background: rgba(155,89,247,.2);   color: var(--rarity-rr); }
+  .dd2-g-badge.g3 { background: rgba(240,180,41,.2);   color: var(--rarity-rrr); }
+  .dd2-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 2px 0; }
+  .dd2-validation-mini { display: flex; flex-direction: column; gap: 3px; }
+  .dd2-validation-mini .val-row { display: flex; align-items: center; gap: 3px; }
+  .dd2-validation-mini .val-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dd2-validation-mini span { display: none; }
+
   .pool-card.svg-selected { outline: 2px solid var(--accent); box-shadow: 0 0 8px rgba(79,142,247,0.6); }
   .save-indicator { font-size:11px; color:var(--text-muted); padding: 4px 8px; }
   .val-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
