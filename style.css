@@ -602,6 +602,7 @@
     overflow-y: auto; padding: 10px 12px;
     border-right: 1px solid var(--border);
     background: var(--surface);
+    min-height: 0;
   }
   .deck-pool-col::-webkit-scrollbar { width: 4px; }
   .deck-pool-col::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -630,8 +631,8 @@
   .deck-count-bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; }
   .deck-count-fill { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; }
 
-  .dd2-body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
-  .dd2-deck-visual { flex: 1; overflow: hidden; padding: 6px; display: flex; flex-direction: column; gap: 6px; }
+  .dd2-body { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+  .dd2-deck-visual { flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 6px; }
   .dd2-deck-visual::-webkit-scrollbar { width: 3px; }
   .dd2-deck-visual::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 

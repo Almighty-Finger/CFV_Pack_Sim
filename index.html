@@ -268,6 +268,7 @@
             <input class="dd2-name-input" id="deck-name-display" placeholder="Deck Name" value="My Deck" readonly style="pointer-events:none;opacity:0.7">
           </div>
           <div class="dd2-header-right">
+            <button class="btn btn-secondary" style="font-size:10px;padding:3px 8px" onclick="toggleDeckVisual()" id="dd2-toggle-btn" title="Show/hide deck visual">👁 Deck</button>
             <span class="dd2-count-badge">DECK <span id="ds-total" style="color:var(--accent)">0</span><span style="opacity:0.5">/50</span></span>
             <div class="deck-count-bar" style="width:50px"><div class="deck-count-fill" id="ds-bar" style="width:0%"></div></div>
             <span class="dd2-count-badge" style="color:#a78bfa">G <span id="ds-g4">0</span><span style="opacity:0.5">/16</span></span>
@@ -275,7 +276,7 @@
         </div>
 
         <div class="dd2-body">
-          <div class="dd2-deck-visual" id="dd2-deck-visual">
+          <div class="dd2-deck-visual" id="dd2-deck-visual" style="display:none">
 
             <div class="dd2-section">
               <div class="dd2-section-header">
@@ -312,7 +313,7 @@
           </div>
 
           <!-- Stats sidebar -->
-          <div class="dd2-sidebar">
+          <div class="dd2-sidebar" style="flex:1;overflow-y:auto">
             <div class="dd2-mini-stat-group">
               <div class="dd2-mini-label">GRADE</div>
               <div class="dd2-mini-row"><span class="dd2-g-badge g0">G0</span><span id="ds-g0" class="dd2-mini-val">0</span></div>
@@ -327,6 +328,11 @@
               <div class="dd2-mini-row"><span style="color:#fb923c;font-size:11px">🃏</span><span id="ds-trig-draw" class="dd2-mini-val">0</span></div>
               <div class="dd2-mini-row"><span style="color:#60a5fa;font-size:11px">🔄</span><span id="ds-trig-stand" class="dd2-mini-val">0</span></div>
               <div class="dd2-mini-row"><span style="color:var(--green);font-size:11px">💚</span><span id="ds-trig-heal" class="dd2-mini-val">0</span></div>
+            </div>
+            <div class="dd2-divider"></div>
+            <div class="dd2-mini-stat-group">
+              <div class="dd2-mini-label">SENTINEL</div>
+              <div class="dd2-mini-row"><span style="color:var(--gold);font-size:11px">🛡</span><span id="ds-sentinel" class="dd2-mini-val">0</span></div>
             </div>
             <div class="dd2-divider"></div>
             <div class="dd2-validation-mini" id="deck-validation"></div>

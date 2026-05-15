@@ -1878,7 +1878,14 @@ function addToDeck(card) {
 
   if (!deck[card.id]) deck[card.id] = { card, count: 0 };
   deck[card.id].count++;
-  _refreshPoolCard(card.id);
+  // Full re-render when deck/gzone hits a boundary so all cards update their maxed state
+  const newTotal = isGUnit(card) ? getGZoneTotal() : getDeckTotal();
+  const hitBoundary = isGUnit(card) ? newTotal === 16 : newTotal === DECK_MAX;
+  if (hitBoundary) {
+    renderDeckPool();
+  } else {
+    _refreshPoolCard(card.id);
+  }
   renderDeckPanel();
 }
 
@@ -2029,6 +2036,8 @@ function renderDeckPanel() {
   if (trigStandEl) trigStandEl.textContent = stands;
   const trigHealEl = document.getElementById('ds-trig-heal');
   if (trigHealEl) trigHealEl.textContent = heals;
+  const sentinelEl = document.getElementById('ds-sentinel');
+  if (sentinelEl) sentinelEl.textContent = sentinels;
 
   // Section counts
   const fvCountEl = document.getElementById('dd2-fv-count');
@@ -2321,7 +2330,8 @@ function doImportDeck() {
 }
 
 async function exportDeckImage() {
-  const deckName = document.getElementById('deck-name-input').value || 'My Deck';
+  const rawName = document.getElementById('deck-name-input').value || 'My Deck';
+  const deckName = prompt('Save deck image as:', rawName) || rawName;
   const deckClan = getDeckClan() || 'N/A';
   const total    = getDeckTotal();
 
@@ -2384,7 +2394,7 @@ async function exportDeckImage() {
   let sentinelCount = 0, gUnitCount = getGZoneTotal();
   if (fvCard) { const t=getTriggerType(fvCard); if(t&&trigCounts[t]!==undefined) trigCounts[t]++; if(isSentinel(fvCard)) sentinelCount++; }
   for (const {card,count} of Object.values(deck)) { const t=getTriggerType(card); if(t&&trigCounts[t]!==undefined) trigCounts[t]+=count; if(isSentinel(card)) sentinelCount+=count; }
-  const trigColors = {Critical:'#f0b429',Draw:'#e67820',Stand:'#3b82f6',Heal:'#3dbf7f'};
+  const trigColors = {Critical:'#f0b429',Draw:'#e67820',Stand:'#3b82f6',Heal:'#3dbf7f',Sentinel:'#f0b429'};
   let tx = GAP*2;
   for (const [t,cnt] of Object.entries(trigCounts)) {
     if (!cnt) continue;
@@ -3093,4 +3103,13 @@ function drawForTurn() {
     if (_lastFoil) { resetFoil(_lastFoil); _lastFoil = null; }
   }, { passive: true });
 })();
+function toggleDeckVisual() {
+  const el = document.getElementById('dd2-deck-visual');
+  const btn = document.getElementById('dd2-toggle-btn');
+  if (!el) return;
+  const hidden = el.style.display === 'none';
+  el.style.display = hidden ? 'flex' : 'none';
+  if (btn) btn.textContent = hidden ? '👁 Hide' : '👁 Deck';
+}
+
 init();
