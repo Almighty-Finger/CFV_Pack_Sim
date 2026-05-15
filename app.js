@@ -162,6 +162,11 @@ function init() {
   _buildCardMap();
   addTDsToCollection();
 
+  // Sync deck name display label in DD2 header
+  const _ni = document.getElementById('deck-name-input');
+  const _nd = document.getElementById('deck-name-display');
+  if (_ni && _nd) _ni.addEventListener('input', () => { _nd.value = _ni.value; });
+
   document.getElementById('pack-area').style.display = 'none';
   document.getElementById('td-decklist-panel').style.display = 'none';
   const _psb = document.getElementById('pack-sim-body');
@@ -1610,48 +1615,55 @@ function openDeckBuilder() {
 }
 function closeDeckBuilder() { document.getElementById('deck-overlay').classList.remove('active'); }
 
-// ── Left panel card hover preview ──
-let _previewTimer = null;
+function toggleDeckFilters() {
+  const panel = document.getElementById('dp-filter-panel');
+  const btn = document.getElementById('dp-filter-toggle');
+  if (!panel) return;
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'flex';
+  if (btn) btn.classList.toggle('active', !open);
+}
+
+// ── Floating card hover tooltip ──
+let _chtTimer = null;
 function previewCard(id) {
-  clearTimeout(_previewTimer);
+  clearTimeout(_chtTimer);
   const card = getAllCardById(id);
   if (!card) return;
-  const panel = document.getElementById('deck-preview-panel');
-  if (!panel) return;
-  const imgEl = document.getElementById('dp-preview-img');
-  const fallEl = document.getElementById('dp-preview-fallback');
-  const nameEl = document.getElementById('dp-preview-name');
-  const subEl  = document.getElementById('dp-preview-sub');
-  const extraEl = document.getElementById('dp-preview-extra');
+  const tip = document.getElementById('card-hover-tip');
+  if (!tip) return;
+  const imgEl = document.getElementById('cht-img');
+  const fbEl  = document.getElementById('cht-fallback');
   if (imgEl) {
-    imgEl.src = cardImgPath(card.id);
     imgEl.style.display = 'block';
+    imgEl.src = cardImgPath(card.id);
+    imgEl.dataset.id = card.id;
     imgEl.onerror = function() {
       imgEl.style.display = 'none';
-      if (fallEl) { fallEl.style.display = 'flex'; fallEl.textContent = card.icon; }
+      if (fbEl) { fbEl.style.display = 'flex'; fbEl.textContent = card.icon; }
     };
-    if (fallEl) fallEl.style.display = 'none';
+    if (fbEl) fbEl.style.display = 'none';
   }
-  if (nameEl) nameEl.textContent = card.name;
-  if (subEl)  subEl.textContent = card.clan + ' · G' + card.grade + ' · ' + card.rarity + ' · ' + getCardNum(card.id);
-  const badges = [];
-  if (isSentinel(card)) badges.push('<span style="background:rgba(240,180,41,0.85);color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px">🛡 Sentinel</span>');
-  const tt = getTriggerType(card);
-  if (tt) { const bg = {Critical:'rgba(240,180,41,.8)',Draw:'rgba(230,120,40,.8)',Stand:'rgba(59,130,246,.8)',Heal:'rgba(61,191,127,.8)'}[tt]||'#555'; badges.push(`<span style="background:${bg};color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px">${tt} Trigger</span>`); }
-  if (isGUnit(card)) badges.push('<span style="background:rgba(167,139,250,.2);color:#a78bfa;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px">✨ G Unit</span>');
-  const owned = collection[card.id]?.count || 0;
-  const inDeck = Object.values(deck).find(x=>x.card.id===card.id)?.count || 0;
-  badges.push(`<span style="background:rgba(255,255,255,.08);color:var(--text-muted);font-size:9px;padding:1px 5px;border-radius:3px">Owned: ${owned}</span>`);
-  if (inDeck) badges.push(`<span style="background:rgba(79,142,247,.2);color:var(--accent);font-size:9px;padding:1px 5px;border-radius:3px">In deck: ${inDeck}</span>`);
-  if (extraEl) extraEl.innerHTML = badges.join(' ');
-  panel.classList.add('has-card');
+  tip.classList.add('visible');
 }
 function clearPreview() {
-  _previewTimer = setTimeout(() => {
-    const panel = document.getElementById('deck-preview-panel');
-    if (panel) panel.classList.remove('has-card');
-  }, 80);
+  _chtTimer = setTimeout(() => {
+    const tip = document.getElementById('card-hover-tip');
+    if (tip) tip.classList.remove('visible');
+  }, 60);
 }
+// Follow the mouse
+document.addEventListener('mousemove', e => {
+  const tip = document.getElementById('card-hover-tip');
+  if (!tip || !tip.classList.contains('visible')) return;
+  const tw = 130, th = 190;
+  let x = e.clientX + 14, y = e.clientY - th / 2;
+  if (x + tw > window.innerWidth  - 8) x = e.clientX - tw - 14;
+  if (y < 8) y = 8;
+  if (y + th > window.innerHeight - 8) y = window.innerHeight - th - 8;
+  tip.style.left = x + 'px';
+  tip.style.top  = y + 'px';
+}, { passive: true });
 
 let deckPoolClanFilter = 'ALL';
 let _dpRenderEpoch = 0;

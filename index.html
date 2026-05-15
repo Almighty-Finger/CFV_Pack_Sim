@@ -223,75 +223,57 @@
 </div>
 
 <div class="deck-overlay" id="deck-overlay">
+  <!-- ── Top bar: name / search / format / actions ── -->
   <div class="deck-header">
     <h2>🃏 Deck Builder</h2>
     <input class="deck-name-input" id="deck-name-input" type="text" value="My Deck" placeholder="Deck name...">
-    <input id="deck-search" type="text" placeholder="Search cards..." style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;width:180px" oninput="_renderDeckPoolDebounced()">
-    <small style="color:var(--text-muted);font-size:11px">Click = add · Right-click G0 = FV</small>
+    <input id="deck-search" type="text" placeholder="Search cards..." style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;width:160px" oninput="_renderDeckPoolDebounced()">
+    <div style="display:flex;gap:4px">
+      <button id="dp-fmt-og" class="fmt-tab active" onclick="setDeckPoolFormat('OG')">⚔️ OG</button>
+      <button id="dp-fmt-g"  class="fmt-tab"        onclick="setDeckPoolFormat('G')">🌀 G</button>
+    </div>
+    <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="toggleDeckFilters()" id="dp-filter-toggle">⚙ Filters</button>
     <label class="toggle-wrap" title="Sort pool by how many copies you own">
       <input type="checkbox" id="deck-sort-owned" onchange="renderDeckPool()">
       <span class="toggle-track"><span class="toggle-thumb"></span></span>
-      <span class="toggle-label" style="font-size:11px">Sort by owned</span>
+      <span class="toggle-label" style="font-size:11px">Sort owned</span>
     </label>
-    <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="closeDeckBuilder()">✕ Close</button>
+    <small style="color:var(--text-muted);font-size:10px">Click=add · R-click G0=FV</small>
+    <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="closeDeckBuilder()">✕</button>
   </div>
-  <div style="padding:6px 16px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:4px;background:var(--surface);flex-shrink:0">
-    <div style="display:flex;gap:6px;padding-bottom:4px">
-      <button id="dp-fmt-og" class="fmt-tab active" onclick="setDeckPoolFormat('OG')">⚔️ Original</button>
-      <button id="dp-fmt-g"  class="fmt-tab"        onclick="setDeckPoolFormat('G')">🌀 Generation G</button>
-    </div>
+
+  <!-- ── Collapsible filter rows ── -->
+  <div id="dp-filter-panel" class="dp-filter-panel" style="display:none">
     <div class="deck-filter-row" id="dp-set-filters"></div>
     <div class="deck-filter-row" id="dp-clan-filters"></div>
     <div class="deck-filter-row" id="dp-rarity-filters"></div>
     <div class="deck-filter-row" id="dp-type-filters"></div>
     <div class="deck-filter-row" id="dp-grade-filters"></div>
   </div>
-  <!-- 3-column deck builder body -->
+  <!-- ── 3-col deck body: pool | visual deck | deck list ── -->
   <div class="deck-body">
 
-    <!-- ── Col 1: Card hover preview ── -->
-    <div class="deck-preview-col" id="deck-preview-panel">
-      <div class="dp-empty-state">
-        <span style="font-size:32px;opacity:0.2">🃏</span>
-        <span style="font-size:11px;opacity:0.3;text-align:center">Hover a card<br>to preview</span>
-      </div>
-      <div class="dp-preview-content">
-        <div class="dp-preview-img-wrap">
-          <img id="dp-preview-img" src="" alt="" style="display:none">
-          <div id="dp-preview-fallback" style="display:none;font-size:48px;align-items:center;justify-content:center;height:100%"></div>
-        </div>
-        <div style="padding:8px">
-          <div id="dp-preview-name" style="font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:4px"></div>
-          <div id="dp-preview-sub" style="font-size:10px;color:var(--text-muted);margin-bottom:6px"></div>
-          <div id="dp-preview-extra" style="display:flex;flex-wrap:wrap;gap:3px"></div>
-        </div>
-      </div>
+    <!-- Col 1: Card pool (scrollable) -->
+    <div class="deck-pool-col">
+      <div class="deck-pool-grid" id="deck-pool-grid"></div>
     </div>
 
-    <!-- ── Col 2: Card pool + visual deck ── -->
-    <div class="deck-center-col">
-      <div class="deck-pool">
-        <div class="deck-pool-grid" id="deck-pool-grid"></div>
-      </div>
+    <!-- Col 2: Visual deck (DD2 style) -->
+    <div class="deck-visual-col">
       <div class="deck-panel dd2-panel">
 
-        <!-- Top header bar -->
         <div class="dd2-header">
           <div class="dd2-header-left">
             <span class="dd2-format-badge">G FORMAT</span>
+            <input class="dd2-name-input" id="deck-name-display" placeholder="Deck Name" value="My Deck" readonly style="pointer-events:none;opacity:0.7">
           </div>
           <div class="dd2-header-right">
-            <span class="dd2-count-badge">
-              DECK <span id="ds-total" style="color:var(--accent)">0</span><span style="opacity:0.5">/50</span>
-            </span>
-            <div class="deck-count-bar" style="width:60px"><div class="deck-count-fill" id="ds-bar" style="width:0%;background:var(--accent)"></div></div>
-            <span class="dd2-count-badge" style="color:#a78bfa">
-              G <span id="ds-g4">0</span><span style="opacity:0.5">/16</span>
-            </span>
+            <span class="dd2-count-badge">DECK <span id="ds-total" style="color:var(--accent)">0</span><span style="opacity:0.5">/50</span></span>
+            <div class="deck-count-bar" style="width:50px"><div class="deck-count-fill" id="ds-bar" style="width:0%"></div></div>
+            <span class="dd2-count-badge" style="color:#a78bfa">G <span id="ds-g4">0</span><span style="opacity:0.5">/16</span></span>
           </div>
         </div>
 
-        <!-- Visual card sections (body) -->
         <div class="dd2-body">
           <div class="dd2-deck-visual" id="dd2-deck-visual">
 
@@ -303,13 +285,13 @@
               </div>
               <div class="dd2-ride-row" id="dd2-fv-row">
                 <div class="dd2-empty-slot" onclick="showToast({icon:'ℹ️',name:'Right-click a Grade 0 card in the pool to set as First Vanguard',rarity:'C'})">
-                  <span style="font-size:18px;opacity:0.3">+</span>
-                  <span style="font-size:8px;opacity:0.3;text-align:center">Right-click G0</span>
+                  <span style="font-size:16px;opacity:0.3">+</span>
+                  <span style="font-size:7px;opacity:0.3;text-align:center">R-click G0</span>
                 </div>
               </div>
             </div>
 
-            <div class="dd2-section" id="dd2-gzone-section">
+            <div class="dd2-section">
               <div class="dd2-section-header">
                 <span class="dd2-section-icon">✨</span>
                 <span class="dd2-section-title">G ZONE</span>
@@ -327,9 +309,9 @@
               <div id="dd2-main-deck"></div>
             </div>
 
-          </div><!-- /dd2-deck-visual -->
+          </div>
 
-          <!-- Sidebar mini stats -->
+          <!-- Stats sidebar -->
           <div class="dd2-sidebar">
             <div class="dd2-mini-stat-group">
               <div class="dd2-mini-label">GRADE</div>
@@ -341,30 +323,29 @@
             <div class="dd2-divider"></div>
             <div class="dd2-mini-stat-group">
               <div class="dd2-mini-label">TRG <span id="ds-trig-total" style="color:var(--gold)">0</span>/16</div>
-              <div class="dd2-mini-row"><span style="color:#f87171">🗡</span><span id="ds-trig-crit" class="dd2-mini-val">0</span></div>
-              <div class="dd2-mini-row"><span style="color:#fb923c">🃏</span><span id="ds-trig-draw" class="dd2-mini-val">0</span></div>
-              <div class="dd2-mini-row"><span style="color:#60a5fa">🔄</span><span id="ds-trig-stand" class="dd2-mini-val">0</span></div>
-              <div class="dd2-mini-row"><span style="color:var(--green)">💚</span><span id="ds-trig-heal" class="dd2-mini-val">0</span></div>
+              <div class="dd2-mini-row"><span style="color:#f87171;font-size:11px">🗡</span><span id="ds-trig-crit" class="dd2-mini-val">0</span></div>
+              <div class="dd2-mini-row"><span style="color:#fb923c;font-size:11px">🃏</span><span id="ds-trig-draw" class="dd2-mini-val">0</span></div>
+              <div class="dd2-mini-row"><span style="color:#60a5fa;font-size:11px">🔄</span><span id="ds-trig-stand" class="dd2-mini-val">0</span></div>
+              <div class="dd2-mini-row"><span style="color:var(--green);font-size:11px">💚</span><span id="ds-trig-heal" class="dd2-mini-val">0</span></div>
             </div>
             <div class="dd2-divider"></div>
             <div class="dd2-validation-mini" id="deck-validation"></div>
           </div>
-        </div><!-- /dd2-body -->
+        </div>
 
-        <!-- Actions -->
         <div class="deck-actions">
-          <button class="btn btn-primary" style="font-size:11px;padding:6px 8px" onclick="exportDeck()">📋</button>
-          <button class="btn btn-primary" style="font-size:11px;padding:6px 8px;background:linear-gradient(135deg,#7c3aed,#4f8ef7)" onclick="exportDeckImage()">🖼</button>
-          <button class="btn btn-secondary" style="font-size:11px;padding:6px 8px" onclick="openImportDeck()">📥</button>
-          <button class="btn btn-secondary" style="font-size:11px;padding:6px 8px" onclick="openHandSample()">🖐</button>
-          <button class="btn btn-danger" style="font-size:11px;padding:6px 8px" onclick="clearDeck()">🗑</button>
+          <button class="btn btn-primary" style="font-size:11px;padding:5px 8px" onclick="exportDeck()" title="Export text">📋 Export</button>
+          <button class="btn btn-primary" style="font-size:11px;padding:5px 8px;background:linear-gradient(135deg,#7c3aed,#4f8ef7)" onclick="exportDeckImage()" title="Export image">🖼 Image</button>
+          <button class="btn btn-secondary" style="font-size:11px;padding:5px 8px" onclick="openImportDeck()" title="Import">📥 Import</button>
+          <button class="btn btn-secondary" style="font-size:11px;padding:5px 8px" onclick="openHandSample()" title="Hand sample">🖐 Hand</button>
+          <button class="btn btn-danger" style="font-size:11px;padding:5px 8px" onclick="clearDeck()" title="Clear deck">🗑 Clear</button>
         </div>
 
         <div id="deck-list" style="display:none"></div>
       </div>
-    </div><!-- /deck-center-col -->
+    </div><!-- /deck-visual-col -->
 
-    <!-- ── Col 3: Compact scrollable deck list ── -->
+    <!-- Col 3: Compact scrollable deck list -->
     <div class="deck-list-col">
       <div class="deck-list-col-header">
         <span style="font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text-muted)">DECK LIST</span>
@@ -374,6 +355,13 @@
     </div>
 
   </div><!-- /deck-body -->
+
+  <!-- Floating card preview tooltip (follows mouse) -->
+  <div id="card-hover-tip" class="card-hover-tip">
+    <img id="cht-img" src="" alt="">
+    <div id="cht-fallback" class="cht-fallback"></div>
+  </div>
+
 </div>
 
 <div class="export-overlay" id="export-overlay">
