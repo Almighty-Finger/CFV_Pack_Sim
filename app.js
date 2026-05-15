@@ -1630,8 +1630,6 @@ function previewCard(id) {
   clearTimeout(_chtTimer);
   const card = getAllCardById(id);
   if (!card) return;
-  const tip = document.getElementById('card-hover-tip');
-  if (!tip) return;
   const imgEl = document.getElementById('cht-img');
   const fbEl  = document.getElementById('cht-fallback');
   if (imgEl) {
@@ -1648,13 +1646,11 @@ function previewCard(id) {
 }
 function clearPreview() {
   _chtTimer = setTimeout(() => {
-    const tip = document.getElementById('card-hover-tip');
-    if (tip) tip.classList.remove('visible');
+      if (tip) tip.classList.remove('visible');
   }, 60);
 }
 // Follow the mouse
 document.addEventListener('mousemove', e => {
-  const tip = document.getElementById('card-hover-tip');
   if (!tip || !tip.classList.contains('visible')) return;
   const tw = 130, th = 190;
   let x = e.clientX + 14, y = e.clientY - th / 2;
