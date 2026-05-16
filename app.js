@@ -1762,7 +1762,7 @@ function renderDeckPool() {
       : `${card.name}${dimReason?' — '+dimReason:''}`;
     return `<div class="pool-card rarity-card-${card.rarity} ${addBlocked?'maxed':''} ${isTheFV?'svg-selected':''}"
       onclick="addToDeck(getAllCardById('${card.id}'))" ${svgHandler} title="${titleTip}"
-      onmouseenter="previewCard('${card.id}')" onmouseleave="clearPreview()">
+     >
       <img data-id="${card.id}" alt="${card.name}" src="${cardImgPath(card.id)}"
            loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display=\'flex\');}})(this)">
       <div class="pc-fallback" style="display:none"><span>${card.icon}</span><span style="font-size:8px;text-align:center;padding:0 4px;color:var(--text-muted)">${card.name}</span></div>
@@ -3104,13 +3104,6 @@ function drawForTurn() {
     if (_lastFoil) { resetFoil(_lastFoil); _lastFoil = null; }
   }, { passive: true });
 })();
-function toggleDeckVisual() {
-  const el = document.getElementById('dd2-deck-visual');
-  const btn = document.getElementById('dd2-toggle-btn');
-  if (!el) return;
-  const hidden = el.style.display === 'none';
-  el.style.display = hidden ? 'flex' : 'none';
-  if (btn) btn.textContent = hidden ? '👁 Hide' : '👁 Deck';
-}
+
 
 init();
