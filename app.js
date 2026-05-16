@@ -1753,7 +1753,7 @@ function renderDeckPool() {
     const noMoreCopies = (inDeck + fvUsesThisId) >= owned;
     const deckClanNow = getDeckClan();
     const wrongClan = !isClanAllowed(card, deckClanNow);
-    if (wrongClan && deckClanNow && !isGUnit(card)) return null;
+    if (wrongClan && deckClanNow) return null;
     const addBlocked = deckFull || nameMaxed || noMoreCopies;
     let dimReason = nameMaxed ? `Max 4 copies of "${card.name}"` : noMoreCopies ? 'No spare copies' : deckFull ? 'Deck full' : '';
     const svgHandler = card.grade === 0 ? `oncontextmenu="event.preventDefault();setFirstVanguard(getAllCardById('${card.id}'))"` : '';
@@ -1801,11 +1801,12 @@ const CROSS_CLAN_ALLOW = {
 };
 
 function isClanAllowed(card, deckClan) {
-  if (isGUnit(card)) return true;
   if (card.crayElemental) return true;
-  if (!deckClan || card.clan === deckClan) return true;
+  if (!deckClan) return true;
+  if (card.clan === deckClan) return true;
   const exceptions = CROSS_CLAN_ALLOW[card.name];
-  return exceptions && exceptions.includes(deckClan);
+  if (exceptions && exceptions.includes(deckClan)) return true;
+  return false;
 }
 
 function isGUnit(card) {
@@ -1839,7 +1840,7 @@ function addToDeck(card) {
 
   const deckClan = getDeckClan();
   if (!isClanAllowed(card, deckClan)) {
-    showToast({icon:'⚠️',name:`Deck must be 1 clan only (${deckClan})`,rarity:'C'}); return;
+    showToast({icon:'⚠️',name:`Wrong clan — G Units must match deck clan (${deckClan})`,rarity:'C'}); return;
   }
 
   if (isGUnit(card)) {
