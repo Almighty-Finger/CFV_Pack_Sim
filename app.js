@@ -2060,6 +2060,17 @@ function renderDeckPanel() {
   }).join('');
 
   // ── DD2 visual: Ride Deck (FV) ──
+  const fvDisplay = document.getElementById('fv-display');
+  if (fvDisplay) {
+    if (fvCard) {
+      fvDisplay.innerHTML =
+        '<span style="font-weight:600;color:var(--text)">' + fvCard.icon + ' ' + fvCard.name + '</span>' +
+        '<span style="display:block;margin-top:2px">' + fvCard.clan + ' · G' + fvCard.grade + ' · ' + fvCard.rarity + '</span>';
+    } else {
+      fvDisplay.textContent = 'R-click a G0 card in the pool to set FV';
+    }
+  }
+
   const fvRow = document.getElementById('dd2-fv-row');
   if (fvRow) {
     if (fvCard) {
@@ -3030,7 +3041,7 @@ function drawForTurn() {
 // Tracks mouse over RRR/SP/GR/LR cards and shifts the holo pattern
 // like physical foil cards do under light
 (function initFoilEffect() {
-  const FOIL_RARITIES = new Set(['RRR','SP','GR','LR','SCR','SGR']);
+  const FOIL_RARITIES = new Set(['RRR','SP','GR','LR','SCR','SGR','OR']);
 
   function getFoilEl(target) {
     // Walk up to find card-front or gallery-card with a foil rarity

@@ -250,20 +250,20 @@
     <div class="deck-filter-row" id="dp-type-filters"></div>
     <div class="deck-filter-row" id="dp-grade-filters"></div>
   </div>
-  <!-- ── 3-col deck body: pool | visual deck | deck list ── -->
+  <!-- ── 2-col deck body: collection pool | stats + deck list ── -->
   <div class="deck-body">
 
-    <!-- Col 1: Card pool (scrollable) -->
+    <!-- Left: owned cards pool -->
     <div class="deck-pool-col">
       <div class="deck-pool-grid" id="deck-pool-grid"></div>
     </div>
 
-    <!-- Col 2: Stats panel -->
+    <!-- Right: stats + scrollable deck list -->
+    <div class="deck-sidebar-col">
     <div class="deck-panel" id="deck-panel">
 
       <!-- Header: name + counts -->
       <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;flex-shrink:0">
-        <input class="deck-name-input" id="deck-name-input-display" type="text" value="My Deck" placeholder="Deck name...">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <div style="display:flex;align-items:center;gap:6px;flex:1">
             <span style="font-size:10px;font-weight:700;color:var(--text-muted)">DECK</span>
@@ -328,10 +328,18 @@
       <div style="display:none" id="dd2-main-count"></div>
       <div style="display:none" id="dd2-gz-count"></div>
       <div style="display:none" id="dd2-fv-count"></div>
-      <div style="display:none" id="dcl-count"></div>
-      <div style="display:none" id="deck-list-col-body"></div>
 
     </div><!-- /deck-panel -->
+
+    <div class="deck-list-col">
+      <div class="deck-list-col-header">
+        <span>DECK LIST</span>
+        <span id="dcl-count">0/50</span>
+      </div>
+      <div class="deck-list-col-body" id="deck-list-col-body"></div>
+    </div>
+
+    </div><!-- /deck-sidebar-col -->
 
   </div><!-- /deck-body -->
 
