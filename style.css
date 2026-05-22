@@ -620,54 +620,6 @@
   /* Col 2 — Visual DD2 deck panel */
   .deck-visual-col { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
   .deck-panel { overflow-y: auto; display: flex; flex-direction: column; gap: 0; padding: 0; background: var(--surface); border-left: 1px solid var(--border); }
-  .deck-panel::-webkit-scrollbar { width: 4px; }
-  .deck-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* DD2 deck visual sections (used inside deck-panel) */
-  .dd2-section { background: rgba(0,0,0,0.22); border-radius: 6px; overflow: hidden; }
-  .dd2-section-header { display: flex; align-items: center; gap: 5px; padding: 4px 8px; background: rgba(255,255,255,.04); border-bottom: 1px solid rgba(255,255,255,.06); }
-  .dd2-section-icon { font-size: 11px; }
-  .dd2-section-title { font-family: 'Rajdhani',sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .1em; color: var(--text-muted); flex: 1; }
-  .dd2-section-count { font-family: 'Rajdhani',sans-serif; font-size: 10px; font-weight: 700; color: var(--accent); }
-  .dd2-ride-row { display: flex; gap: 5px; padding: 5px 8px; flex-wrap: wrap; align-items: center; min-height: 56px; }
-  .dd2-empty-slot { width: 40px; height: 55px; border-radius: 4px; border: 1px dashed rgba(255,255,255,.18); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-  .dd2-empty-slot:hover { border-color: rgba(255,255,255,.45); }
-  .dd2-card-grid { display: flex; flex-wrap: wrap; gap: 3px; padding: 5px 8px; }
-  .dd2-grade-block { padding: 2px 8px 5px; }
-  .dd2-grade-label { font-family: 'Rajdhani',sans-serif; font-size: 10px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; }
-  .dd2-mini-card { position: relative; width: 40px; height: 55px; border-radius: 4px; cursor: pointer; transition: transform .12s; flex-shrink: 0; overflow: hidden; }
-  .dd2-mini-card:hover { transform: translateY(-3px) scale(1.09); z-index: 5; }
-  .dd2-mini-card img { width: 100%; height: 100%; object-fit: fill; display: block; border: 1px solid rgba(255,255,255,.12); border-radius: 4px; }
-  .dd2-count-overlay { position: absolute; bottom: 1px; right: 1px; background: rgba(0,0,0,.84); color: #fff; font-size: 7px; font-weight: 700; padding: 1px 2px; border-radius: 2px; font-family: 'Rajdhani',sans-serif; }
-  .dd2-remove-btn { position: absolute; top: 1px; right: 1px; background: rgba(239,68,68,.9); color: #fff; border: none; font-size: 7px; padding: 1px 3px; border-radius: 2px; cursor: pointer; opacity: 0; transition: opacity .12s; line-height: 1; }
-  .dd2-mini-card:hover .dd2-remove-btn { opacity: 1; }
-  .dd2-sentinel-tag { position: absolute; bottom: 9px; left: 0; right: 0; background: rgba(240,180,41,.9); color: #000; font-size: 5px; font-weight: 700; text-align: center; padding: 1px 0; }
-  .dd2-mini-card.rRRR img { border-color: var(--rarity-rrr); }
-  .dd2-mini-card.rSP  img { border-color: var(--rarity-sp); }
-  .dd2-mini-card.rGR  img { border-color: #9b4dca; }
-  .dd2-mini-card.rLR  img { border-color: var(--rarity-lr); }
-  .dd2-g-badge { font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 2px; font-family: 'Rajdhani',sans-serif; }
-  .dd2-g-badge.g0 { background: rgba(138,147,168,.25); color: var(--rarity-c); }
-  .dd2-g-badge.g1 { background: rgba(79,142,247,.2);   color: var(--rarity-r); }
-  .dd2-g-badge.g2 { background: rgba(155,89,247,.2);   color: var(--rarity-rr); }
-  .dd2-g-badge.g3 { background: rgba(240,180,41,.2);   color: var(--rarity-rrr); }
-
-  /* Deck list rows */
-  .dcl-section-header { font-size: 9px; font-weight: 700; color: var(--text-muted); padding: 4px 0 2px; text-transform: uppercase; border-top: 1px solid rgba(255,255,255,.06); margin-top: 3px; }
-  .dcl-row { display: flex; align-items: center; gap: 4px; padding: 2px 0; cursor: pointer; }
-  .dcl-row:hover { opacity: .8; }
-  .dcl-name { font-size: 10px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
-  .dcl-cnt { font-size: 11px; font-weight: 700; font-family: 'Rajdhani',sans-serif; color: var(--accent); flex-shrink: 0; }
-  .dcl-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 11px; padding: 0; flex-shrink: 0; opacity: 0; line-height: 1; }
-  .dcl-row:hover .dcl-remove { opacity: 1; }
-  .dcl-badge { font-size: 7px; background: rgba(240,180,41,.2); color: var(--gold); padding: 0 3px; border-radius: 2px; flex-shrink: 0; }
-
-  /* Validation dots */
-  .val-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
-  .val-dot.ok   { background: var(--green); }
-  .val-dot.warn { background: var(--gold); }
-  .val-dot.err  { background: var(--red); }
-  .val-row { display: flex; align-items: center; gap: 5px; }
   .dd2-panel { display: flex; flex-direction: column; background: var(--surface); overflow: hidden; flex: 1; }
 
   .dd2-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); gap: 8px; flex-shrink: 0; }

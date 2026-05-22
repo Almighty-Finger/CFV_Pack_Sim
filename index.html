@@ -318,45 +318,6 @@
         <div id="deck-validation" style="display:flex;flex-direction:column;gap:3px;font-size:11px"></div>
       </div>
 
-      <!-- Ride Deck / G Zone / Main Deck visual -->
-      <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px">
-        <div class="dd2-section">
-          <div class="dd2-section-header">
-            <span class="dd2-section-icon">🃏</span>
-            <span class="dd2-section-title">RIDE DECK</span>
-            <span class="dd2-section-count" id="dd2-fv-count">0</span>
-          </div>
-          <div class="dd2-ride-row" id="dd2-fv-row">
-            <div class="dd2-empty-slot" onclick="showToast({icon:'ℹ️',name:'Right-click a Grade 0 card to set as First Vanguard',rarity:'C'})">
-              <span style="font-size:16px;opacity:.3">+</span>
-              <span style="font-size:7px;opacity:.3;text-align:center">R-click G0</span>
-            </div>
-          </div>
-        </div>
-        <div class="dd2-section">
-          <div class="dd2-section-header">
-            <span class="dd2-section-icon">✨</span>
-            <span class="dd2-section-title">G ZONE</span>
-            <span class="dd2-section-count" id="dd2-gz-count">0 / 16</span>
-          </div>
-          <div class="dd2-card-grid" id="dd2-gzone-grid"></div>
-        </div>
-        <div class="dd2-section">
-          <div class="dd2-section-header">
-            <span class="dd2-section-icon">📦</span>
-            <span class="dd2-section-title">MAIN DECK</span>
-            <span class="dd2-section-count" id="dd2-main-count">0 / 50</span>
-          </div>
-          <div id="dd2-main-deck"></div>
-        </div>
-      </div>
-
-      <!-- Deck list -->
-      <div style="padding:10px 14px;flex:1">
-        <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.08em;margin-bottom:6px">DECK LIST <span id="dcl-count" style="color:var(--accent)"></span></div>
-        <div id="deck-list-col-body"></div>
-      </div>
-
       <!-- Actions -->
       <div style="padding:12px 14px;display:flex;flex-direction:column;gap:6px;margin-top:auto">
         <input class="deck-name-input" id="deck-name-input" type="text" value="My Deck" placeholder="Deck name..." style="width:100%;box-sizing:border-box">
@@ -372,5 +333,262 @@
     </div>
 
   </div><!-- /deck-body -->
+
+<div class="zoom-overlay" id="zoom-overlay" onclick="closeZoom(event)">
+  <div class="zoom-card" id="zoom-card">
+    <button class="zoom-close" onclick="closeZoom()">✕</button>
+    <img id="zoom-img" src="" alt="">
+    <div class="zoom-fallback" id="zoom-fallback" style="display:none"><span id="zoom-icon"></span></div>
+    <div class="zoom-info">
+      <div class="zoom-name" id="zoom-name"></div>
+      <div class="zoom-sub" id="zoom-sub"></div>
+      <div id="zoom-extra"></div>
+    </div>
+    <div class="zoom-actions">
+      <button class="btn btn-primary" id="zoom-add-deck-btn" style="font-size:12px;padding:7px 16px" onclick="addToDeckFromZoom()">+ Add to Deck</button>
+      <button class="btn" id="zoom-wishlist-btn" style="font-size:12px;padding:7px 14px;background:transparent;border-color:var(--border)" onclick="toggleWishlist(zoomCard?.id);openZoom(zoomCard)">☆ Wishlist</button>
+    </div>
+  </div>
+</div>
+
+<div class="gallery-overlay" id="gallery-overlay">
+  <div class="gallery-header">
+    <div class="gallery-header-top">
+      <h2>🖼 My Collection</h2>
+      <input class="gallery-search" id="gallery-search" type="text" placeholder="Search cards..." oninput="_renderGalleryDebounced()" style="max-width:200px">
+      <button class="gallery-filter-toggle" id="gallery-filter-toggle" onclick="toggleGalleryFilters()">⚙ Filters</button>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="gallery-owned-only" onchange="renderGallery()">
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label" style="font-size:12px">Owned only</span>
+      </label>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="gallery-missing-sort" onchange="renderGallery()">
+        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        <span class="toggle-label" style="font-size:12px">Missing first</span>
+      </label>
+      <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="closeGallery()">✕ Close</button>
+    </div>
+    <div style="display:flex;gap:6px;padding:6px 0 4px">
+      <button id="gal-fmt-og" class="fmt-tab active" onclick="setGalleryFormat('OG')">⚔️ Original</button>
+      <button id="gal-fmt-g"  class="fmt-tab"        onclick="setGalleryFormat('G')">🌀 Generation G</button>
+    </div>
+    <div class="gallery-filter-panel" id="gallery-filter-panel">
+      <div class="gallery-filter-row" id="gallery-set-filters"></div>
+      <div class="gallery-filter-row" id="gallery-clan-filters"></div>
+      <div class="gallery-filter-row" id="gallery-rarity-filters"></div>
+      <div class="gallery-filter-row" id="gallery-type-filters"></div>
+      <div class="gallery-filter-row" id="gallery-grade-filters"></div>
+    </div>
+  </div>
+  <div class="gallery-body">
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </div>
+</div>
+
+<div class="deck-overlay" id="deck-overlay">
+  <!-- ── Top bar: name / search / format / actions ── -->
+  <div class="deck-header">
+    <h2>🃏 Deck Builder</h2>
+    <input class="deck-name-input" id="deck-name-input" type="text" value="My Deck" placeholder="Deck name...">
+    <input id="deck-search" type="text" placeholder="Search cards..." style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;width:160px" oninput="_renderDeckPoolDebounced()">
+    <div style="display:flex;gap:4px">
+      <button id="dp-fmt-og" class="fmt-tab active" onclick="setDeckPoolFormat('OG')">⚔️ OG</button>
+      <button id="dp-fmt-g"  class="fmt-tab"        onclick="setDeckPoolFormat('G')">🌀 G</button>
+    </div>
+    <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="toggleDeckFilters()" id="dp-filter-toggle">⚙ Filters</button>
+    <label class="toggle-wrap" title="Sort pool by how many copies you own">
+      <input type="checkbox" id="deck-sort-owned" onchange="renderDeckPool()">
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      <span class="toggle-label" style="font-size:11px">Sort owned</span>
+    </label>
+    <small style="color:var(--text-muted);font-size:10px">Click=add · R-click G0=FV</small>
+    <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="closeDeckBuilder()">✕</button>
+  </div>
+
+  <!-- ── Collapsible filter rows ── -->
+  <div id="dp-filter-panel" class="dp-filter-panel" style="display:none">
+    <div class="deck-filter-row" id="dp-set-filters"></div>
+    <div class="deck-filter-row" id="dp-clan-filters"></div>
+    <div class="deck-filter-row" id="dp-rarity-filters"></div>
+    <div class="deck-filter-row" id="dp-type-filters"></div>
+    <div class="deck-filter-row" id="dp-grade-filters"></div>
+  </div>
+  <!-- ── 3-col deck body: pool | visual deck | deck list ── -->
+  <div class="deck-body">
+
+    <!-- Col 1: Card pool (scrollable) -->
+    <div class="deck-pool-col">
+      <div class="deck-pool-grid" id="deck-pool-grid"></div>
+    </div>
+
+    <!-- Col 2: Stats panel -->
+    <div class="deck-panel" id="deck-panel">
+
+      <!-- Header: name + counts -->
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+        <input class="deck-name-input" id="deck-name-input" type="text" value="My Deck" placeholder="Deck name...">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div style="display:flex;align-items:center;gap:6px;flex:1">
+            <span style="font-size:10px;font-weight:700;color:var(--text-muted)">DECK</span>
+            <span style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700"><span id="ds-total" style="color:var(--accent)">0</span><span style="opacity:0.4">/50</span></span>
+            <div class="deck-count-bar" style="flex:1;max-width:60px"><div class="deck-count-fill" id="ds-bar" style="width:0%"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:10px;font-weight:700;color:var(--text-muted)">G ZONE</span>
+            <span style="font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;color:#a78bfa"><span id="ds-g4">0</span><span style="opacity:0.4">/16</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- FV -->
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0">
+        <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.08em;margin-bottom:6px">★ FIRST VANGUARD</div>
+        <div id="fv-display" style="min-height:28px;font-size:11px;color:var(--text-muted)">R-click a G0 card to set FV</div>
+      </div>
+
+      <!-- Grade -->
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0">
+        <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.08em;margin-bottom:6px">GRADE</div>
+        <div class="deck-stats-grid">
+          <div class="deck-stat-box"><div class="dsn" id="ds-g0">0</div><div class="dsl">G0</div></div>
+          <div class="deck-stat-box"><div class="dsn" id="ds-g1">0</div><div class="dsl">G1</div></div>
+          <div class="deck-stat-box"><div class="dsn" id="ds-g2">0</div><div class="dsl">G2</div></div>
+          <div class="deck-stat-box"><div class="dsn" id="ds-g3">0</div><div class="dsl">G3</div></div>
+        </div>
+      </div>
+
+      <!-- Triggers -->
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0">
+        <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.08em;margin-bottom:6px">TRIGGERS <span id="ds-trig-total" style="color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700">0</span>/16</div>
+        <div class="deck-stats-grid">
+          <div class="deck-stat-box"><div class="dsn" id="ds-trig-crit" style="color:#f87171">0</div><div class="dsl">🗡 Crit</div></div>
+          <div class="deck-stat-box"><div class="dsn" id="ds-trig-draw" style="color:#fb923c">0</div><div class="dsl">🃏 Draw</div></div>
+          <div class="deck-stat-box"><div class="dsn" id="ds-trig-stand" style="color:#60a5fa">0</div><div class="dsl">🔄 Stand</div></div>
+          <div class="deck-stat-box"><div class="dsn" id="ds-trig-heal" style="color:var(--green)">0</div><div class="dsl">💚 Heal</div></div>
+          <div class="deck-stat-box"><div class="dsn" id="ds-sentinel" style="color:var(--gold)">0</div><div class="dsl">🛡 Sent.</div></div>
+        </div>
+      </div>
+
+      <!-- Validation -->
+      <div style="padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0">
+        <div id="deck-validation" style="display:flex;flex-direction:column;gap:3px;font-size:11px"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="deck-actions" style="padding:10px 14px;margin-top:auto;flex-shrink:0">
+        <button class="btn btn-primary" style="font-size:11px;padding:5px 8px" onclick="exportDeck()">📋 Export</button>
+        <button class="btn btn-primary" style="font-size:11px;padding:5px 8px;background:linear-gradient(135deg,#7c3aed,#4f8ef7)" onclick="exportDeckImage()">🖼 Image</button>
+        <button class="btn btn-secondary" style="font-size:11px;padding:5px 8px" onclick="openImportDeck()">📥 Import</button>
+        <button class="btn btn-secondary" style="font-size:11px;padding:5px 8px" onclick="openHandSample()">🖐 Hand</button>
+        <button class="btn btn-danger" style="font-size:11px;padding:5px 8px" onclick="clearDeck()">🗑 Clear</button>
+      </div>
+
+      <!-- Hidden compat IDs still needed by app.js -->
+      <div style="display:none" id="deck-list"></div>
+      <div style="display:none" id="dd2-fv-row"></div>
+      <div style="display:none" id="dd2-gzone-grid"></div>
+      <div style="display:none" id="dd2-main-deck"></div>
+      <div style="display:none" id="dd2-main-count"></div>
+      <div style="display:none" id="dd2-gz-count"></div>
+      <div style="display:none" id="dd2-fv-count"></div>
+      <div style="display:none" id="dcl-count"></div>
+      <div style="display:none" id="deck-list-col-body"></div>
+
+    </div><!-- /deck-panel -->
+
+  </div><!-- /deck-body -->
+
+
+</div>
+
+<div class="export-overlay" id="export-overlay">
+  <div class="export-box">
+    <h3>📋 Export Deck List</h3>
+    <textarea class="export-textarea" id="export-textarea" readonly></textarea>
+    <div class="export-btns">
+      <button class="btn btn-primary" onclick="copyExport()">📋 Copy</button>
+      <button class="btn btn-secondary" onclick="closeExport()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="zoom-overlay" id="stats-overlay" onclick="if(event.target===this)closeStats()">
+  <div class="zoom-card" style="width:420px;max-width:95vw;max-height:85vh;overflow-y:auto">
+    <button class="zoom-close" onclick="closeStats()">✕</button>
+    <div style="padding:20px">
+      <h3 style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;margin-bottom:16px">📊 Session Statistics</h3>
+      <div id="stats-content"></div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Pack Price (for spending calc)</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="number" id="pack-price-input" value="350" min="1" max="9999"
+            style="width:80px;padding:4px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px"
+            oninput="sessionStats.packPrice=parseInt(this.value)||350;renderStats()">
+          <span style="font-size:12px;color:var(--text-muted)">¥ per pack</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pack-rip-overlay" style="display:none;position:fixed;inset:0;z-index:9000;pointer-events:none;overflow:hidden;background:rgba(0,0,0,0.75)">
+  <div id="pack-rip-top" style="position:absolute;left:50%;transform:translateX(-50%);width:180px;height:232px;transition:transform 0.42s cubic-bezier(0.4,0,0.2,1);clip-path:inset(0 0 50% 0 round 12px 12px 0 0)">
+    <img id="rip-img-top" src="" alt="" style="width:180px;height:464px;object-fit:cover;border-radius:12px;display:block">
+    <div id="rip-fallback-top" style="display:none;position:absolute;inset:0;background:var(--surface);border:2px solid var(--border);border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:center;font-size:48px"><span id="rip-icon-top"></span></div>
+  </div>
+  <div id="pack-rip-bot" style="position:absolute;left:50%;transform:translateX(-50%);width:180px;height:232px;transition:transform 0.42s cubic-bezier(0.4,0,0.2,1);clip-path:inset(50% 0 0 0 round 0 0 12px 12px)">
+    <img id="rip-img-bot" src="" alt="" style="width:180px;height:464px;object-fit:cover;border-radius:12px;display:block;margin-top:-232px">
+    <div id="rip-fallback-bot" style="display:none;position:absolute;inset:0;background:var(--surface);border:2px solid var(--border);border-radius:0 0 12px 12px;display:flex;align-items:center;justify-content:center;font-size:48px"><span id="rip-icon-bot"></span></div>
+  </div>
+  <div id="rip-flash" style="position:absolute;inset:0;background:rgba(0,0,0,0.6);opacity:0;transition:opacity 0.15s;pointer-events:none"></div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<div class="zoom-overlay" id="import-overlay" onclick="if(event.target===this)closeImportDeck()">
+  <div class="zoom-card" style="width:500px;max-width:95vw;max-height:85vh;overflow-y:auto">
+    <button class="zoom-close" onclick="closeImportDeck()">✕</button>
+    <div style="padding:20px">
+      <h3 style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px">📥 Import Deck List</h3>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">Paste a deck list exported from this simulator (or matching format: <code style="font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">Nx Card Name (SETID_NUM) [RRR]</code>). Cards you don't own will be skipped.</p>
+      <textarea id="import-textarea" placeholder="Paste your deck list here…" style="width:100%;height:220px;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;font-family:monospace;resize:vertical"></textarea>
+      <div id="import-preview" style="margin-top:10px;font-size:11px;color:var(--text-muted);min-height:20px"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-primary" style="flex:1;font-size:13px;padding:9px" onclick="doImportDeck()">✅ Import</button>
+        <button class="btn btn-secondary" style="font-size:13px;padding:9px" onclick="closeImportDeck()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="data.js?v=202604122333"></script>
+<script src="app.js?v=202604122333"></script>
+
+<div class="hand-overlay" id="hand-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+  <div style="background:var(--surface);border-radius:16px;padding:24px;width:min(95vw,700px);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h2 style="margin:0;font-size:20px">🖐 Hand Sample</h2>
+      <button class="btn btn-secondary" style="font-size:12px;padding:5px 12px" onclick="closeHandSample()">✕ Close</button>
+    </div>
+    <div id="hand-deck-info" style="font-size:12px;color:var(--text-muted)"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="hand-phase-btns">
+      <button class="btn btn-primary" style="font-size:12px;padding:7px 14px" onclick="drawOpeningHand()">🔀 Draw Opening Hand</button>
+    </div>
+    <div id="hand-status" style="font-size:13px;color:var(--text-muted);min-height:20px"></div>
+    <div id="hand-cards" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:200px;align-items:center"></div>
+    <div id="mulligan-section" style="display:none;flex-direction:column;gap:10px">
+      <div style="font-size:13px;color:var(--text-muted)">Select cards to mulligan (put to bottom, redraw same number):</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="mulligan-btns">
+        <button class="btn btn-primary" style="font-size:12px;padding:7px 14px" onclick="doMulligan()">↩ Mulligan Selected</button>
+        <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px" onclick="keepHand()">✓ Keep Hand</button>
+      </div>
+    </div>
+    <div id="turn-section" style="display:none;flex-direction:column;gap:10px">
+      <div style="font-size:13px;color:var(--text-muted)">Opening hand kept. Draw your first card for turn?</div>
+      <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;width:fit-content" onclick="drawForTurn()">➕ Draw for Turn</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
