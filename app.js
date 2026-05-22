@@ -164,7 +164,7 @@ function init() {
 
   // Sync deck name display label in DD2 header
   const _ni = document.getElementById('deck-name-input');
-  const _nd = document.getElementById('deck-name-display');
+  const _nd = document.getElementById('deck-name-input');
   if (_ni && _nd) _ni.addEventListener('input', () => { _nd.value = _ni.value; });
 
   document.getElementById('pack-area').style.display = 'none';
@@ -1630,6 +1630,8 @@ function previewCard(id) {
   clearTimeout(_chtTimer);
   const card = getAllCardById(id);
   if (!card) return;
+  const tip = document.getElementById('card-hover-tip');
+  if (!tip) return;
   const imgEl = document.getElementById('cht-img');
   const fbEl  = document.getElementById('cht-fallback');
   if (imgEl) {
@@ -1646,11 +1648,13 @@ function previewCard(id) {
 }
 function clearPreview() {
   _chtTimer = setTimeout(() => {
-      if (tip) tip.classList.remove('visible');
+    const tip = document.getElementById('card-hover-tip');
+    if (tip) tip.classList.remove('visible');
   }, 60);
 }
 // Follow the mouse
 document.addEventListener('mousemove', e => {
+  const tip = document.getElementById('card-hover-tip');
   if (!tip || !tip.classList.contains('visible')) return;
   const tw = 130, th = 190;
   let x = e.clientX + 14, y = e.clientY - th / 2;
@@ -1753,7 +1757,7 @@ function renderDeckPool() {
     const noMoreCopies = (inDeck + fvUsesThisId) >= owned;
     const deckClanNow = getDeckClan();
     const wrongClan = !isClanAllowed(card, deckClanNow);
-    if (wrongClan && deckClanNow) return null;
+    if (wrongClan && deckClanNow && !isGUnit(card)) return null;
     const addBlocked = deckFull || nameMaxed || noMoreCopies;
     let dimReason = nameMaxed ? `Max 4 copies of "${card.name}"` : noMoreCopies ? 'No spare copies' : deckFull ? 'Deck full' : '';
     const svgHandler = card.grade === 0 ? `oncontextmenu="event.preventDefault();setFirstVanguard(getAllCardById('${card.id}'))"` : '';
@@ -1762,7 +1766,7 @@ function renderDeckPool() {
       : `${card.name}${dimReason?' — '+dimReason:''}`;
     return `<div class="pool-card rarity-card-${card.rarity} ${addBlocked?'maxed':''} ${isTheFV?'svg-selected':''}"
       onclick="addToDeck(getAllCardById('${card.id}'))" ${svgHandler} title="${titleTip}"
-     >
+      onmouseenter="previewCard('${card.id}')" onmouseleave="clearPreview()">
       <img data-id="${card.id}" alt="${card.name}" src="${cardImgPath(card.id)}"
            loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display=\'flex\');}})(this)">
       <div class="pc-fallback" style="display:none"><span>${card.icon}</span><span style="font-size:8px;text-align:center;padding:0 4px;color:var(--text-muted)">${card.name}</span></div>
@@ -1801,12 +1805,11 @@ const CROSS_CLAN_ALLOW = {
 };
 
 function isClanAllowed(card, deckClan) {
+  if (isGUnit(card)) return true;
   if (card.crayElemental) return true;
-  if (!deckClan) return true;
-  if (card.clan === deckClan) return true;
+  if (!deckClan || card.clan === deckClan) return true;
   const exceptions = CROSS_CLAN_ALLOW[card.name];
-  if (exceptions && exceptions.includes(deckClan)) return true;
-  return false;
+  return exceptions && exceptions.includes(deckClan);
 }
 
 function isGUnit(card) {
@@ -1840,7 +1843,7 @@ function addToDeck(card) {
 
   const deckClan = getDeckClan();
   if (!isClanAllowed(card, deckClan)) {
-    showToast({icon:'⚠️',name:`Wrong clan — G Units must match deck clan (${deckClan})`,rarity:'C'}); return;
+    showToast({icon:'⚠️',name:`Deck must be 1 clan only (${deckClan})`,rarity:'C'}); return;
   }
 
   if (isGUnit(card)) {
@@ -1879,14 +1882,7 @@ function addToDeck(card) {
 
   if (!deck[card.id]) deck[card.id] = { card, count: 0 };
   deck[card.id].count++;
-  // Full re-render when deck/gzone hits a boundary so all cards update their maxed state
-  const newTotal = isGUnit(card) ? getGZoneTotal() : getDeckTotal();
-  const hitBoundary = isGUnit(card) ? newTotal === 16 : newTotal === DECK_MAX;
-  if (hitBoundary) {
-    renderDeckPool();
-  } else {
-    _refreshPoolCard(card.id);
-  }
+  _refreshPoolCard(card.id);
   renderDeckPanel();
 }
 
@@ -2331,8 +2327,7 @@ function doImportDeck() {
 }
 
 async function exportDeckImage() {
-  const rawName = document.getElementById('deck-name-input').value || 'My Deck';
-  const deckName = prompt('Save deck image as:', rawName) || rawName;
+  const deckName = document.getElementById('deck-name-input').value || 'My Deck';
   const deckClan = getDeckClan() || 'N/A';
   const total    = getDeckTotal();
 
@@ -2395,7 +2390,7 @@ async function exportDeckImage() {
   let sentinelCount = 0, gUnitCount = getGZoneTotal();
   if (fvCard) { const t=getTriggerType(fvCard); if(t&&trigCounts[t]!==undefined) trigCounts[t]++; if(isSentinel(fvCard)) sentinelCount++; }
   for (const {card,count} of Object.values(deck)) { const t=getTriggerType(card); if(t&&trigCounts[t]!==undefined) trigCounts[t]+=count; if(isSentinel(card)) sentinelCount+=count; }
-  const trigColors = {Critical:'#f0b429',Draw:'#e67820',Stand:'#3b82f6',Heal:'#3dbf7f',Sentinel:'#f0b429'};
+  const trigColors = {Critical:'#f0b429',Draw:'#e67820',Stand:'#3b82f6',Heal:'#3dbf7f'};
   let tx = GAP*2;
   for (const [t,cnt] of Object.entries(trigCounts)) {
     if (!cnt) continue;
@@ -3104,6 +3099,4 @@ function drawForTurn() {
     if (_lastFoil) { resetFoil(_lastFoil); _lastFoil = null; }
   }, { passive: true });
 })();
-
-
 init();
