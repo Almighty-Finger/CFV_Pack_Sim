@@ -36,9 +36,11 @@
       <div class="pack-sim-body collapsed" id="pack-sim-body">
 
         <div style="padding:14px 16px 12px">
-          <div class="format-tabs" style="margin-bottom:10px">
-            <button class="format-tab active" id="fmt-og" onclick="setFormat('OG')">⚔️ Original (OG)</button>
-            <button class="format-tab" id="fmt-g" onclick="setFormat('G')">🌀 Generation <span class="format-g-badge">G</span></button>
+          <div class="format-tabs format-tabs-4" style="margin-bottom:10px">
+            <button class="format-tab active" id="fmt-og" onclick="setFormat('OG')">⚔️ OG</button>
+            <button class="format-tab" id="fmt-g" onclick="setFormat('G')">🌀 G</button>
+            <button class="format-tab" id="fmt-v" onclick="setFormat('V')">🔷 V</button>
+            <button class="format-tab" id="fmt-d" onclick="setFormat('D')">💠 D</button>
           </div>
           <div class="set-selector" id="set-selector"></div>
         </div>
@@ -96,7 +98,7 @@
             <span>Packs since last RRR+:</span>
             <span id="pity-count" style="font-weight:700;color:var(--accent)">0</span>
           </div>
-          <button class="btn" style="font-size:10px;padding:3px 10px;background:transparent;border-color:var(--border);margin-left:auto" onclick="openStats()">📊 Stats</button>
+          <button type="button" class="btn btn-secondary pack-stats-btn" onclick="openStats()">📊 Stats</button>
         </div>
       </div>
     </div>
@@ -193,11 +195,7 @@
       <h2>🖼 My Collection</h2>
       <input class="gallery-search" id="gallery-search" type="text" placeholder="Search cards..." oninput="_renderGalleryDebounced()" style="max-width:200px">
       <button class="gallery-filter-toggle" id="gallery-filter-toggle" onclick="toggleGalleryFilters()">⚙ Filters</button>
-      <label class="toggle-wrap">
-        <input type="checkbox" id="gallery-owned-only" onchange="renderGallery()">
-        <span class="toggle-track"><span class="toggle-thumb"></span></span>
-        <span class="toggle-label" style="font-size:12px">Owned only</span>
-      </label>
+      <input type="checkbox" id="gallery-owned-only" style="display:none" onchange="setGalleryOwnedFilter(this.checked?'OWNED':'ALL')">
       <label class="toggle-wrap">
         <input type="checkbox" id="gallery-missing-sort" onchange="renderGallery()">
         <span class="toggle-track"><span class="toggle-thumb"></span></span>
@@ -205,16 +203,29 @@
       </label>
       <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="closeGallery()">✕ Close</button>
     </div>
-    <div style="display:flex;gap:6px;padding:6px 0 4px">
-      <button id="gal-fmt-og" class="fmt-tab active" onclick="setGalleryFormat('OG')">⚔️ Original</button>
-      <button id="gal-fmt-g"  class="fmt-tab"        onclick="setGalleryFormat('G')">🌀 Generation G</button>
+    <div class="filter-row-label">Series</div>
+    <div class="format-tabs format-tabs-5" style="padding:2px 0 6px">
+      <button id="gal-fmt-all" class="fmt-tab format-tab" onclick="setGalleryFormat('ALL')">🌐 All</button>
+      <button id="gal-fmt-og" class="fmt-tab format-tab active" onclick="setGalleryFormat('OG')">⚔️ OG</button>
+      <button id="gal-fmt-g"  class="fmt-tab format-tab"        onclick="setGalleryFormat('G')">🌀 G</button>
+      <button id="gal-fmt-v"  class="fmt-tab format-tab"        onclick="setGalleryFormat('V')">🔷 V</button>
+      <button id="gal-fmt-d"  class="fmt-tab format-tab"        onclick="setGalleryFormat('D')">💠 D</button>
+    </div>
+    <div class="filter-row-label">Format</div>
+    <div class="format-tabs format-tabs-play" style="padding:2px 0 8px">
+      <button id="gal-pf-premium" class="fmt-tab format-tab format-tab-play active" onclick="setGalleryPlayFormat('Premium')">Premium</button>
+      <button id="gal-pf-vpremium" class="fmt-tab format-tab format-tab-play" onclick="setGalleryPlayFormat('V-Premium')">V-Premium</button>
+      <button id="gal-pf-standard" class="fmt-tab format-tab format-tab-play" onclick="setGalleryPlayFormat('Standard')">Standard</button>
     </div>
     <div class="gallery-filter-panel" id="gallery-filter-panel">
-      <div class="gallery-filter-row" id="gallery-set-filters"></div>
-      <div class="gallery-filter-row" id="gallery-clan-filters"></div>
-      <div class="gallery-filter-row" id="gallery-rarity-filters"></div>
-      <div class="gallery-filter-row" id="gallery-type-filters"></div>
-      <div class="gallery-filter-row" id="gallery-grade-filters"></div>
+      <div class="filter-section"><span class="filter-section-label">Cards</span><div class="filter-chip-row" id="gallery-owned-filters"></div></div>
+      <div class="filter-section"><span class="filter-section-label">Set</span><div class="filter-chip-row" id="gallery-set-filters"></div></div>
+      <div class="filter-section"><span class="filter-section-label">Clan</span><div class="filter-chip-row" id="gallery-clan-filters"></div></div>
+      <div class="filter-section"><span class="filter-section-label">Rarity</span><div class="filter-chip-row" id="gallery-rarity-filters"></div></div>
+      <div class="filter-section"><span class="filter-section-label">Type</span><div class="filter-chip-row" id="gallery-type-filters"></div></div>
+      <div class="filter-section"><span class="filter-section-label">Grade</span><div class="filter-chip-row" id="gallery-grade-filters"></div></div>
+      <div class="filter-section"><span class="filter-section-label">Sort by</span><div class="filter-chip-row" id="gallery-sort-by-filters"></div></div>
+      <div class="filter-section"><span class="filter-section-label">Order</span><div class="filter-chip-row" id="gallery-sort-dir-filters"></div></div>
     </div>
   </div>
   <div class="gallery-body">
@@ -228,27 +239,41 @@
     <h2>🃏 Deck Builder</h2>
     <input class="deck-name-input" id="deck-name-input" type="text" value="My Deck" placeholder="Deck name...">
     <input id="deck-search" type="text" placeholder="Search cards..." style="padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;width:160px" oninput="_renderDeckPoolDebounced()">
-    <div style="display:flex;gap:4px">
-      <button id="dp-fmt-og" class="fmt-tab active" onclick="setDeckPoolFormat('OG')">⚔️ OG</button>
-      <button id="dp-fmt-g"  class="fmt-tab"        onclick="setDeckPoolFormat('G')">🌀 G</button>
-    </div>
+    <div id="deck-era-display" style="font-size:10px;color:var(--text-muted);white-space:nowrap"></div>
     <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="toggleDeckFilters()" id="dp-filter-toggle">⚙ Filters</button>
     <label class="toggle-wrap" title="Sort pool by how many copies you own">
-      <input type="checkbox" id="deck-sort-owned" onchange="renderDeckPool()">
+      <input type="checkbox" id="deck-sort-owned" onchange="setDeckSort(this.checked?'owned':'rarity', deckSortDir)">
       <span class="toggle-track"><span class="toggle-thumb"></span></span>
       <span class="toggle-label" style="font-size:11px">Sort owned</span>
     </label>
     <small style="color:var(--text-muted);font-size:10px">Click=add · R-click G0=FV</small>
+    <span id="dp-clan-lock" style="display:none;font-size:10px;padding:4px 10px;border-radius:6px;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.35);color:var(--accent);font-weight:600;white-space:nowrap"></span>
     <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="closeDeckBuilder()">✕</button>
   </div>
 
   <!-- ── Collapsible filter rows ── -->
   <div id="dp-filter-panel" class="dp-filter-panel" style="display:none">
-    <div class="deck-filter-row" id="dp-set-filters"></div>
-    <div class="deck-filter-row" id="dp-clan-filters"></div>
-    <div class="deck-filter-row" id="dp-rarity-filters"></div>
-    <div class="deck-filter-row" id="dp-type-filters"></div>
-    <div class="deck-filter-row" id="dp-grade-filters"></div>
+    <div class="filter-section"><span class="filter-section-label">Series</span>
+      <div class="format-tabs format-tabs-5" style="margin-bottom:6px">
+        <button id="dp-fmt-all" class="fmt-tab format-tab" onclick="setDeckPoolFormat('ALL')">🌐 All</button>
+        <button id="dp-fmt-og" class="fmt-tab format-tab active" onclick="setDeckPoolFormat('OG')">⚔️ OG</button>
+        <button id="dp-fmt-g"  class="fmt-tab format-tab" onclick="setDeckPoolFormat('G')">🌀 G</button>
+        <button id="dp-fmt-v"  class="fmt-tab format-tab" onclick="setDeckPoolFormat('V')">🔷 V</button>
+        <button id="dp-fmt-d"  class="fmt-tab format-tab" onclick="setDeckPoolFormat('D')">💠 D</button>
+      </div>
+    </div>
+    <div class="filter-section"><span class="filter-section-label">Format</span>
+      <div class="filter-chip-row" id="dp-play-format-filters"></div>
+    </div>
+    <div class="filter-section"><span class="filter-section-label">Pool</span><div class="filter-chip-row deck-filter-row" id="dp-pool-filters"></div></div>
+    <input type="checkbox" id="deck-show-all-cards" style="display:none" onchange="setDeckShowAllCards(this.checked)">
+    <div class="filter-section"><span class="filter-section-label">Set</span><div class="filter-chip-row deck-filter-row" id="dp-set-filters"></div></div>
+    <div class="filter-section"><span class="filter-section-label">Clan</span><div class="filter-chip-row deck-filter-row" id="dp-clan-filters"></div></div>
+    <div class="filter-section"><span class="filter-section-label">Rarity</span><div class="filter-chip-row deck-filter-row" id="dp-rarity-filters"></div></div>
+    <div class="filter-section"><span class="filter-section-label">Type</span><div class="filter-chip-row deck-filter-row" id="dp-type-filters"></div></div>
+    <div class="filter-section"><span class="filter-section-label">Grade</span><div class="filter-chip-row deck-filter-row" id="dp-grade-filters"></div></div>
+    <div class="filter-section"><span class="filter-section-label">Sort by</span><div class="filter-chip-row deck-filter-row" id="dp-sort-by-filters"></div></div>
+    <div class="filter-section"><span class="filter-section-label">Order</span><div class="filter-chip-row deck-filter-row" id="dp-sort-dir-filters"></div></div>
   </div>
   <!-- ── 2-col deck body: collection pool | stats + deck list ── -->
   <div class="deck-body">
@@ -264,6 +289,7 @@
 
       <!-- Header: name + counts -->
       <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+        <div id="deck-era-panel" style="font-size:11px;line-height:1.45;color:var(--text-muted)"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <div style="display:flex;align-items:center;gap:6px;flex:1">
             <span style="font-size:10px;font-weight:700;color:var(--text-muted)">DECK</span>
@@ -358,9 +384,9 @@
 </div>
 
 <div class="zoom-overlay" id="stats-overlay" onclick="if(event.target===this)closeStats()">
-  <div class="zoom-card" style="width:420px;max-width:95vw;max-height:85vh;overflow-y:auto">
-    <button class="zoom-close" onclick="closeStats()">✕</button>
-    <div style="padding:20px">
+  <div class="modal-dialog modal-dialog-wide">
+    <button type="button" class="modal-close" onclick="closeStats()" aria-label="Close">✕</button>
+    <div class="modal-dialog-body">
       <h3 style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;margin-bottom:16px">📊 Session Statistics</h3>
       <div id="stats-content"></div>
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
@@ -391,9 +417,9 @@
 <div class="toast-container" id="toast-container"></div>
 
 <div class="zoom-overlay" id="import-overlay" onclick="if(event.target===this)closeImportDeck()">
-  <div class="zoom-card" style="width:500px;max-width:95vw;max-height:85vh;overflow-y:auto">
-    <button class="zoom-close" onclick="closeImportDeck()">✕</button>
-    <div style="padding:20px">
+  <div class="modal-dialog">
+    <button class="modal-close" onclick="closeImportDeck()" aria-label="Close">✕</button>
+    <div class="modal-dialog-body">
       <h3 style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px">📥 Import Deck List</h3>
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px">Paste a deck list exported from this simulator (or matching format: <code style="font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">Nx Card Name (SETID_NUM) [RRR]</code>). Cards you don't own will be skipped.</p>
       <textarea id="import-textarea" placeholder="Paste your deck list here…" style="width:100%;height:220px;box-sizing:border-box;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;font-family:monospace;resize:vertical"></textarea>

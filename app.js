@@ -1,5 +1,133 @@
 let currentSetIdx = -1;
 let currentFormat = 'OG';
+const SERIES_FORMATS = ['ALL', 'OG', 'G', 'V', 'D'];
+const PLAY_FORMATS = ['Premium', 'V-Premium', 'Standard'];
+
+function getSetFormat(set) {
+  if (!set) return 'OG';
+  const f = set.format;
+  if (f === 'G' || f === 'V' || f === 'D') return f;
+  return 'OG';
+}
+
+function setMatchesFormat(set, fmt) {
+  return getSetFormat(set) === fmt;
+}
+
+function cardIdMatchesFormat(cardId, fmt) {
+  const setId = cardId.split('_')[0];
+  const set = SETS.find(s => s.id === setId);
+  return setMatchesFormat(set, fmt);
+}
+
+function cardIdMatchesSeries(cardId, series) {
+  if (series === 'ALL') return true;
+  return cardIdMatchesFormat(cardId, series);
+}
+
+function cardMatchesPlayFormat(cardId, playFmt) {
+  if (playFmt === 'Premium') return true;
+  if (playFmt === 'V-Premium') return cardIdMatchesFormat(cardId, 'V');
+  if (playFmt === 'Standard') return cardIdMatchesFormat(cardId, 'D');
+  return true;
+}
+
+function getCardPlayFormat(card) {
+  if (!card) return 'Premium';
+  const f = getSetFormat(SETS.find(s => s.id === card.id.split('_')[0]));
+  if (f === 'D') return 'Standard';
+  if (f === 'V') return 'V-Premium';
+  return 'Premium';
+}
+
+function detectDeckEraFromCards() {
+  let hasD = false, hasV = false;
+  const check = (card) => {
+    if (!card) return;
+    const pf = getCardPlayFormat(card);
+    if (pf === 'Standard') hasD = true;
+    else if (pf === 'V-Premium') hasV = true;
+  };
+  check(fvCard);
+  for (const { card } of Object.values(deck)) check(card);
+  if (hasD) return 'Standard';
+  if (hasV) return 'V-Premium';
+  return 'Premium';
+}
+
+function updateFormatTabUI(prefix, fmt) {
+  for (const f of SERIES_FORMATS) {
+    const el = document.getElementById(prefix + f.toLowerCase());
+    if (el) el.classList.toggle('active', fmt === f);
+  }
+}
+
+function updatePlayFormatTabUI(prefix, playFmt) {
+  for (const pf of PLAY_FORMATS) {
+    const id = prefix + pf.toLowerCase().replace(/-/g, '');
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', playFmt === pf);
+  }
+}
+
+function filterChipBtn(label, active, onclick) {
+  return `<button type="button" class="filter-btn ${active ? 'active' : ''}" style="font-size:10px;padding:3px 10px;white-space:nowrap" onclick="${onclick}">${label}</button>`;
+}
+
+const SORT_RARITY_ORDER = ['C','R','RR','RRR','SP','LR','SCR','GR','SGR','OR','TD'];
+
+function getCardSeriesTag(cardId) {
+  const setId = cardId.split('_')[0];
+  const set = SETS.find(s => s.id === setId);
+  return getSetFormat(set);
+}
+
+function seriesTagHtml(cardId) {
+  const series = getCardSeriesTag(cardId);
+  return `<span class="card-series-tag series-${series}" title="${series} Series">${series}</span>`;
+}
+
+function parseCardNumSort(id) {
+  const m = id.match(/_(\d+)/);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+function compareCardsForSort(a, b, sortBy) {
+  if (sortBy === 'rarity') {
+    const ia = SORT_RARITY_ORDER.indexOf(a.rarity);
+    const ib = SORT_RARITY_ORDER.indexOf(b.rarity);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  }
+  if (sortBy === 'grade') {
+    const g = (a.grade ?? 0) - (b.grade ?? 0);
+    return g !== 0 ? g : a.name.localeCompare(b.name);
+  }
+  if (sortBy === 'setno') {
+    const setA = a.id.split('_')[0];
+    const setB = b.id.split('_')[0];
+    let c = setA.localeCompare(setB, undefined, { numeric: true });
+    if (c === 0) c = parseCardNumSort(a.id) - parseCardNumSort(b.id);
+    return c;
+  }
+  if (sortBy === 'owned') {
+    return (collection[b.id]?.count || 0) - (collection[a.id]?.count || 0);
+  }
+  return a.name.localeCompare(b.name);
+}
+
+function sortCardList(cards, sortBy, sortDir, missingFirst) {
+  const dir = sortDir === 'asc' ? 1 : -1;
+  return [...cards].sort((a, b) => {
+    if (missingFirst) {
+      const ao = collection[a.id]?.count > 0 ? 1 : 0;
+      const bo = collection[b.id]?.count > 0 ? 1 : 0;
+      if (ao !== bo) return ao - bo;
+    }
+    const cmp = compareCardsForSort(a, b, sortBy);
+    if (cmp !== 0) return cmp * dir;
+    return a.id.localeCompare(b.id) * dir;
+  });
+}
 let packPanelOpen = false;
 let collection = {};
 let history = [];
@@ -261,8 +389,7 @@ function togglePackSim() {
 
 function setFormat(fmt) {
   currentFormat = fmt;
-  document.getElementById('fmt-og').classList.toggle('active', fmt==='OG');
-  document.getElementById('fmt-g').classList.toggle('active', fmt==='G');
+  updateFormatTabUI('fmt-', fmt);
   packPanelOpen = false;
   currentSetIdx = -1;
   selectedTD = null;
@@ -275,8 +402,11 @@ function setFormat(fmt) {
 function renderSetButtons() {
   const el = document.getElementById('set-selector');
   function numSort(a,b){return parseInt(a.s.id.replace(/\D/g,''))-parseInt(b.s.id.replace(/\D/g,''));}
-  const isGFormat = s => s.format === 'G';
-  const inFmt = s => currentFormat === 'G' ? isGFormat(s) : !isGFormat(s);
+  const inFmt = s => currentFormat === 'ALL' || setMatchesFormat(s, currentFormat);
+  if (!SETS.some(inFmt)) {
+    el.innerHTML = `<div style="padding:20px 16px;color:var(--text-muted);font-size:13px;text-align:center;line-height:1.5">No <b style="color:var(--text)">${currentFormat} Series</b> sets in the database yet.<br><span style="font-size:11px">Add sets with <code style="font-size:10px">format:"${currentFormat}"</code> in data.js when ready.</span></div>`;
+    return;
+  }
   const btSets  = SETS.map((s,i)=>({s,i})).filter(({s})=>/^BT/.test(s.id)&&inFmt(s)).sort(numSort);
   const ebSets  = SETS.map((s,i)=>({s,i})).filter(({s})=>/^EB/.test(s.id)&&inFmt(s)).sort(numSort);
   const gbtSets = SETS.map((s,i)=>({s,i})).filter(({s})=>s.id.startsWith('GBT')&&inFmt(s)).sort(numSort);
@@ -375,7 +505,7 @@ function renderSetButtons() {
       </div>
       ${tdG.body}${gbtG.body}${gebG.body}${gcbG.body}
     `;
-  } else {
+  } else if (currentFormat === 'OG') {
     const btG  = groupHtml('bt','Booster Sets (BT)',btSets);
     const ebG  = groupHtml('eb','Extra Boosters (EB)',ebSets);
     el.innerHTML = `
@@ -384,6 +514,11 @@ function renderSetButtons() {
       </div>
       ${tdG.body}${btG.body}${ebG.body}
     `;
+  } else {
+    const seriesLabel = currentFormat === 'V' ? 'V Series' : 'D Series';
+    const allSets = SETS.map((s,i)=>({s,i})).filter(({s})=>setMatchesFormat(s,currentFormat)).sort(numSort);
+    const allG = groupHtml(currentFormat.toLowerCase(), seriesLabel, allSets);
+    el.innerHTML = `<div class="set-group-headers">${allG.header}</div>${allG.body}`;
   }
 }
 
@@ -1330,6 +1465,14 @@ let gallerySetFilter = 'ALL';
 let _galRenderEpoch = 0;
 let galleryFormat = 'OG';
 let deckPoolFormat = 'OG';
+let galleryPlayFormat = 'Premium';
+let deckPlayFormat = 'Premium';
+let galleryOwnedFilter = 'ALL';
+let gallerySortBy = 'rarity';
+let gallerySortDir = 'desc';
+let deckShowAllCards = false;
+let deckSortBy = 'rarity';
+let deckSortDir = 'desc';
 
 let galleryFiltersOpen = false;
 function toggleGalleryFilters() {
@@ -1338,53 +1481,100 @@ function toggleGalleryFilters() {
   document.getElementById('gallery-filter-toggle').classList.toggle('active', galleryFiltersOpen);
 }
 function openGallery() {
-  buildGalleryFilters();
-  renderGallery();
-  document.getElementById('gallery-overlay').classList.add('active');
+  try {
+    updateFormatTabUI('gal-fmt-', galleryFormat);
+    updatePlayFormatTabUI('gal-pf-', galleryPlayFormat);
+    buildGalleryFilters();
+    renderGallery();
+    document.getElementById('gallery-overlay').classList.add('active');
+  } catch (e) {
+    console.error('openGallery failed', e);
+    showToast({ icon: '❌', name: 'Gallery failed to open — check console', rarity: 'C' });
+  }
 }
 function closeGallery() { document.getElementById('gallery-overlay').classList.remove('active'); }
 
 function buildGalleryFilters() {
+  const btn = filterChipBtn;
   const allCards = getAllSetCards();
   const EXTRA_CLANS = ['Angel Feather','Dimension Police','Gear Chronicle','Genesis','Link Joker','Neo Nectar','Pale Moon'];
   const clans = ['ALL', ...new Set([...allCards.map(c => c.clan), ...EXTRA_CLANS])].sort((a,b) => a==='ALL'?-1:a.localeCompare(b));
-  document.getElementById('gallery-set-filters') && (document.getElementById('gallery-set-filters').innerHTML = ['ALL',...SETS.map(s=>s.id)].map(s => `<button class="filter-btn ${s===gallerySetFilter?'active':''}" onclick="setGallerySet('${s}')">${s==='ALL'?'All Sets':s}</button>`).join(''));
   const RARITY_ORDER_ALL = ['ALL','TD','C','R','RR','RRR','SP','LR','SCR','GR','SGR'];
   const presentRarities = new Set(getAllSetCards().map(c=>c.rarity));
   const rarities = RARITY_ORDER_ALL.filter(r => r==='ALL'||r==='TD'||presentRarities.has(r));
-  const _galIsG = s => s.format === 'G';
-  const _galInFmt = s => galleryFormat === 'G' ? _galIsG(s) : !_galIsG(s);
+  const _galInFmt = s => galleryFormat === 'ALL' || setMatchesFormat(s, galleryFormat);
   const sets = ['ALL',...SETS.filter(s=>s.packSize!==50&&_galInFmt(s)).map(s=>s.id).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),...SETS.filter(s=>s.packSize===50&&_galInFmt(s)).map(s=>s.id).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}))];
   document.getElementById('gallery-set-filters').innerHTML = sets.map(s =>
-    `<button class="filter-btn ${s===gallerySetFilter?'active':''}" onclick="setGallerySet('${s}')">${s==='ALL'?'All Sets':s}</button>`
+    btn(s==='ALL'?'All Sets':s, s===gallerySetFilter, `setGallerySet('${s}')`)
   ).join('');
   document.getElementById('gallery-rarity-filters').innerHTML = rarities.map(r =>
-    `<button class="filter-btn ${r===galleryRarityFilter?'active':''}" onclick="setGalleryRarity('${r}')">${r==='ALL'?'All':r}</button>`
+    btn(r==='ALL'?'All':r, r===galleryRarityFilter, `setGalleryRarity('${r}')`)
   ).join('');
   document.getElementById('gallery-clan-filters').innerHTML = clans.map(c =>
-    `<button class="filter-btn ${c===galleryClanFilter?'active':''}" onclick="setGalleryClan('${c}')">${c==='ALL'?'All Clans':c}</button>`
+    btn(c==='ALL'?'All Clans':c, c===galleryClanFilter, `setGalleryClan('${c}')`)
   ).join('');
   const types = ['ALL','Normal','Trigger','🗡 Critical','🃏 Draw','🔄 Stand','💚 Heal','Sentinel','Wishlist'];
   document.getElementById('gallery-type-filters').innerHTML = types.map(t =>
-    `<button class="filter-btn ${t===galleryTypeFilter?'active':''}" onclick="setGalleryType('${t}')">${t==='ALL'?'All Types':t}</button>`
+    btn(t==='ALL'?'All Types':t, t===galleryTypeFilter, `setGalleryType('${t}')`)
   ).join('');
-  const maxGrade = Math.max(...getAllSetCards().map(c=>c.grade));
+  const maxGrade = Math.max(0, ...getAllSetCards().map(c=>c.grade));
   const grades = ['ALL',...Array.from({length:maxGrade+1},(_,i)=>String(i))];
   const gradeButtons = grades.map(g =>
-    `<button class="filter-btn ${g===galleryGradeFilter?'active':''}" onclick="setGalleryGrade('${g}')">${g==='ALL'?'All Grades':'G'+g}</button>`
+    btn(g==='ALL'?'All Grades':'G'+g, g===galleryGradeFilter, `setGalleryGrade('${g}')`)
   );
   const hasGUnits = getAllSetCards().some(c=>isGUnit(c));
   const gUnitBtn = hasGUnits
-    ? `<button class="filter-btn ${'GUNITS'===galleryGradeFilter?'active':''}" onclick="setGalleryGrade('GUNITS')">✨ G Units</button>`
+    ? btn('✨ G Units', 'GUNITS'===galleryGradeFilter, `setGalleryGrade('GUNITS')`)
     : '';
   document.getElementById('gallery-grade-filters').innerHTML = gradeButtons.join('') + gUnitBtn;
+  const ownedEl = document.getElementById('gallery-owned-filters');
+  if (ownedEl) {
+    ownedEl.innerHTML = [
+      btn('All Cards', galleryOwnedFilter === 'ALL', `setGalleryOwnedFilter('ALL')`),
+      btn('Owned Only', galleryOwnedFilter === 'OWNED', `setGalleryOwnedFilter('OWNED')`),
+    ].join('');
+  }
+  const sortByEl = document.getElementById('gallery-sort-by-filters');
+  if (sortByEl) {
+    sortByEl.innerHTML = [
+      ['rarity','Rarity'],['grade','Grade'],['setno','Set No.'],['name','Name'],
+    ].map(([k, lab]) => btn(lab, gallerySortBy === k, `setGallerySort('${k}','${gallerySortDir}')`)).join('');
+  }
+  const sortDirEl = document.getElementById('gallery-sort-dir-filters');
+  if (sortDirEl) {
+    sortDirEl.innerHTML = [
+      btn('↑ Asc', gallerySortDir === 'asc', `setGallerySort('${gallerySortBy}','asc')`),
+      btn('↓ Desc', gallerySortDir === 'desc', `setGallerySort('${gallerySortBy}','desc')`),
+    ].join('');
+  }
+}
+
+function setGallerySort(by, dir) {
+  gallerySortBy = by;
+  gallerySortDir = dir;
+  buildGalleryFilters();
+  renderGallery();
+}
+
+function setGalleryPlayFormat(pf) {
+  galleryPlayFormat = pf;
+  updatePlayFormatTabUI('gal-pf-', pf);
+  buildGalleryFilters();
+  renderGallery();
+}
+
+function setGalleryOwnedFilter(mode) {
+  galleryOwnedFilter = mode;
+  const chk = document.getElementById('gallery-owned-only');
+  if (chk) chk.checked = mode === 'OWNED';
+  buildGalleryFilters();
+  renderGallery();
 }
 
 function setGalleryFormat(fmt) {
   galleryFormat = fmt;
   gallerySetFilter = 'ALL';
-  document.getElementById('gal-fmt-og').classList.toggle('active', fmt==='OG');
-  document.getElementById('gal-fmt-g').classList.toggle('active', fmt==='G');
+  updateFormatTabUI('gal-fmt-', fmt);
   buildGalleryFilters(); renderGallery();
 }
 function setGalleryRarity(r) { galleryRarityFilter=r; buildGalleryFilters(); renderGallery(); }
@@ -1409,16 +1599,15 @@ function _renderCollDebounced() {
 }
 
 function renderGallery() {
-  const search = document.getElementById('gallery-search').value.toLowerCase();
-  const ownedOnly = document.getElementById('gallery-owned-only').checked;
+  const search = (document.getElementById('gallery-search')?.value || '').toLowerCase();
+  const ownedOnly = galleryOwnedFilter === 'OWNED';
 
   const setFilterIds = gallerySetFilter === 'ALL' ? null
     : new Set((SETS.find(s => s.id === gallerySetFilter)?.cards || []).map(c => c.id));
 
-  const _galIsG = id => { const s = SETS.find(x => x.id === id.split('_')[0]); return !!(s && s.format === 'G'); };
-
   const filtered = getAllSetCards().filter(card => {
-    if (galleryFormat === 'G' ? !_galIsG(card.id) : _galIsG(card.id)) return false;
+    if (!cardIdMatchesSeries(card.id, galleryFormat)) return false;
+    if (!cardMatchesPlayFormat(card.id, galleryPlayFormat)) return false;
     if (ownedOnly && !(collection[card.id]?.count > 0)) return false;
     if (setFilterIds && !setFilterIds.has(card.id)) return false;
     if (galleryRarityFilter !== 'ALL') { const rMatch = galleryRarityFilter === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR') : card.rarity === galleryRarityFilter; if (!rMatch) return false; }
@@ -1441,13 +1630,14 @@ function renderGallery() {
   });
 
   const missingFirst = document.getElementById('gallery-missing-sort')?.checked;
-  if (missingFirst) filtered.sort((a,b) => { const ao=collection[a.id]?.count>0?1:0,bo=collection[b.id]?.count>0?1:0; return ao-bo; });
+  const sorted = sortCardList(filtered, gallerySortBy, gallerySortDir, missingFirst);
   const grid = document.getElementById('gallery-grid');
 
   function makeGalleryCard(card) {
     const owned = collection[card.id];
     const count = owned ? owned.count : 0;
     return `<div class="gallery-card rarity-card-${card.rarity} ${count===0?'not-owned':''}" onclick="openZoom(getAllCardById('${card.id}'))">
+      ${seriesTagHtml(card.id)}
       <img class="gc-img" data-id="${card.id}" alt="${card.name}"
            loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)"
            src="${cardImgPath(card.id)}">
@@ -1462,14 +1652,14 @@ function renderGallery() {
 
   const CHUNK = 80;
   const _myGalEpoch = ++_galRenderEpoch;
-  grid.innerHTML = filtered.slice(0, CHUNK).map(makeGalleryCard).join('');
+  grid.innerHTML = sorted.slice(0, CHUNK).map(makeGalleryCard).join('');
   let idx = CHUNK;
   function appendChunk() {
     if (_myGalEpoch !== _galRenderEpoch) return;
-    if (idx >= filtered.length) return;
+    if (idx >= sorted.length) return;
     const frag = document.createDocumentFragment();
     const div = document.createElement('div');
-    div.innerHTML = filtered.slice(idx, idx + CHUNK).map(makeGalleryCard).join('');
+    div.innerHTML = sorted.slice(idx, idx + CHUNK).map(makeGalleryCard).join('');
     while (div.firstChild) frag.appendChild(div.firstChild);
     grid.appendChild(frag);
     idx += CHUNK;
@@ -1563,6 +1753,28 @@ function getCardNum(id) {
   return m ? m[1] : id;
 }
 
+function getCardSetLabel(id) {
+  const setId = id.split('_')[0] || '';
+  const num = getCardNum(id);
+  return setId ? `${setId} · ${num}` : num;
+}
+
+const FOIL_RARITIES = new Set(['RRR','SP','GR','LR','SCR','SGR','OR']);
+
+function syncDeckClanLock() {
+  const locked = getDeckClan();
+  if (locked) deckPoolClanFilter = locked;
+  const lockEl = document.getElementById('dp-clan-lock');
+  if (lockEl) {
+    if (locked) {
+      lockEl.style.display = '';
+      lockEl.textContent = '🔒 ' + locked;
+    } else {
+      lockEl.style.display = 'none';
+    }
+  }
+}
+
 function isFirstVanguard(card) { return card.grade === 0; }
 
 function isTrigger(card) {
@@ -1608,6 +1820,8 @@ function getDeckClan() {
 }
 
 function openDeckBuilder() {
+  syncDeckClanLock();
+  updatePlayFormatTabUI('dp-pf-', deckPlayFormat);
   buildDeckPoolFilters();
   renderDeckPool();
   renderDeckPanel();
@@ -1672,10 +1886,12 @@ let deckPoolGradeFilter = 'ALL';
 let deckPoolSetFilter = 'ALL';
 let deckPoolRarityFilter = 'ALL';
 function buildDeckPoolFilters() {
+  syncDeckClanLock();
+  const lockedClan = getDeckClan();
   const EXTRA_CLANS = ['Angel Feather','Dimension Police','Gear Chronicle','Genesis','Link Joker','Neo Nectar','Pale Moon'];
-  const clans = ['ALL', ...new Set([...getAllSetCards().map(c=>c.clan), ...EXTRA_CLANS])].sort((a,b)=>a==='ALL'?-1:a.localeCompare(b));
-  const _dpIsG = s => s.format === 'G';
-  const _dpInFmt = s => deckPoolFormat === 'G' ? _dpIsG(s) : !_dpIsG(s);
+  let clans = ['ALL', ...new Set([...getAllSetCards().map(c=>c.clan), ...EXTRA_CLANS])].sort((a,b)=>a==='ALL'?-1:a.localeCompare(b));
+  if (lockedClan) clans = [lockedClan];
+  const _dpInFmt = s => deckPoolFormat === 'ALL' || setMatchesFormat(s, deckPoolFormat);
   const sets = ['ALL', ...SETS.filter(s => _dpInFmt(s)).map(s => s.id)];
   const RARITY_ORDER_ALL2 = ['ALL','C','R','RR','RRR','SP','LR','SCR','GR','SGR'];
   const presentRarities2 = new Set(getAllSetCards().map(c=>c.rarity));
@@ -1683,40 +1899,102 @@ function buildDeckPoolFilters() {
   const types = ['ALL','Normal','Trigger','🗡 Critical','🃏 Draw','🔄 Stand','💚 Heal','Sentinel'];
   const maxGrade2 = Math.max(...getAllSetCards().map(c=>c.grade));
   const grades = ['ALL',...Array.from({length:maxGrade2+1},(_,i)=>String(i))];
-  const btn = (label, active, onclick) =>
-    `<button class="filter-btn ${active?'active':''}" style="font-size:10px;padding:3px 8px;white-space:nowrap" onclick="${onclick}">${label}</button>`;
+  const btn = filterChipBtn;
   document.getElementById('dp-set-filters').innerHTML = sets.map(s => btn(s==='ALL'?'All Sets':s, s===deckPoolSetFilter, `setDeckPoolSet('${s}')`)).join('');
-  document.getElementById('dp-clan-filters').innerHTML = clans.map(c => btn(c==='ALL'?'All Clans':c, c===deckPoolClanFilter, `setDeckPoolClan('${c}')`)).join('');
+  document.getElementById('dp-clan-filters').innerHTML = lockedClan
+    ? `<span class="filter-btn active filter-locked" style="font-size:10px;padding:4px 10px;cursor:default">🔒 ${lockedClan}</span>`
+    : clans.map(c => btn(c==='ALL'?'All Clans':c, c===deckPoolClanFilter, `setDeckPoolClan('${c}')`)).join('');
   document.getElementById('dp-rarity-filters').innerHTML = rarities.map(r => btn(r==='ALL'?'All Rarity':r, r===deckPoolRarityFilter, `setDeckPoolRarity('${r}')`)).join('');
   document.getElementById('dp-type-filters').innerHTML = types.map(t => btn(t==='ALL'?'All Types':t, t===deckPoolTypeFilter, `setDeckPoolType('${t}')`)).join('');
   const hasGUnitsDP = getAllSetCards().some(c=>isGUnit(c));
   const gUnitBtnDP = hasGUnitsDP ? btn('✨ G Units','GUNITS'===deckPoolGradeFilter,"setDeckPoolGrade('GUNITS')") : '';
   document.getElementById('dp-grade-filters').innerHTML =
     grades.map(g => btn(g==='ALL'?'All Grades':'Grade '+g, g===deckPoolGradeFilter, `setDeckPoolGrade('${g}')`)).join('') + gUnitBtnDP;
+  const poolEl = document.getElementById('dp-pool-filters');
+  if (poolEl) {
+    poolEl.innerHTML = [
+      btn('Owned Only', !deckShowAllCards, `setDeckShowAllCards(false)`),
+      btn('All Cards', deckShowAllCards, `setDeckShowAllCards(true)`),
+    ].join('');
+  }
+  const playFmtEl = document.getElementById('dp-play-format-filters');
+  if (playFmtEl) {
+    playFmtEl.innerHTML = PLAY_FORMATS.map(pf =>
+      btn(pf, deckPlayFormat === pf, `setDeckPlayFormat('${pf}')`)
+    ).join('');
+  }
+  const sortByEl = document.getElementById('dp-sort-by-filters');
+  if (sortByEl) {
+    sortByEl.innerHTML = [
+      ['rarity','Rarity'],['grade','Grade'],['setno','Set No.'],['name','Name'],['owned','Owned'],
+    ].map(([k, lab]) => btn(lab, deckSortBy === k, `setDeckSort('${k}','${deckSortDir}')`)).join('');
+  }
+  const sortDirEl = document.getElementById('dp-sort-dir-filters');
+  if (sortDirEl) {
+    sortDirEl.innerHTML = [
+      btn('↑ Asc', deckSortDir === 'asc', `setDeckSort('${deckSortBy}','asc')`),
+      btn('↓ Desc', deckSortDir === 'desc', `setDeckSort('${deckSortBy}','desc')`),
+    ].join('');
+  }
+}
+
+function setDeckSort(by, dir) {
+  deckSortBy = by;
+  deckSortDir = dir;
+  const ownedChk = document.getElementById('deck-sort-owned');
+  if (ownedChk) ownedChk.checked = by === 'owned';
+  buildDeckPoolFilters();
+  renderDeckPool();
+}
+
+function setDeckPlayFormat(pf) {
+  deckPlayFormat = pf;
+  updatePlayFormatTabUI('dp-pf-', pf);
+  buildDeckPoolFilters();
+  renderDeckPool();
+  renderDeckPanel();
 }
 function setDeckPoolFormat(fmt) {
   deckPoolFormat = fmt;
   deckPoolSetFilter = 'ALL';
-  document.getElementById('dp-fmt-og').classList.toggle('active', fmt==='OG');
-  document.getElementById('dp-fmt-g').classList.toggle('active', fmt==='G');
+  updateFormatTabUI('dp-fmt-', fmt);
   buildDeckPoolFilters(); renderDeckPool();
 }
-function setDeckPoolClan(c) { deckPoolClanFilter=c; buildDeckPoolFilters(); renderDeckPool(); }
+
+function setDeckShowAllCards(on) {
+  deckShowAllCards = !!on;
+  const chk = document.getElementById('deck-show-all-cards');
+  if (chk) chk.checked = deckShowAllCards;
+  buildDeckPoolFilters();
+  renderDeckPool();
+}
+function setDeckPoolClan(c) {
+  const locked = getDeckClan();
+  if (locked && c !== locked) {
+    showToast({icon:'🔒',name:`Clan locked to ${locked}`,rarity:'C'});
+    return;
+  }
+  deckPoolClanFilter=c;
+  buildDeckPoolFilters();
+  renderDeckPool();
+}
 function setDeckPoolType(t) { deckPoolTypeFilter=t; buildDeckPoolFilters(); renderDeckPool(); }
 function setDeckPoolGrade(g) { deckPoolGradeFilter=g; buildDeckPoolFilters(); renderDeckPool(); }
 function setDeckPoolSet(s) { deckPoolSetFilter=s; buildDeckPoolFilters(); renderDeckPool(); }
 function setDeckPoolRarity(r) { deckPoolRarityFilter=r; buildDeckPoolFilters(); renderDeckPool(); }
 
 function renderDeckPool() {
+  syncDeckClanLock();
   const deckSearch = (document.getElementById('deck-search')?.value||'').toLowerCase();
+  const lockedClan = getDeckClan();
   const dpSetFilterIds = deckPoolSetFilter === 'ALL' ? null
     : new Set((SETS.find(s => s.id === deckPoolSetFilter)?.cards || []).map(c => c.id));
 
   const allCards = getAllSetCards().filter(card => {
-    if (!(collection[card.id]?.count > 0)) return false;
-    const _cardSet = SETS.find(s=>s.id===card.id.split('_')[0]);
-    const _cardIsG = !!(_cardSet && _cardSet.format==='G');
-    if (deckPoolFormat === 'G' ? !_cardIsG : _cardIsG) return false;
+    if (!deckShowAllCards && !(collection[card.id]?.count > 0)) return false;
+    if (lockedClan && !isClanAllowed(card, lockedClan)) return false;
+    if (!cardIdMatchesSeries(card.id, deckPoolFormat)) return false;
+    if (!cardMatchesPlayFormat(card.id, deckPlayFormat)) return false;
     if (dpSetFilterIds && !dpSetFilterIds.has(card.id)) return false;
     if (deckPoolRarityFilter !== 'ALL') { const rMatch = deckPoolRarityFilter === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR') : card.rarity === deckPoolRarityFilter; if (!rMatch) return false; }
     if (deckPoolClanFilter !== 'ALL' && card.clan !== deckPoolClanFilter) return false;
@@ -1737,8 +2015,10 @@ function renderDeckPool() {
   });
 
   if (document.getElementById('deck-sort-owned')?.checked) {
-    allCards.sort((a,b) => (collection[b.id]?.count||0) - (collection[a.id]?.count||0));
+    deckSortBy = 'owned';
+    deckSortDir = 'desc';
   }
+  const sortedCards = sortCardList(allCards, deckSortBy, deckSortDir, false);
 
   const deckCounts = {};
   for (const [id, {count}] of Object.entries(deck)) deckCounts[id] = count;
@@ -1748,6 +2028,7 @@ function renderDeckPool() {
 
   function makeDeckCard(card) {
     const owned = collection[card.id]?.count || 0;
+    const unowned = owned < 1;
     const inDeck = deckCounts[card.id] || 0;
     const isTheFV = fvCard && fvCard.id === card.id;
     const deckFull = isGUnit(card) ? getGZoneTotal() >= 16 : getDeckTotal() >= DECK_MAX;
@@ -1757,16 +2038,17 @@ function renderDeckPool() {
     const noMoreCopies = (inDeck + fvUsesThisId) >= owned;
     const deckClanNow = getDeckClan();
     const wrongClan = !isClanAllowed(card, deckClanNow);
-    if (wrongClan && deckClanNow && !isGUnit(card)) return null;
-    const addBlocked = deckFull || nameMaxed || noMoreCopies;
-    let dimReason = nameMaxed ? `Max 4 copies of "${card.name}"` : noMoreCopies ? 'No spare copies' : deckFull ? 'Deck full' : '';
+    if (wrongClan && deckClanNow) return null;
+    const addBlocked = unowned || deckFull || nameMaxed || noMoreCopies;
+    let dimReason = unowned ? 'Not in collection' : nameMaxed ? `Max 4 copies of "${card.name}"` : noMoreCopies ? 'No spare copies' : deckFull ? 'Deck full' : '';
     const svgHandler = card.grade === 0 ? `oncontextmenu="event.preventDefault();setFirstVanguard(getAllCardById('${card.id}'))"` : '';
     const titleTip = card.grade===0
       ? `${card.name} — Click: add trigger | Right-click: set as SVG${dimReason?' ('+dimReason+')':''}`
       : `${card.name}${dimReason?' — '+dimReason:''}`;
-    return `<div class="pool-card rarity-card-${card.rarity} ${addBlocked?'maxed':''} ${isTheFV?'svg-selected':''}"
+    return `<div class="pool-card rarity-card-${card.rarity} ${addBlocked?'maxed':''} ${unowned?'not-owned':''} ${isTheFV?'svg-selected':''}"
       onclick="addToDeck(getAllCardById('${card.id}'))" ${svgHandler} title="${titleTip}"
       onmouseenter="previewCard('${card.id}')" onmouseleave="clearPreview()">
+      ${seriesTagHtml(card.id)}
       <img data-id="${card.id}" alt="${card.name}" src="${cardImgPath(card.id)}"
            loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display=\'flex\');}})(this)">
       <div class="pc-fallback" style="display:none"><span>${card.icon}</span><span style="font-size:8px;text-align:center;padding:0 4px;color:var(--text-muted)">${card.name}</span></div>
@@ -1782,14 +2064,14 @@ function renderDeckPool() {
 
   const DP_CHUNK = 80;
   const _myEpoch = ++_dpRenderEpoch;
-  dpGrid.innerHTML = allCards.slice(0, DP_CHUNK).map(makeDeckCard).filter(Boolean).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Open packs to get cards first!</div>';
+  dpGrid.innerHTML = sortedCards.slice(0, DP_CHUNK).map(makeDeckCard).filter(Boolean).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:20px">Open packs to get cards first!</div>';
   let dpIdx = DP_CHUNK;
   function appendDpChunk() {
     if (_myEpoch !== _dpRenderEpoch) return;
-    if (dpIdx >= allCards.length) return;
+    if (dpIdx >= sortedCards.length) return;
     const frag = document.createDocumentFragment();
     const div = document.createElement('div');
-    div.innerHTML = allCards.slice(dpIdx, dpIdx + DP_CHUNK).map(makeDeckCard).filter(Boolean).join('');
+    div.innerHTML = sortedCards.slice(dpIdx, dpIdx + DP_CHUNK).map(makeDeckCard).filter(Boolean).join('');
     while (div.firstChild) frag.appendChild(div.firstChild);
     dpGrid.appendChild(frag);
     dpIdx += DP_CHUNK;
@@ -1805,7 +2087,6 @@ const CROSS_CLAN_ALLOW = {
 };
 
 function isClanAllowed(card, deckClan) {
-  if (isGUnit(card)) return true;
   if (card.crayElemental) return true;
   if (!deckClan || card.clan === deckClan) return true;
   const exceptions = CROSS_CLAN_ALLOW[card.name];
@@ -1839,7 +2120,12 @@ function getGZoneTotal() {
 function addToDeck(card) {
   if (!card) return;
   const owned = collection[card.id]?.count || 0;
-  if (!owned) { showToast({icon:'⚠️',name:'You don\'t own this card',rarity:'C'}); return; }
+  if (!owned) { showToast({icon:'⚠️',name:'You don\'t own this card — enable All Cards to browse',rarity:'C'}); return; }
+
+  if (!cardMatchesPlayFormat(card.id, deckPlayFormat)) {
+    showToast({icon:'⚠️',name:`Not legal in ${deckPlayFormat} (card is ${getCardPlayFormat(card)} era)`,rarity:'C'});
+    return;
+  }
 
   const deckClan = getDeckClan();
   if (!isClanAllowed(card, deckClan)) {
@@ -1959,12 +2245,16 @@ function setFirstVanguard(card) {
   }
 
   fvCard = card;
+  syncDeckClanLock();
+  buildDeckPoolFilters();
   renderDeckPool();
   renderDeckPanel();
 }
 
 function clearFV() {
   fvCard = null;
+  syncDeckClanLock();
+  buildDeckPoolFilters();
   renderDeckPool();
   renderDeckPanel();
 }
@@ -1981,6 +2271,8 @@ function clearDeck() {
   if (!confirm('Clear the entire deck?')) return;
   deck = {};
   fvCard = null;
+  syncDeckClanLock();
+  buildDeckPoolFilters();
   renderDeckPool();
   renderDeckPanel();
 }
@@ -2060,6 +2352,20 @@ function renderDeckPanel() {
   }).join('');
 
   // ── DD2 visual: Ride Deck (FV) ──
+  const contentsEra = detectDeckEraFromCards();
+  const hasCards = fvCard || Object.keys(deck).length > 0;
+  const mismatch = hasCards && (
+    (deckPlayFormat === 'Standard' && contentsEra !== 'Standard') ||
+    (deckPlayFormat === 'V-Premium' && contentsEra !== 'V-Premium') ||
+    (deckPlayFormat === 'Premium' && contentsEra !== 'Premium')
+  );
+  const eraHtml = `<span style="color:var(--accent);font-weight:600">Format pool: ${deckPlayFormat}</span>` +
+    (hasCards ? ` · <span style="color:${mismatch ? 'var(--gold)' : 'var(--text)'};font-weight:600">Deck era: ${contentsEra}${mismatch ? ' ⚠ mismatch' : ''}</span>` : '');
+  const eraEl = document.getElementById('deck-era-display');
+  if (eraEl) eraEl.innerHTML = eraHtml;
+  const eraPanel = document.getElementById('deck-era-panel');
+  if (eraPanel) eraPanel.innerHTML = eraHtml;
+
   const fvDisplay = document.getElementById('fv-display');
   if (fvDisplay) {
     if (fvCard) {
@@ -2395,7 +2701,13 @@ async function exportDeckImage() {
   roundRect(ctx, GAP*2, 60, 280, 32, 7); ctx.fill();
   ctx.fillStyle = '#4f8ef7';
   ctx.font = '15px Arial';
-  ctx.fillText(`${deckClan}  ·  ${total} / 50 cards`, GAP*2+12, 82);
+  const deckEra = detectDeckEraFromCards();
+  ctx.fillText(`${deckClan}  ·  ${total} / 50  ·  ${deckEra}`, GAP*2+12, 82);
+  ctx.fillStyle = 'rgba(79,142,247,0.35)';
+  roundRect(ctx, GAP*2+12, 88, 200, 22, 5); ctx.fill();
+  ctx.fillStyle = '#9ec5ff';
+  ctx.font = '11px Arial';
+  ctx.fillText(`Format: ${deckPlayFormat}`, GAP*2+20, 103);
 
   const trigCounts = {Critical:0,Draw:0,Stand:0,Heal:0};
   let sentinelCount = 0, gUnitCount = getGZoneTotal();
@@ -2440,6 +2752,10 @@ async function exportDeckImage() {
     roundRect(ctx,cx,cy,CARD_W,CARD_H,6); ctx.stroke();
     if(count>1){ctx.fillStyle='rgba(0,0,0,0.8)';roundRect(ctx,cx+CARD_W-26,cy+3,23,18,4);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(`${count}x`,cx+CARD_W-14,cy+15);ctx.textAlign='left';}
     if(isFV){ctx.fillStyle='#4f8ef7';roundRect(ctx,cx+3,cy+3,34,16,4);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText('★ FV',cx+20,cy+14);ctx.textAlign='left';}
+    const setLabel = getCardSetLabel(card.id);
+    ctx.fillStyle='rgba(0,0,0,0.82)';roundRect(ctx,cx+3,cy+CARD_H-18,CARD_W-6,15,3);ctx.fill();
+    ctx.fillStyle='#e8ecf4';ctx.font='bold 8px Consolas,monospace';ctx.textAlign='center';
+    ctx.fillText(setLabel,cx+CARD_W/2,cy+CARD_H-7);ctx.textAlign='left';
 
   }
 
@@ -2519,7 +2835,7 @@ function showToast(card) {
 
 
 document.addEventListener('wheel', function(e) {
-  const row = e.target.closest('.gallery-filter-row, .deck-filter-row');
+  const row = e.target.closest('.gallery-filter-row, .deck-filter-row, .filter-chip-row');
   if (row) { e.preventDefault(); row.scrollLeft += e.deltaY + e.deltaX; }
 }, { passive: false });
 
@@ -3041,8 +3357,6 @@ function drawForTurn() {
 // Tracks mouse over RRR/SP/GR/LR cards and shifts the holo pattern
 // like physical foil cards do under light
 (function initFoilEffect() {
-  const FOIL_RARITIES = new Set(['RRR','SP','GR','LR','SCR','SGR','OR']);
-
   function getFoilEl(target) {
     // Walk up to find card-front or gallery-card with a foil rarity
     let el = target;
@@ -3050,7 +3364,8 @@ function drawForTurn() {
       if (!el) return null;
       for (const r of FOIL_RARITIES) {
         if (el.classList?.contains('card-front') && el.classList?.contains(r)) return el;
-        if (el.classList?.contains(`rarity-card-${r}`)) return el;
+        if (el.classList?.contains(`rarity-card-${r}`) &&
+            (el.classList.contains('gallery-card') || el.classList.contains('pool-card') || el.classList.contains('card-front'))) return el;
       }
       el = el.parentElement;
     }
