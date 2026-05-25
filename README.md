@@ -44,7 +44,7 @@ Images uploaded till: Everything that exist in the sim
 
 REMINDER: Because this website does not have cloud save...please use the save function(top right) to save your collection
 
-also with how GitHub work please fully refresh the site everytime there is an update (ctrl + R)
+also with how GitHub work please fully refresh the site everytime there is an update (ctrl + shift + r)
 
 hope you guys like this thing i made
 
