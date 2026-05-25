@@ -21,9 +21,10 @@ i will have everything at some point
 
 All list for OG is done expect for PR and Special sets
 
-adding the rest of G
+adding the rest of G: GBT04
+adding Standard : DBT02
 
-Revamp the deckbuilder
+~~Revamp the deckbuilder~~
 
 ~~adding hand sample~~
 
