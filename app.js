@@ -1215,7 +1215,9 @@ function cardImgPath(id, ext) {
   ext = ext || 'webp';
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD|CB)/.test(setId);
+  const isDSeries = /^D(BT)/.test(setID);
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
+  const base = isDSeries ? IMG_CARDS_D : IMG_CARDS_OG;
 
   if (setId.startsWith('GTD')) {
     return `${base}${setId}/${id}.${ext}`;
@@ -1234,8 +1236,11 @@ function cardImgPath(id, ext) {
     if (m) {
       return `${base}${setId}/${m[1]}-${m[2]}.${ext}`;
     }
+    
   }
-
+  if (setId.startsWith('GBT')) {
+    return `${base}${setId}/${id}.${ext}`;
+  }
   // For all OG sets (BT, EB, TD), just use the ID as-is
   return `${base}${setId}/${id}.${ext}`;
 }
@@ -1243,7 +1248,9 @@ function cardImgPath(id, ext) {
 function cardImgCandidates(id) {
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD|CB)/.test(setId);
+  const isDSeries = /^D(BT)/.test(setID);
   const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
+  const base = isDSeries ? IMG_CARDS_D : IMG_CARDS_OG;
   
   // Use the ID exactly as is - it already has EN suffix
   const fileId = id;
