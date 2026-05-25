@@ -3227,7 +3227,7 @@ const SETS = [
   {
     id:"GBT01",label:"GBT01",name:"Generation Stride",icon:"⚙️",
     desc:"【VGE-G-BT01】 Cardfight!! Vanguard G Booster Pack Vol. 1: Generation Stride | Featured Clans: Gear Chronicle, Royal Paladin, Kagero, Oracle Think Tank, Nova Grappler, Cray Elemental | 103 types (GR:1 / RRR:8 / RR:12 / R:22 / C:60) + SP:12",
-    packSize:7,format:"G",guaranteedTrigger:true,hasGR:true,
+    packSize:5,boxPacks:30,format:"G",guaranteedTrigger:true,hasGR:true,
     cards:[
       {id:"GBT01_001EN",name:"Interdimensional Dragon, Chronoscommand Dragon",grade:4,clan:"Gear Chronicle",rarity:"GR",icon:"⚙️",gUnit:true},
       {id:"GBT01_002EN",name:"Holy Dragon, Saint Blow Dragon",grade:4,clan:"Royal Paladin",rarity:"RRR",icon:"⚔️",gUnit:true},
@@ -3349,7 +3349,7 @@ const SETS = [
   {
     id:"GBT02",label:"GBT02",name:"Soaring Ascent of Gale & Blossom",icon:"🌸",
     desc:"【VGE-G-BT02】 Soaring Ascent of Gale & Blossom | Neo Nectar, Aqua Force, Narukami, Great Nature, Gear Chronicle, Royal Paladin, Cray Elemental | 103 types (GR:1/RRR:8/RR:12/R:22/C:60) + SP:12",
-    packSize:7,format:"G",guaranteedTrigger:true,hasGR:true,
+    packSize:5,boxPacks:30,format:"G",guaranteedTrigger:true,hasGR:true,
     cards:[
       {id:"GBT02_001EN",name:"Flower Princess of Spring's Beginning, Primavera",grade:4,clan:"Neo Nectar",rarity:"GR",icon:"🌿",gUnit:true},
       {id:"GBT02_002EN",name:"Divine Knight of Flashing Flame, Samuel",grade:4,clan:"Royal Paladin",rarity:"RRR",icon:"⚔️",gUnit:true},
@@ -3471,7 +3471,7 @@ const SETS = [
   {
     id:"GCB01",label:"GCB01",name:"Academy of Divas",icon:"🧜",
     desc:"【VGE-G-CB01】 Academy of Divas | Featured Clan: Bermuda Triangle | 40 types (GR:1/RRR:4/RR:7/R:12/C:16) + SP:12",
-    packSize:7,format:"G",guaranteedTrigger:true,hasGR:true,subtype:"clan",
+    packSize:5,boxPacks:30,format:"G",guaranteedTrigger:true,hasGR:true,subtype:"clan",
     cards:[
       {id:"GCB01_001EN",name:"School Etoile, Olyvia",grade:4,clan:"Bermuda Triangle",rarity:"GR",icon:"🧜",gUnit:true},
       {id:"GCB01_002EN",name:"PR♥ISM-Promise, Princess Labrador",grade:4,clan:"Bermuda Triangle",rarity:"RRR",icon:"🧜",gUnit:true},
@@ -3585,7 +3585,7 @@ const SETS = [
   {
     id:"GBT03",label:"GBT03",name:"Sovereign Star Dragon",icon:"🌑",
     desc:"【VGE-G-BT03】 Cardfight!! Vanguard G Booster Pack Vol. 3: Sovereign Star Dragon | Featured Clans: Link Joker, Shadow Paladin, Gold Paladin, Murakumo, Dark Irregulars, Kagero, Cray Elemental | 116 cards (GR:2 / RRR:8 / RR:12 / R:24 / C:58) + SP:12",
-    packSize:7,format:"G",guaranteedTrigger:true,hasGR:true,
+    packSize:5,boxPacks:30,format:"G",guaranteedTrigger:true,hasGR:true,
     cards:[
       {id:"GBT03_001EN",name:"Phantom Blaster Dragon",grade:3,clan:"Shadow Paladin",rarity:"GR",icon:"🌑"},
       {id:"GBT03_002EN",name:"Genesis Dragon, Amnesty Messiah",grade:4,clan:"Link Joker",rarity:"GR",icon:"🔗",gUnit:true},
@@ -3941,47 +3941,45 @@ const SLOT_RULES_5_EB_TRIGGER = SLOT_RULES_5_EB;
 const SLOT_RULES_5_EB_LR      = [ { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"], triggerOnly:true }, RPLUS_EB_LR ];
 const SLOT_RULES_5_GEB_OLD    = SLOT_RULES_5_EB;
 
-const SLOT_RULES_7_GBT01 = [
-  { raritiesAllowed:["R","RR","RRR","SP","GR"], weights:[264, 60, 33, 3, 1] },
+// GBT: 5-card packs, 30 per box — slots: C, C, C, C(trigger guaranteed), R+
+// Weights calibrated to ~30 packs: 22 R, 5 RR, 2 RRR, 0.5 SP, 0.5 GR per box
+const SLOT_RULES_5_GBT01 = [
+  { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
   { raritiesAllowed:["C"], triggerOnly:true },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C","R"] },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
+  { raritiesAllowed:["R","RR","RRR","SP","GR"], weights:[44, 10, 4, 1, 1] },
 ];
-
-const SLOT_RULES_7_GBT04 = [
-  { raritiesAllowed:["R","RR","RRR","SP","GR","SCR"], weights:[264, 60, 33, 3, 1, 6] },
+const SLOT_RULES_5_GBT04 = [
+  { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
   { raritiesAllowed:["C"], triggerOnly:true },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C","R"] },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
+  { raritiesAllowed:["R","RR","RRR","SP","GR","SCR"], weights:[44, 10, 4, 1, 1, 2] },
 ];
-
-const SLOT_RULES_7_GBT07 = [
-  { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[264, 60, 33, 3, 1, 6, 0.5] },
+const SLOT_RULES_5_GBT07 = [
+  { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
   { raritiesAllowed:["C"], triggerOnly:true },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C","R"] },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
+  { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[44, 10, 4, 1, 1, 2, 0.5] },
 ];
-
-const SLOT_RULES_7_GBT11_S1 = [
-  { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[192, 48, 16, 1.6, 1, 3.2, 0.5] },
+const SLOT_RULES_5_GBT11_S1 = [
+  { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
   { raritiesAllowed:["C"], triggerOnly:true },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C","R"] },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
+  { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[44, 10, 4, 1, 1, 2, 0.5] },
 ];
-const SLOT_RULES_7_GBT11_S2_FULL = { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[192, 48, 16, 1.6, 1, 3.2, 0.5] };
-const SLOT_RULES_7_GBT11_S2_CAP  = { raritiesAllowed:["R","RR"], weights:[192, 48] };
+const SLOT_RULES_5_GBT11_S2_FULL = { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[192, 48, 16, 1.6, 1, 3.2, 0.5] };
+const SLOT_RULES_5_GBT11_S2_CAP  = { raritiesAllowed:["R","RR"], weights:[192, 48] };
 
-const SLOT_RULES_7_CLAN_S1 = [
-  { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[144, 36, 12, 1.2, 1, 2.4, 0.5] },
+const SLOT_RULES_5_CLAN_S1 = [
+  { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
   { raritiesAllowed:["C"], triggerOnly:true },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C","R"] },
-  { raritiesAllowed:["C","R"] }, { raritiesAllowed:["C"] }, { raritiesAllowed:["C"] },
+  { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[44, 10, 4, 1, 1, 2, 0.5] },
 ];
-const SLOT_RULES_7_CLAN_S2_FULL = { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[144, 36, 12, 1.2, 1, 2.4, 0.5] };
-const SLOT_RULES_7_CLAN_S2_CAP  = { raritiesAllowed:["R","RR"], weights:[144, 36] };
+const SLOT_RULES_5_CLAN_S2_FULL = { raritiesAllowed:["R","RR","RRR","SP","GR","SCR","SGR"], weights:[144, 36, 12, 1.2, 1, 2.4, 0.5] };
+const SLOT_RULES_5_CLAN_S2_CAP  = { raritiesAllowed:["R","RR"], weights:[144, 36] };
 
-const SLOT_RULES_7_GBT = SLOT_RULES_7_GBT01;
-const SLOT_RULES_7     = SLOT_RULES_7_GBT01;
+// Aliases for backward compat
+const SLOT_RULES_7_CLAN_S2_FULL = SLOT_RULES_5_CLAN_S2_FULL;
+const SLOT_RULES_7_CLAN_S2_CAP  = SLOT_RULES_5_CLAN_S2_CAP;
+const SLOT_RULES_5_GBT = SLOT_RULES_5_GBT01;
+const SLOT_RULES_7_GBT = SLOT_RULES_5_GBT01;
+const SLOT_RULES_7     = SLOT_RULES_5_GBT01;
 const SLOT_RULES_5_GEB = SLOT_RULES_5_GEB_OLD;
 
 const RARITY_POOL = [

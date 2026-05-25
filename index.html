@@ -72,7 +72,7 @@
           <button class="btn btn-primary" onclick="stagePack(1)">⚔️ Open 1 Pack</button>
           <button class="btn btn-secondary" onclick="stagePack(6)">Open 6 Packs</button>
           <button class="btn btn-secondary" onclick="stageBox()">Open Box</button>
-          <button class="btn btn-secondary" onclick="getWholeSet()" title="Add all cards from this set to collection (max 4x each)">📦 Get Set</button>
+          <button class="btn btn-secondary" onclick="getWholeSet()" data-no-pity title="Add all cards from this set to collection (max 4x each)">📦 Get Set</button>
         </div>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="btn btn-secondary" onclick="resetPackStats()" style="font-size:12px">🔄 Reset Stats</button>
@@ -90,7 +90,7 @@
             <span class="toggle-label">🔊 Sound</span>
           </label>
           <label class="toggle-wrap" title="Enable ultra-rare God Packs">
-            <input type="checkbox" id="godpack-toggle" checked onchange="toggleGodPacks(this)">
+            <input type="checkbox" id="godpack-toggle" onchange="toggleGodPacks(this)">
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
             <span class="toggle-label">✨ God Packs</span>
           </label>

@@ -136,7 +136,7 @@ let packsSinceLastRRR = 0;
 let packsSinceLastLR = 0;
 let totalPacksOpened = 0;
 let wishlist = new Set();
-let godPacksEnabled = true;
+let godPacksEnabled = false;
 let sessionStats = {
   totalPulled: 0,
   byRarity: {},
@@ -735,13 +735,13 @@ function generatePack() {
   if (isTwoSlot) {
     const used = new Set();
     const s1Rules = sub === 'clan' || sub === 'technical' || sub === 'character'
-      ? SLOT_RULES_7_CLAN_S1 : SLOT_RULES_7_GBT11_S1;
+      ? SLOT_RULES_5_CLAN_S1 : SLOT_RULES_5_GBT11_S1;
     const slot0Card = rollSlot(set.cards, s1Rules[0], used);
     const s2Pool = (slot0Card && slot0Card.rarity === 'RRR')
       ? (sub === 'clan' || sub === 'technical' || sub === 'character'
-          ? SLOT_RULES_7_CLAN_S2_CAP : SLOT_RULES_7_GBT11_S2_CAP)
+          ? SLOT_RULES_5_CLAN_S2_CAP : SLOT_RULES_5_GBT11_S2_CAP)
       : (sub === 'clan' || sub === 'technical' || sub === 'character'
-          ? SLOT_RULES_7_CLAN_S2_FULL : SLOT_RULES_7_GBT11_S2_FULL);
+          ? SLOT_RULES_5_CLAN_S2_FULL : SLOT_RULES_5_GBT11_S2_FULL);
     const slot1Card = rollSlot(set.cards, s2Pool, used);
     const rest = s1Rules.slice(1).map(slot => rollSlot(set.cards, slot, used));
     return [slot0Card, slot1Card, ...rest];
@@ -750,15 +750,30 @@ function generatePack() {
   if (isGBT) {
     const used = new Set();
     const num = parseInt(id.replace('GBT',''));
-    const slots = num >= 7 ? SLOT_RULES_7_GBT07 : num >= 4 ? SLOT_RULES_7_GBT04 : SLOT_RULES_7_GBT01;
+    const slots = num >= 7 ? SLOT_RULES_5_GBT07 : num >= 4 ? SLOT_RULES_5_GBT04 : SLOT_RULES_5_GBT01;
     return slots.map(slot => rollSlot(set.cards, slot, used));
   }
 
-  // D-series booster — single pack (used when box generator calls generatePack individually)
-  // Slot structure: [C/CT, C/CT, C/CT, C/CT, C/CT/R, R, RR+]
-  // premiumRarity is injected by the box generator for slot 7 guarantee
+  // D-series — single pack with weighted premium slot
   if (id.startsWith('DBT')) {
-    return generatePackDBT(set.cards, null);
+    // Weighted slot-7 odds for single pack (approximate per-pack rates from box ratios)
+    // Box has 16 packs: 4 RRR, 5 RR, 5 H, 1 ORR, 1 SP → per-pack weights
+    const premiumWeights = [
+      { rarity:'RRR', w: 4  },
+      { rarity:'RR',  w: 5  },
+      { rarity:'H',   w: 5  },
+      { rarity:'ORR', w: 1  },
+      { rarity:'SP',  w: 1  },
+      { rarity:'DSR', w: 0.05 },
+    ];
+    const totalW = premiumWeights.reduce((s, x) => s + x.w, 0);
+    let roll = Math.random() * totalW;
+    let forcedRar = 'RR';
+    for (const { rarity, w } of premiumWeights) {
+      roll -= w;
+      if (roll <= 0) { forcedRar = rarity; break; }
+    }
+    return generatePackDBT(set.cards, forcedRar);
   }
 
   const btNum = isBT ? parseInt(id.replace('BT','')) : 99;
@@ -1031,6 +1046,7 @@ function stageBox() {
     return;
   }
   const isGBT11plus = set.id.startsWith('GBT') && parseInt(set.id.replace('GBT','')) >= 11;
+  const isGBT       = set.id.startsWith('GBT');
   const isClanStyle = sub==='clan'||sub==='technical'||sub==='character';
   const isGEBOld    = set.id.startsWith('GEB') && (sub==='geb_old'||parseInt(set.id.replace('GEB',''))<=1);
   const boxPacks = isClanStyle ? 12
@@ -1038,7 +1054,15 @@ function stageBox() {
                  : isGEBOld    ? 15
                  : set.id.startsWith('GCB') ? 12
                  : set.id.startsWith('GEB') ? 12
-                 : set.id.startsWith('EB')  ? 15 : 30;
+                 : set.id.startsWith('EB')  ? 15
+                 : isGBT       ? (set.boxPacks || 30)
+                 : 30;
+
+  // GBT sets: 5-card packs, use generatePack (which uses SLOT_RULES_5_GBT*)
+  if (isGBT) {
+    _doStagePack(boxPacks);
+    return;
+  }
 
   const is5card = (set.packSize || 5) === 5;
   if (is5card) {
@@ -1215,53 +1239,32 @@ function cardImgPath(id, ext) {
   ext = ext || 'webp';
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD|CB)/.test(setId);
-  const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
-
-  if (setId.startsWith('GTD')) {
-    return `${base}${setId}/${id}.${ext}`;
-  }
-
-  if (setId.startsWith('GBT')) {
-    return `${base}${setId}/${id}.${ext}`;
-  }
-
-  if (setId.startsWith('GEB') || setId.startsWith('GCB')) {
-    return `${base}${setId}/${id}.${ext}`;
-  }
+  const isDSeries = /^D(BT|EB|TD|CB)/.test(setId);
+  const base = isDSeries ? IMG_CARDS_D : isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
 
   if (setId === 'EB10') {
     const m = id.match(/^(EB10_(?:S\d+|\d+)EN)-([BW])$/);
-    if (m) {
-      return `${base}${setId}/${m[1]}-${m[2]}.${ext}`;
-    }
+    if (m) return `${base}${setId}/${m[1]}-${m[2]}.${ext}`;
   }
 
-  // For all OG sets (BT, EB, TD), just use the ID as-is
   return `${base}${setId}/${id}.${ext}`;
 }
 
 function cardImgCandidates(id) {
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD|CB)/.test(setId);
-  const base = isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
-  
-  // Use the ID exactly as is - it already has EN suffix
-  const fileId = id;
-  
+  const isDSeries = /^D(BT|EB|TD|CB)/.test(setId);
+  const base = isDSeries ? IMG_CARDS_D : isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
+
   if (setId === 'EB10') {
     const m = id.match(/^(EB10_(?:S\d+|\d+)EN)-([BW])$/);
-    if (m) {
-      return [
-        `${base}${setId}/${m[1]}-${m[2]}.webp`,
-        `${base}${setId}/${m[1]}${m[2]}.webp`,
-      ];
-    }
+    if (m) return [
+      `${base}${setId}/${m[1]}-${m[2]}.webp`,
+      `${base}${setId}/${m[1]}${m[2]}.webp`,
+    ];
   }
 
-  // Try exact ID, then lowercase (GEB uses lowercase filenames)
-  return [
-    `${base}${setId}/${fileId}.webp`,
-  ];
+  return [`${base}${setId}/${id}.webp`];
 }
 
 function setImgSrcWithFallback(imgEl, id, onBothFail) {
@@ -1276,6 +1279,7 @@ function setImgSrcWithFallback(imgEl, id, onBothFail) {
 }
 const IMG_CARDS_OG = 'images/cards/1 OG/';
 const IMG_CARDS_G  = 'images/cards/2 G/';
+const IMG_CARDS_D  = 'images/cards/4 D/';
 const IMG_CARDS    = IMG_CARDS_OG;
 const IMG_ASSETS  = 'images/assets/';
 const IMG_BOXES   = 'images/boxes/';
