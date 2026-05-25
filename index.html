@@ -201,7 +201,7 @@
         <span class="toggle-track"><span class="toggle-thumb"></span></span>
         <span class="toggle-label" style="font-size:12px">Missing first</span>
       </label>
-      <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="closeGallery()">✕ Close</button>
+      <button class="btn btn-danger" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="closeGallery()">✕ Close Collection</button>
     </div>
     <div class="filter-row-label">Series</div>
     <div class="format-tabs format-tabs-5" style="padding:2px 0 6px">
@@ -246,9 +246,8 @@
       <span class="toggle-track"><span class="toggle-thumb"></span></span>
       <span class="toggle-label" style="font-size:11px">Sort owned</span>
     </label>
-    <small style="color:var(--text-muted);font-size:10px">Click=add · R-click G0=FV</small>
-    <span id="dp-clan-lock" style="display:none;font-size:10px;padding:4px 10px;border-radius:6px;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.35);color:var(--accent);font-weight:600;white-space:nowrap"></span>
-    <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="closeDeckBuilder()">✕</button>
+    <button class="btn btn-secondary" style="font-size:12px;padding:7px 14px;margin-left:auto" onclick="toggleDeckListDrawer()" id="deck-list-toggle">📋 Deck List</button>
+    <button class="btn btn-danger" style="font-size:12px;padding:7px 14px" onclick="closeDeckBuilder()">✕ Close Builder</button>
   </div>
 
   <!-- ── Collapsible filter rows ── -->
@@ -306,7 +305,7 @@
       <!-- FV -->
       <div style="padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0">
         <div style="font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.08em;margin-bottom:6px">★ FIRST VANGUARD</div>
-        <div id="fv-display" style="min-height:28px;font-size:11px;color:var(--text-muted)">R-click a G0 card to set FV</div>
+        <div id="fv-display" style="min-height:28px;font-size:11px;color:var(--text-muted)">Click ★FV on a G0 card in the pool</div>
       </div>
 
       <!-- Grade -->
@@ -346,28 +345,23 @@
         <button class="btn btn-danger" style="font-size:11px;padding:5px 8px" onclick="clearDeck()">🗑 Clear</button>
       </div>
 
-      <!-- Hidden compat IDs still needed by app.js -->
-      <div style="display:none" id="deck-list"></div>
-      <div style="display:none" id="dd2-fv-row"></div>
-      <div style="display:none" id="dd2-gzone-grid"></div>
-      <div style="display:none" id="dd2-main-deck"></div>
-      <div style="display:none" id="dd2-main-count"></div>
-      <div style="display:none" id="dd2-gz-count"></div>
-      <div style="display:none" id="dd2-fv-count"></div>
 
     </div><!-- /deck-panel -->
-
-    <div class="deck-list-col">
-      <div class="deck-list-col-header">
-        <span>DECK LIST</span>
-        <span id="dcl-count">0/50</span>
-      </div>
-      <div class="deck-list-col-body" id="deck-list-col-body"></div>
-    </div>
 
     </div><!-- /deck-sidebar-col -->
 
   </div><!-- /deck-body -->
+
+  <!-- Deck list slide-in drawer -->
+  <div class="deck-list-drawer" id="deck-list-drawer">
+    <div class="deck-list-drawer-header">
+      <span>DECK LIST</span>
+      <span id="dcl-count" style="font-family:'Rajdhani',sans-serif;font-size:14px;color:var(--accent)">0/50</span>
+      <button class="btn btn-secondary" style="font-size:11px;padding:4px 10px;margin-left:auto" onclick="toggleDeckListDrawer()">✕ Close</button>
+    </div>
+    <div class="deck-list-col-body" id="deck-list-col-body"></div>
+  </div>
+  <div class="deck-list-drawer-backdrop" id="deck-list-backdrop" onclick="toggleDeckListDrawer()"></div>
 
 
 </div>

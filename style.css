@@ -123,9 +123,9 @@
 
   .pack-visual {
     flex-shrink: 0;
-    /* 146:298 ratio — matches box image */
+    /* 137:200 ratio — matches standard card proportions */
     width: 110px;
-    aspect-ratio: 146 / 298;
+    aspect-ratio: 137 / 200;
     border-radius: 12px;
     position: relative;
     cursor: pointer;
@@ -332,6 +332,9 @@
   .rarity-badge.RR { color: var(--rarity-rr); }
   .rarity-badge.RRR { color: var(--rarity-rrr); }
   .rarity-badge.SP { color: var(--rarity-sp); }
+  .rarity-badge.H   { color: #00e5ff; background: rgba(0,229,255,0.12); } /* Holo — cyan, same tier as RR */
+  .rarity-badge.ORR { color: #a78bfa; background: rgba(167,139,250,0.15); } /* Overtrigger double rare */
+  .rarity-badge.DSR { background: linear-gradient(90deg,#f0b429,#ef4444,#a78bfa); color:#fff; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
   .rarity-badge.TD  { background: rgba(100,100,100,0.2); color: #999; border-color: rgba(150,150,150,0.3); }
 
   /* FLIP ALL ANIMATION */
@@ -637,25 +640,22 @@
     align-items: center; justify-content: center; gap: 6px; font-size: 32px;
   }
   .gallery-card .gc-count {
-    position: absolute; top: 5px; right: 5px;
+    position: absolute; bottom: 5px; right: 5px;
     background: rgba(0,0,0,0.75); color: var(--gold);
     font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
   }
   .gallery-card .gc-rarity {
-    position: absolute; bottom: 5px; left: 5px;
+    position: absolute; top: 5px; right: 5px;
     font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 3px;
+    background: rgba(0,0,0,0.72);
   }
-  .gallery-card .gc-add-deck {
-    position: absolute; top: 5px; left: 5px;
-    background: rgba(79,142,247,0.85); color: white;
-    font-size: 14px; font-weight: 700; width: 22px; height: 22px;
-    border-radius: 50%; display: none; align-items: center; justify-content: center;
-    cursor: pointer; border: none; transition: background 0.15s;
-  }
-  .gallery-card:hover .gc-add-deck { display: flex; }
-  .gallery-card .gc-add-deck:hover { background: var(--accent); }
   .gallery-card.not-owned { opacity: 0.3; }
   .gallery-card.not-owned:hover { opacity: 0.5; }
+  .gallery-fv-card {
+    outline: 2px solid rgba(79,142,247,0.9) !important;
+    outline-offset: 1px;
+    box-shadow: 0 0 10px rgba(79,142,247,0.4);
+  }
 
   .card-series-tag {
     position: absolute;
@@ -675,7 +675,6 @@
   .card-series-tag.series-G  { background: rgba(155,89,247,0.9); color: #fff; }
   .card-series-tag.series-V  { background: rgba(0,229,255,0.85); color: #001a22; }
   .card-series-tag.series-D  { background: rgba(239,69,101,0.9); color: #fff; }
-  .gallery-card .gc-add-deck { top: 26px; right: 3px; left: auto; }
   .pool-card .wishlist-btn { top: 22px; right: 3px; }
   .pool-card .card-series-tag { top: 3px; right: 3px; left: auto; }
 
@@ -741,16 +740,16 @@
   .pool-card img { width: var(--pool-w); height: var(--pool-h); object-fit: fill; display: block; }
   .pool-card .pc-fallback { width: var(--pool-w); height: var(--pool-h); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 20px; }
   .pool-card .pc-count-badge { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.85); color: var(--gold); font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 3px; }
-  .pool-card .pc-in-deck { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(79,142,247,0.85); color: #fff; font-size: 9px; font-weight: 700; text-align: center; padding: 2px; }
-  .pool-card.maxed { opacity: 0.4; pointer-events: none; }
+  .pool-card .pc-in-deck { position: absolute; bottom: 2px; left: 2px; background: rgba(79,142,247,0.92); color: #fff; font-size: 8px; font-weight: 700; padding: 1px 5px; border-radius: 3px; white-space: nowrap; }
+  .pool-card.maxed { opacity: 0.5; }
+  .pool-card.maxed .pc-add-btn { opacity: 0.3; pointer-events: none; }
   .pool-card.not-owned { opacity: 0.35; }
   .pool-card.not-owned:hover { opacity: 0.45; }
   .pool-card.svg-selected { outline: 2px solid var(--accent); box-shadow: 0 0 8px rgba(79,142,247,0.6); }
 
   .deck-visual-col { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
   .deck-panel {
-    flex: 0 0 auto;
-    max-height: 46%;
+    flex: 1;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -781,74 +780,60 @@
     color: var(--text-muted);
     margin-top: 2px;
   }
-  .dd2-panel { display: flex; flex-direction: column; background: var(--surface); overflow: hidden; flex: 1; }
-
-  .dd2-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); gap: 8px; flex-shrink: 0; }
-  .dd2-header-left, .dd2-header-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .dd2-format-badge { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .1em; padding: 2px 7px; border-radius: 3px; background: linear-gradient(135deg,#7c3aed,#4f46e5); color: #fff; flex-shrink: 0; }
-  .dd2-name-input { background: transparent; border: none; color: var(--text-muted); font-size: 12px; font-family: 'Rajdhani',sans-serif; width: 100px; }
-  .dd2-count-badge { font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; }
-  .deck-count-bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; }
-  .deck-count-fill { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; }
-
-  .dd2-body { flex: 1; min-height: 0; display: flex; overflow: hidden; }
-  .dd2-deck-visual { flex: 1; overflow-y: auto; padding: 6px; display: flex; flex-direction: column; gap: 6px; }
-  .dd2-deck-visual::-webkit-scrollbar { width: 3px; }
-  .dd2-deck-visual::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .dd2-section { background: rgba(0,0,0,0.2); border-radius: 6px; overflow: hidden; }
-  .dd2-section-header { display: flex; align-items: center; gap: 5px; padding: 5px 8px; background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .dd2-section-icon { font-size: 12px; }
-  .dd2-section-title { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: .1em; color: var(--text-muted); flex: 1; }
-  .dd2-section-count { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; color: var(--accent); }
-
-  .dd2-ride-row { display: flex; gap: 6px; padding: 6px 8px; flex-wrap: wrap; min-height: 68px; align-items: center; }
-  .dd2-empty-slot { width: 46px; height: 64px; border-radius: 4px; border: 1px dashed rgba(255,255,255,0.18); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: border-color .15s; }
-  .dd2-empty-slot:hover { border-color: rgba(255,255,255,0.4); }
-
-  .dd2-card-grid { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 8px; }
-  .dd2-grade-block { padding: 3px 8px 6px; }
-  .dd2-grade-label { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 4px; }
-
-  .dd2-mini-card { position: relative; width: 46px; height: 64px; border-radius: 4px; cursor: pointer; transition: transform .12s; flex-shrink: 0; overflow: hidden; }
-  .dd2-mini-card:hover { transform: translateY(-4px) scale(1.08); z-index: 5; }
-  .dd2-mini-card img { width: 100%; height: 100%; object-fit: fill; border-radius: 4px; display: block; border: 1px solid rgba(255,255,255,0.12); }
-  .dd2-count-overlay { position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.82); color: #fff; font-size: 8px; font-weight: 700; padding: 1px 3px; border-radius: 2px; font-family: 'Rajdhani',sans-serif; }
-  .dd2-remove-btn { position: absolute; top: 1px; right: 1px; background: rgba(239,68,68,0.9); color: #fff; border: none; font-size: 7px; font-weight: 700; padding: 1px 3px; border-radius: 2px; cursor: pointer; opacity: 0; transition: opacity .12s; line-height: 1; }
-  .dd2-mini-card:hover .dd2-remove-btn { opacity: 1; }
-  .dd2-sentinel-tag { position: absolute; bottom: 10px; left: 0; right: 0; background: rgba(240,180,41,0.9); color: #000; font-size: 5px; font-weight: 700; text-align: center; padding: 1px 0; }
-  .dd2-mini-card.rRRR img { border-color: var(--rarity-rrr); }
-  .dd2-mini-card.rSP  img { border-color: var(--rarity-sp); }
-  .dd2-mini-card.rGR  img { border-color: #9b4dca; }
-  .dd2-mini-card.rLR  img { border-color: var(--rarity-lr); }
-
-  /* Stats sidebar — bigger numbers */
-  .dd2-sidebar { width: 72px; flex-shrink: 0; display: flex; flex-direction: column; padding: 8px 6px; gap: 4px; overflow-y: auto; border-left: 1px solid var(--border); background: rgba(0,0,0,0.22); }
-  .dd2-sidebar::-webkit-scrollbar { display: none; }
-  .dd2-mini-stat-group { display: flex; flex-direction: column; gap: 4px; }
-  .dd2-mini-label { font-size: 8px; font-weight: 700; letter-spacing: .05em; color: var(--text-muted); text-transform: uppercase; text-align: center; margin-bottom: 1px; }
-  .dd2-mini-row { display: flex; align-items: center; justify-content: space-between; padding: 1px 2px; }
-  .dd2-mini-val { font-size: 16px; font-weight: 700; font-family: 'Rajdhani',sans-serif; color: var(--text); line-height: 1; }
-  .dd2-g-badge { font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 2px; font-family: 'Rajdhani',sans-serif; }
-  .dd2-g-badge.g0 { background: rgba(138,147,168,.25); color: var(--rarity-c); }
-  .dd2-g-badge.g1 { background: rgba(79,142,247,.2);   color: var(--rarity-r); }
-  .dd2-g-badge.g2 { background: rgba(155,89,247,.2);   color: var(--rarity-rr); }
-  .dd2-g-badge.g3 { background: rgba(240,180,41,.2);   color: var(--rarity-rrr); }
-  .dd2-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 3px 0; }
-  .dd2-validation-mini { display: flex; flex-direction: column; gap: 4px; }
-  .dd2-validation-mini .val-row { display: flex; align-items: center; gap: 4px; }
-  .dd2-validation-mini .val-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .dd2-validation-mini span { display: none; }
-
-  /* Deck list (right column, below stats) */
-  .deck-list-col {
-    flex: 1 1 0;
-    min-height: 0;
+  /* ── Deck list slide-in drawer ── */
+  .deck-list-drawer {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 280px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    background: rgba(0,0,0,0.14);
+    z-index: 50;
+    transform: translateX(100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: -8px 0 32px rgba(0,0,0,0.45);
   }
+  .deck-list-drawer.open { transform: translateX(0); }
+  .deck-list-drawer-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.28);
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+  .deck-list-drawer-backdrop {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 49;
+    background: rgba(0,0,0,0.35);
+  }
+  .deck-list-drawer.open ~ .deck-list-drawer-backdrop { display: block; }
+
+  /* Pool card highlight when in deck */
+  .pool-card.pool-in-deck {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-radius: 6px;
+  }
+  .pool-card.pool-in-deck::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 6px;
+    background: rgba(79,142,247,0.12);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+
   .deck-list-col-header {
     display: flex;
     justify-content: space-between;
@@ -876,8 +861,41 @@
   .dcl-name { font-size: 10px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
   .dcl-cnt { font-size: 11px; font-weight: 700; font-family: 'Rajdhani', sans-serif; color: var(--accent); flex-shrink: 0; }
   .dcl-remove { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 11px; padding: 0 2px; flex-shrink: 0; opacity: 0; transition: opacity .1s; line-height: 1; }
-  .dcl-row:hover .dcl-remove { opacity: 1; }
+  .dcl-add    { background: none; border: none; color: var(--accent);     cursor: pointer; font-size: 11px; padding: 0 2px; flex-shrink: 0; opacity: 0; transition: opacity .1s; line-height: 1; }
+  .dcl-row:hover .dcl-remove,
+  .dcl-row:hover .dcl-add { opacity: 1; }
   .dcl-badge { font-size: 7px; background: rgba(240,180,41,.2); color: var(--gold); padding: 1px 3px; border-radius: 2px; flex-shrink: 0; }
+
+  /* Pool card deck button bar (always visible at bottom) */
+  .pc-deck-btns {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.78);
+    z-index: 8; opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .pool-card:hover .pc-deck-btns,
+  .pool-card.pool-in-deck .pc-deck-btns { opacity: 1; }
+  .pc-add-btn, .pc-remove-btn {
+    background: none; border: none; color: #fff;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    padding: 2px 7px; line-height: 1.5; flex-shrink: 0;
+    transition: background 0.12s;
+  }
+  .pc-remove-btn:hover { background: rgba(239,69,101,0.5); }
+  .pc-add-btn:hover    { background: rgba(79,142,247,0.5); }
+  .pc-deck-count {
+    font-size: 10px; font-weight: 700; color: var(--gold);
+    min-width: 14px; text-align: center; font-family: 'Rajdhani',sans-serif;
+  }
+  .pc-fv-btn {
+    background: none; border: none; color: rgba(255,255,255,0.55);
+    font-size: 7px; font-weight: 700; cursor: pointer;
+    padding: 2px 4px; line-height: 1.5; white-space: nowrap;
+    transition: color 0.12s, background 0.12s; border-radius: 2px;
+  }
+  .pc-fv-btn:hover  { background: rgba(79,142,247,0.4); color: #fff; }
+  .pc-fv-btn.active { background: rgba(79,142,247,0.85); color: #fff; }
 
   /* Floating card hover tooltip */
   .card-hover-tip {
@@ -983,7 +1001,10 @@
   .rarity-card-GR.foil-active img,
   .rarity-card-LR.foil-active img,
   .rarity-card-SCR.foil-active img,
-  .rarity-card-SGR.foil-active img {
+  .rarity-card-SGR.foil-active img,
+  .rarity-card-H.foil-active img,
+  .rarity-card-ORR.foil-active img,
+  .rarity-card-DSR.foil-active img {
     transform: perspective(600px)
                rotateX(var(--foil-tilt-x, 0deg))
                rotateY(var(--foil-tilt-y, 0deg))
@@ -994,10 +1015,53 @@
   .rarity-card-RRR.foil-active,
   .rarity-card-SP.foil-active,
   .rarity-card-GR.foil-active,
-  .rarity-card-LR.foil-active {
+  .rarity-card-LR.foil-active,
+  .rarity-card-H.foil-active,
+  .rarity-card-ORR.foil-active,
+  .rarity-card-DSR.foil-active {
     transition: box-shadow 0.08s ease-out;
     z-index: 10;
   }
+
+  /* ── H (Holo) foil: cyan shimmer ── */
+  .card-front.H.foil-active::after,
+  .rarity-card-H.foil-active::after {
+    background: radial-gradient(
+      ellipse at var(--foil-x,50%) var(--foil-y,50%),
+      rgba(0,229,255,calc(0.5 * var(--foil-shine,0.5))) 0%,
+      rgba(0,180,255,0.2) 40%,
+      transparent 70%
+    );
+    opacity: 1; animation: none;
+  }
+  .rarity-card-H.foil-active { box-shadow: 0 0 20px rgba(0,229,255,0.5), 0 0 40px rgba(0,180,255,0.2); }
+
+  /* ── ORR (Overtrigger) foil: purple pulse ── */
+  .card-front.ORR.foil-active::after,
+  .rarity-card-ORR.foil-active::after {
+    background: radial-gradient(
+      ellipse at var(--foil-x,50%) var(--foil-y,50%),
+      rgba(167,139,250,calc(0.6 * var(--foil-shine,0.5))) 0%,
+      rgba(124,58,237,0.25) 40%,
+      transparent 70%
+    );
+    opacity: 1; animation: none;
+  }
+  .rarity-card-ORR.foil-active { box-shadow: 0 0 28px rgba(167,139,250,0.7), 0 0 56px rgba(124,58,237,0.3); }
+
+  /* ── DSR foil: full rainbow, even more intense than SP ── */
+  .card-front.DSR.foil-active::after,
+  .rarity-card-DSR.foil-active::after {
+    background: conic-gradient(
+      from calc(var(--foil-x,50%) * 3.6deg),
+      rgba(255,80,120,0.4) 0deg, rgba(255,180,80,0.45) 60deg,
+      rgba(80,255,180,0.4) 120deg, rgba(80,160,255,0.45) 180deg,
+      rgba(180,80,255,0.4) 240deg, rgba(255,80,120,0.45) 300deg,
+      rgba(255,80,120,0.4) 360deg
+    );
+    opacity: 1; animation: none;
+  }
+  .rarity-card-DSR.foil-active { box-shadow: 0 0 40px rgba(255,215,0,0.7), 0 0 80px rgba(167,139,250,0.4), 0 0 120px rgba(239,68,68,0.2); }
 
   /* ── RRR foil-active: gold streak follows cursor ── */
   .card-front.RRR.foil-active::after {

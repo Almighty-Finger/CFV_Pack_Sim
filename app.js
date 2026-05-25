@@ -290,11 +290,6 @@ function init() {
   _buildCardMap();
   addTDsToCollection();
 
-  // Sync deck name display label in DD2 header
-  const _ni = document.getElementById('deck-name-input');
-  const _nd = document.getElementById('deck-name-input');
-  if (_ni && _nd) _ni.addEventListener('input', () => { _nd.value = _ni.value; });
-
   document.getElementById('pack-area').style.display = 'none';
   document.getElementById('td-decklist-panel').style.display = 'none';
   const _psb = document.getElementById('pack-sim-body');
@@ -616,6 +611,8 @@ function selectSet(idx) {
   const lrTag = document.getElementById('lr-legend-tag');
   if (lrTag) lrTag.style.display = set.cards.some(c => c.rarity === 'LR') ? '' : 'none';
   document.getElementById('reveal-section').classList.remove('active');
+  const grid = document.getElementById('cards-grid');
+  if (grid) { grid.className = 'cards-grid'; grid.innerHTML = ''; }
   const boxImg = document.getElementById('box-img');
   const boxFallback = document.getElementById('box-fallback');
   boxImg.style.display = 'none'; boxImg.src = '';
@@ -757,6 +754,13 @@ function generatePack() {
     return slots.map(slot => rollSlot(set.cards, slot, used));
   }
 
+  // D-series booster — single pack (used when box generator calls generatePack individually)
+  // Slot structure: [C/CT, C/CT, C/CT, C/CT, C/CT/R, R, RR+]
+  // premiumRarity is injected by the box generator for slot 7 guarantee
+  if (id.startsWith('DBT')) {
+    return generatePackDBT(set.cards, null);
+  }
+
   const btNum = isBT ? parseInt(id.replace('BT','')) : 99;
   const ebNum = isEB ? parseInt(id.replace('EB','')) : 99;
   const variableTrigger = (isBT && btNum <= 5) || (isEB && ebNum <= 7);
@@ -884,6 +888,88 @@ function generatePack5(cards, rplusPool, forcedRarity, variableTrigger, isGodPac
   return [slot1, slot2, slot3, slot4, rPlusCard];
 }
 
+// ── D-Series (overDress) pack & box generator ──
+function generatePackDBT(cards, forcedPremium) {
+  const used = new Set();
+  const allCPool = cards.filter(c => (c.rarity === 'C') && !c.token);
+  const rPool    = cards.filter(c => c.rarity === 'R');
+  const premiumPool = cards.filter(c => ['RR','H','RRR','ORR','SP','DSR'].includes(c.rarity));
+
+  function pick(pool, fallback) {
+    const fresh = pool.filter(c => !used.has(c.id));
+    const src = fresh.length ? fresh : (fallback || pool).filter(c => !used.has(c.id));
+    if (!src.length) return null;
+    const card = src[Math.floor(Math.random() * src.length)];
+    if (card) used.add(card.id);
+    return card;
+  }
+  function pickByRarity(rar) {
+    const pool = cards.filter(c => c.rarity === rar && !used.has(c.id));
+    const src = pool.length ? pool : premiumPool.filter(c => !used.has(c.id));
+    if (!src.length) return null;
+    const card = src[Math.floor(Math.random() * src.length)];
+    used.add(card.id); return card;
+  }
+
+  const s1 = pick(allCPool);
+  const s2 = pick(allCPool);
+  const s3 = pick(allCPool);
+  const s4 = pick(allCPool);
+  const s5 = Math.random() < 0.25 ? pick(rPool, allCPool) : pick(allCPool);
+  const s6 = pick(rPool, allCPool);
+  const s7 = forcedPremium ? pickByRarity(forcedPremium) : pick(premiumPool, rPool);
+  return [s1, s2, s3, s4, s5, s6, s7].filter(Boolean);
+}
+
+function generateBoxDBT(set) {
+  const cards = set.cards.filter(c => c.rarity && c.rarity !== 'nan');
+  const NATIONS = ['Dragon Empire','Dark States','Brandt Gate','Keter Sanctuary','Stoicheia'];
+
+  // Box slot-7 distribution: 4 RRR, 5 RR (1/nation), 5 H, 1 ORR, 1 SP
+  let slot7 = ['RRR','RRR','RRR','RRR','RR','RR','RR','RR','RR','H','H','H','H','H','ORR','SP'];
+  for (let i = slot7.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [slot7[i], slot7[j]] = [slot7[j], slot7[i]];
+  }
+
+  // Pre-assign RR cards — 1 per nation, shuffled
+  const rrNations = [...NATIONS].sort(() => Math.random() - 0.5);
+  const rrCardByNation = {};
+  for (const n of NATIONS) {
+    const pool = cards.filter(c => c.rarity === 'RR' && c.clan === n);
+    rrCardByNation[n] = pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+  }
+  let rrIdx = 0;
+
+  // Token: 50% chance per box, injected into 1 random C slot in 1 random pack
+  const tokenCards = cards.filter(c => c.token);
+  const includeToken = tokenCards.length > 0 && Math.random() < 0.5;
+  const tokenPackIdx = includeToken ? Math.floor(Math.random() * 16) : -1;
+
+  const allCards = [];
+  for (let i = 0; i < 16; i++) {
+    const rar = slot7[i];
+    let pack;
+    if (rar === 'RR' && rrIdx < rrNations.length) {
+      pack = generatePackDBT(cards, null);
+      const rrCard = rrCardByNation[rrNations[rrIdx++]];
+      if (rrCard && pack.length >= 7) pack[6] = rrCard;
+      else if (rrCard) pack.push(rrCard);
+    } else {
+      pack = generatePackDBT(cards, rar);
+    }
+    if (i === tokenPackIdx && tokenCards.length) {
+      const token = tokenCards[Math.floor(Math.random() * tokenCards.length)];
+      const slot = Math.floor(Math.random() * 4);
+      pack[slot] = token;
+    }
+    allCards.push(...pack);
+  }
+  return allCards.filter(Boolean);
+}
+
+
+
 function generateBox5(cards, rplusPool, boxPacks, isEB, variableTrigger) {
   const hasLR = cards.some(c => c.rarity === 'LR');
   const hasSP = cards.some(c => c.rarity === 'SP');
@@ -937,6 +1023,13 @@ function stageBox() {
   const set = SETS[currentSetIdx];
   if (!set) return;
   const sub = set.subtype || '';
+
+  // D-series box — dedicated generator
+  if (set.id.startsWith('DBT')) {
+    stagedCards = generateBoxDBT(set);
+    _presentStagedCards(16);
+    return;
+  }
   const isGBT11plus = set.id.startsWith('GBT') && parseInt(set.id.replace('GBT','')) >= 11;
   const isClanStyle = sub==='clan'||sub==='technical'||sub==='character';
   const isGEBOld    = set.id.startsWith('GEB') && (sub==='geb_old'||parseInt(set.id.replace('GEB',''))<=1);
@@ -1059,7 +1152,7 @@ function revealCards() {
   for (const c of allCards) {
     sessionStats.totalPulled++;
     sessionStats.byRarity[c.rarity] = (sessionStats.byRarity[c.rarity]||0) + 1;
-    const rarityOrder = ["C","R","RR","RRR","SP","LR","SCR","GR","SGR","OR"];
+    const rarityOrder = ["C","R","H","RR","RRR","ORR","SP","DSR","LR","SCR","GR","SGR","OR"];
     if (!sessionStats.bestPull || rarityOrder.indexOf(c.rarity) > rarityOrder.indexOf(sessionStats.bestPull.rarity))
       sessionStats.bestPull = c;
     if (wishlist.has(c.id)) {
@@ -1272,7 +1365,7 @@ function updateCollection() {
   document.getElementById('coll-dupes').textContent = dupes;
 
   const rarityCounts = {};
-  const rarityOrder = ["TD","C","R","RR","RRR","SP","LR","SCR","GR","SGR","OR"];
+  const rarityOrder = ["TD","C","R","H","RR","RRR","ORR","SP","DSR","LR","SCR","GR","SGR","OR"];
   for (const r of rarityOrder) rarityCounts[r] = 0;
   for (const {card,count} of boosterCards) rarityCounts[card.rarity] = (rarityCounts[card.rarity]||0)+count;
   const maxCount = Math.max(...Object.values(rarityCounts), 1);
@@ -1354,7 +1447,7 @@ function updateHistory() {
     el.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Your pack history will appear here.</p></div>';
     return;
   }
-  const rarityOrder = ["SGR","SCR","GR","OR","LR","SP","RRR","RR","R","C"];
+  const rarityOrder = ["DSR","ORR","SGR","SCR","GR","OR","LR","SP","RRR","H","RR","R","C"];
   el.innerHTML = history.slice(0,20).map((entry,i) => {
     const rrrs = entry.cards.filter(c=>["RRR","SP"].includes(c.rarity));
     const open = historyExpanded.has(i);
@@ -1499,8 +1592,8 @@ function buildGalleryFilters() {
   const allCards = getAllSetCards();
   const EXTRA_CLANS = ['Angel Feather','Dimension Police','Gear Chronicle','Genesis','Link Joker','Neo Nectar','Pale Moon'];
   const clans = ['ALL', ...new Set([...allCards.map(c => c.clan), ...EXTRA_CLANS])].sort((a,b) => a==='ALL'?-1:a.localeCompare(b));
-  const RARITY_ORDER_ALL = ['ALL','TD','C','R','RR','RRR','SP','LR','SCR','GR','SGR'];
-  const presentRarities = new Set(getAllSetCards().map(c=>c.rarity));
+  const RARITY_ORDER_ALL = ['ALL','TD','C','R','H','RR','RRR','ORR','SP','DSR','LR','SCR','GR','SGR'];
+  const presentRarities = new Set(allCards.map(c=>c.rarity));
   const rarities = RARITY_ORDER_ALL.filter(r => r==='ALL'||r==='TD'||presentRarities.has(r));
   const _galInFmt = s => galleryFormat === 'ALL' || setMatchesFormat(s, galleryFormat);
   const sets = ['ALL',...SETS.filter(s=>s.packSize!==50&&_galInFmt(s)).map(s=>s.id).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),...SETS.filter(s=>s.packSize===50&&_galInFmt(s)).map(s=>s.id).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}))];
@@ -1511,21 +1604,24 @@ function buildGalleryFilters() {
     btn(r==='ALL'?'All':r, r===galleryRarityFilter, `setGalleryRarity('${r}')`)
   ).join('');
   document.getElementById('gallery-clan-filters').innerHTML = clans.map(c =>
-    btn(c==='ALL'?'All Clans':c, c===galleryClanFilter, `setGalleryClan('${c}')`)
+    btn(c==='ALL'?'All Clans/Nations':c, c===galleryClanFilter, `setGalleryClan('${c}')`)
   ).join('');
-  const types = ['ALL','Normal','Trigger','🗡 Critical','🃏 Draw','🔄 Stand','💚 Heal','Sentinel','Wishlist'];
+
+  const hasD = SETS.some(s => s.format === 'D');
+  const baseTypes = ['ALL','Normal','Trigger','🗡 Critical','🃏 Draw','🔄 Stand','💚 Heal','🔵 Front','⚡ Overtrigger','Sentinel'];
+  const dTypes = hasD ? ['📋 Normal Order','⚡ Blitz Order','📌 Set Order','Persona Ride','Token'] : [];
+  const types = [...baseTypes, ...dTypes, 'Wishlist'];
   document.getElementById('gallery-type-filters').innerHTML = types.map(t =>
     btn(t==='ALL'?'All Types':t, t===galleryTypeFilter, `setGalleryType('${t}')`)
   ).join('');
-  const maxGrade = Math.max(0, ...getAllSetCards().map(c=>c.grade));
+
+  const maxGrade = Math.max(0, ...allCards.map(c=>c.grade));
   const grades = ['ALL',...Array.from({length:maxGrade+1},(_,i)=>String(i))];
   const gradeButtons = grades.map(g =>
     btn(g==='ALL'?'All Grades':'G'+g, g===galleryGradeFilter, `setGalleryGrade('${g}')`)
   );
-  const hasGUnits = getAllSetCards().some(c=>isGUnit(c));
-  const gUnitBtn = hasGUnits
-    ? btn('✨ G Units', 'GUNITS'===galleryGradeFilter, `setGalleryGrade('GUNITS')`)
-    : '';
+  const hasGUnits = allCards.some(c=>isGUnit(c));
+  const gUnitBtn = hasGUnits ? btn('✨ G Units', 'GUNITS'===galleryGradeFilter, `setGalleryGrade('GUNITS')`) : '';
   document.getElementById('gallery-grade-filters').innerHTML = gradeButtons.join('') + gUnitBtn;
   const ownedEl = document.getElementById('gallery-owned-filters');
   if (ownedEl) {
@@ -1610,18 +1706,33 @@ function renderGallery() {
     if (!cardMatchesPlayFormat(card.id, galleryPlayFormat)) return false;
     if (ownedOnly && !(collection[card.id]?.count > 0)) return false;
     if (setFilterIds && !setFilterIds.has(card.id)) return false;
-    if (galleryRarityFilter !== 'ALL') { const rMatch = galleryRarityFilter === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR') : card.rarity === galleryRarityFilter; if (!rMatch) return false; }
+    if (galleryRarityFilter !== 'ALL') {
+      const r = galleryRarityFilter;
+      const match = r === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR')
+                  : r === 'H'   ? card.rarity === 'H'
+                  : r === 'ORR' ? card.rarity === 'ORR'
+                  : r === 'DSR' ? card.rarity === 'DSR'
+                  : card.rarity === r;
+      if (!match) return false;
+    }
     if (galleryClanFilter !== 'ALL' && card.clan !== galleryClanFilter) return false;
     if (galleryTypeFilter === 'Wishlist') return wishlist.has(card.id);
     if (galleryTypeFilter !== 'ALL') {
-      if (galleryTypeFilter === 'Trigger' && !isTrigger(card)) return false;
-      else if (galleryTypeFilter === 'Sentinel' && !isSentinel(card)) return false;
-      else if (galleryTypeFilter === 'Heal' && !isHeal(card)) return false;
-      else if (galleryTypeFilter === 'Critical' || galleryTypeFilter === '🗡 Critical') { if (getTriggerType(card) !== 'Critical') return false; }
-      else if (galleryTypeFilter === 'Draw' || galleryTypeFilter === '🃏 Draw') { if (getTriggerType(card) !== 'Draw') return false; }
-      else if (galleryTypeFilter === 'Stand' || galleryTypeFilter === '🔄 Stand') { if (getTriggerType(card) !== 'Stand') return false; }
-      else if (galleryTypeFilter === '💚 Heal') { if (!isHeal(card)) return false; }
-      else if (galleryTypeFilter === 'Normal' && (isTrigger(card) || isSentinel(card) || isGUnit(card))) return false;
+      const tf = galleryTypeFilter;
+      if      (tf === 'Token')           { if (!card.token) return false; }
+      else if (tf === 'Persona Ride')    { if (!card.personaRide) return false; }
+      else if (tf === '📋 Normal Order') { if (card.order !== 'Normal Order') return false; }
+      else if (tf === '⚡ Blitz Order')  { if (card.order !== 'Blitz Order') return false; }
+      else if (tf === '📌 Set Order')    { if (card.order !== 'Set Order') return false; }
+      else if (tf === 'Sentinel')        { if (!isSentinel(card)) return false; }
+      else if (tf === '🔵 Front')        { if (getTriggerType(card) !== 'Front') return false; }
+      else if (tf === '⚡ Overtrigger')  { if (getTriggerType(card) !== 'Overtrigger') return false; }
+      else if (tf === 'Trigger')         { if (!isTrigger(card)) return false; }
+      else if (tf === '🗡 Critical' || tf === 'Critical') { if (getTriggerType(card) !== 'Critical') return false; }
+      else if (tf === '🃏 Draw'     || tf === 'Draw')     { if (getTriggerType(card) !== 'Draw') return false; }
+      else if (tf === '🔄 Stand'    || tf === 'Stand')    { if (getTriggerType(card) !== 'Stand') return false; }
+      else if (tf === '💚 Heal'     || tf === 'Heal')     { if (!isHeal(card)) return false; }
+      else if (tf === 'Normal') { if (isTrigger(card) || isSentinel(card) || isGUnit(card) || card.token || card.order || card.personaRide) return false; }
     }
     if (galleryGradeFilter === 'GUNITS') { if (!isGUnit(card)) return false; }
     else if (galleryGradeFilter !== 'ALL' && card.grade !== parseInt(galleryGradeFilter)) return false;
@@ -1631,12 +1742,17 @@ function renderGallery() {
 
   const missingFirst = document.getElementById('gallery-missing-sort')?.checked;
   const sorted = sortCardList(filtered, gallerySortBy, gallerySortDir, missingFirst);
+  // Float FV card to the very top
+  if (fvCard) {
+    const fvIdx = sorted.findIndex(c => c.id === fvCard.id);
+    if (fvIdx > 0) { sorted.unshift(sorted.splice(fvIdx, 1)[0]); }
+  }
   const grid = document.getElementById('gallery-grid');
 
   function makeGalleryCard(card) {
     const owned = collection[card.id];
     const count = owned ? owned.count : 0;
-    return `<div class="gallery-card rarity-card-${card.rarity} ${count===0?'not-owned':''}" onclick="openZoom(getAllCardById('${card.id}'))">
+    return `<div class="gallery-card rarity-card-${card.rarity} ${count===0?'not-owned':''} ${fvCard&&fvCard.id===card.id?'gallery-fv-card':''}" onclick="openZoom(getAllCardById('${card.id}'))">
       ${seriesTagHtml(card.id)}
       <img class="gc-img" data-id="${card.id}" alt="${card.name}"
            loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display='flex');}})(this)"
@@ -1644,9 +1760,17 @@ function renderGallery() {
       <div class="gc-fallback" style="display:none"><span style="font-size:32px">${card.icon}</span><span style="font-size:9px;color:var(--text-muted);text-align:center;padding:0 4px">${card.name}</span></div>
       ${count>0?`<span class="gc-count">${count}x</span>`:''}
       <span class="gc-rarity rarity-badge ${card.rarity}">${card.rarity}</span>
-      <span style="position:absolute;bottom:22px;right:3px;background:rgba(0,0,0,0.65);color:rgba(255,255,255,0.75);font-size:7px;font-family:monospace;padding:1px 3px;border-radius:2px;z-index:4;pointer-events:none">${getCardNum(card.id)}</span>
-      ${isSentinel(card)?'<div style="position:absolute;bottom:22px;left:0;right:0;background:rgba(240,180,41,0.85);color:#000;font-size:7px;font-weight:700;text-align:center;padding:1px">🛡 Sentinel</div>':card.grade===0&&isTrigger(card)?`<div style="position:absolute;bottom:22px;left:0;right:0;background:${getTriggerColor(getTriggerType(card))};color:#fff;font-size:7px;font-weight:700;text-align:center;padding:1px">${getTriggerType(card)==='Heal'?'💚 Heal':getTriggerType(card)||''}</div>`:''}
-      <button class="gc-add-deck" onclick="event.stopPropagation();addToDeck(getAllCardById('${card.id}'))" title="Add to deck">+</button>
+      <span style="position:absolute;bottom:5px;left:5px;background:rgba(0,0,0,0.72);color:rgba(255,255,255,0.85);font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;z-index:4;pointer-events:none">G${card.grade}</span>
+      <span style="position:absolute;bottom:20px;right:3px;background:rgba(0,0,0,0.65);color:rgba(255,255,255,0.75);font-size:7px;font-family:monospace;padding:1px 3px;border-radius:2px;z-index:4;pointer-events:none">${getCardNum(card.id)}</span>
+      ${(()=>{
+        if(card.token)   return '<div style="position:absolute;top:22px;left:3px;background:rgba(100,100,100,0.85);color:#fff;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:6;pointer-events:none">TOKEN</div>';
+        if(card.order)   { const ol={['Normal Order']:'N.ORD',['Blitz Order']:'BLITZ',['Set Order']:'S.ORD'}; return `<div style="position:absolute;top:22px;left:3px;background:rgba(59,130,246,0.85);color:#fff;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:6;pointer-events:none">${ol[card.order]||'ORDER'}</div>`; }
+        if(isSentinel(card)) return '<div style="position:absolute;top:22px;left:3px;background:rgba(240,180,41,0.9);color:#000;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:6;pointer-events:none">🛡 SENT</div>';
+        const tt=getTriggerType(card);
+        if(!tt) return '';
+        const tLabels={Critical:'CRIT',Draw:'DRAW',Stand:'STND',Heal:'HEAL',Front:'FRNT',Overtrigger:'OT'};
+        return `<div style="position:absolute;top:22px;left:3px;background:${getTriggerColor(tt)};color:#fff;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:6;pointer-events:none">${tLabels[tt]||tt}</div>`;
+      })()}
     </div>`;
   }
 
@@ -1726,24 +1850,34 @@ function _getCardTrigger(card) {
 function getTriggerType(card) {
   if (card.grade !== 0) return null;
   const t = _getCardTrigger(card);
-  if (t === 'Heal')     return 'Heal';
-  if (t === 'Critical') return 'Critical';
-  if (t === 'Draw')     return 'Draw';
-  if (t === 'Stand')    return 'Stand';
+  if (t === 'Heal')        return 'Heal';
+  if (t === 'Critical')    return 'Critical';
+  if (t === 'Draw')        return 'Draw';
+  if (t === 'Stand')       return 'Stand';
+  if (t === 'Front')       return 'Front';
+  if (t === 'Overtrigger' || t === 'Over') return 'Overtrigger';
   return null;
 }
 
 function getUnitType(card) {
-  if (card.grade === 0) return getTriggerType(card) ? getTriggerType(card)+' Trigger' : 'G0';
+  if (card.token)  return 'Token';
+  if (card.order)  return card.order; // "Normal Order", "Blitz Order", "Set Order"
+  if (card.grade === 0) {
+    const t = getTriggerType(card);
+    if (t === 'Overtrigger') return 'Overtrigger';
+    return t ? t + ' Trigger' : 'G0 Unit';
+  }
   return 'Normal Unit';
 }
 
 function getTriggerColor(type) {
   return {
-    'Critical': 'rgba(240,180,41,0.85)',
-    'Draw':     'rgba(230,120,40,0.85)',
-    'Stand':    'rgba(59,130,246,0.85)',
-    'Heal':     'rgba(61,191,127,0.85)',
+    'Critical':    'rgba(240,180,41,0.85)',
+    'Draw':        'rgba(230,120,40,0.85)',
+    'Stand':       'rgba(59,130,246,0.85)',
+    'Heal':        'rgba(61,191,127,0.85)',
+    'Front':       'rgba(220,60,180,0.85)',
+    'Overtrigger': 'rgba(167,139,250,0.85)',
   }[type] || 'rgba(0,0,0,0.65)';
 }
 
@@ -1759,27 +1893,18 @@ function getCardSetLabel(id) {
   return setId ? `${setId} · ${num}` : num;
 }
 
-const FOIL_RARITIES = new Set(['RRR','SP','GR','LR','SCR','SGR','OR']);
+const FOIL_RARITIES = new Set(['RRR','SP','GR','LR','SCR','SGR','OR','H','ORR','DSR']);
 
-function syncDeckClanLock() {
-  const locked = getDeckClan();
-  if (locked) deckPoolClanFilter = locked;
-  const lockEl = document.getElementById('dp-clan-lock');
-  if (lockEl) {
-    if (locked) {
-      lockEl.style.display = '';
-      lockEl.textContent = '🔒 ' + locked;
-    } else {
-      lockEl.style.display = 'none';
-    }
-  }
-}
+function isToken(card) { return !!(card && card.token); }
+function isOrder(card) { return !!(card && card.order); }
+function isOvertrigger(card) { return !!(card && (card.overtrigger || getTriggerType(card) === 'Overtrigger')); }
 
 function isFirstVanguard(card) { return card.grade === 0; }
 
 function isTrigger(card) {
   if (card.grade !== 0) return false;
-  return !!getTriggerType(card);
+  const t = getTriggerType(card);
+  return !!t && t !== 'Overtrigger'; // Overtrigger is a special G0, not a normal trigger
 }
 
 function isHeal(card) {
@@ -1820,7 +1945,7 @@ function getDeckClan() {
 }
 
 function openDeckBuilder() {
-  syncDeckClanLock();
+
   updatePlayFormatTabUI('dp-pf-', deckPlayFormat);
   buildDeckPoolFilters();
   renderDeckPool();
@@ -1828,6 +1953,11 @@ function openDeckBuilder() {
   document.getElementById('deck-overlay').classList.add('active');
 }
 function closeDeckBuilder() { document.getElementById('deck-overlay').classList.remove('active'); }
+
+function toggleDeckListDrawer() {
+  const drawer = document.getElementById('deck-list-drawer');
+  if (drawer) drawer.classList.toggle('open');
+}
 
 function toggleDeckFilters() {
   const panel = document.getElementById('dp-filter-panel');
@@ -1886,17 +2016,20 @@ let deckPoolGradeFilter = 'ALL';
 let deckPoolSetFilter = 'ALL';
 let deckPoolRarityFilter = 'ALL';
 function buildDeckPoolFilters() {
-  syncDeckClanLock();
+
   const lockedClan = getDeckClan();
   const EXTRA_CLANS = ['Angel Feather','Dimension Police','Gear Chronicle','Genesis','Link Joker','Neo Nectar','Pale Moon'];
   let clans = ['ALL', ...new Set([...getAllSetCards().map(c=>c.clan), ...EXTRA_CLANS])].sort((a,b)=>a==='ALL'?-1:a.localeCompare(b));
   if (lockedClan) clans = [lockedClan];
   const _dpInFmt = s => deckPoolFormat === 'ALL' || setMatchesFormat(s, deckPoolFormat);
   const sets = ['ALL', ...SETS.filter(s => _dpInFmt(s)).map(s => s.id)];
-  const RARITY_ORDER_ALL2 = ['ALL','C','R','RR','RRR','SP','LR','SCR','GR','SGR'];
+  const RARITY_ORDER_ALL2 = ['ALL','C','R','H','RR','RRR','ORR','SP','DSR','LR','SCR','GR','SGR'];
   const presentRarities2 = new Set(getAllSetCards().map(c=>c.rarity));
   const rarities = RARITY_ORDER_ALL2.filter(r => r==='ALL'||presentRarities2.has(r));
-  const types = ['ALL','Normal','Trigger','🗡 Critical','🃏 Draw','🔄 Stand','💚 Heal','Sentinel'];
+  const hasD = SETS.some(s => s.format === 'D');
+  const basePoolTypes = ['ALL','Normal','Trigger','🗡 Critical','🃏 Draw','🔄 Stand','💚 Heal','🔵 Front','⚡ Overtrigger','Sentinel'];
+  const dPoolTypes = hasD ? ['📋 Normal Order','⚡ Blitz Order','📌 Set Order','Persona Ride'] : [];
+  const types = [...basePoolTypes, ...dPoolTypes];
   const maxGrade2 = Math.max(...getAllSetCards().map(c=>c.grade));
   const grades = ['ALL',...Array.from({length:maxGrade2+1},(_,i)=>String(i))];
   const btn = filterChipBtn;
@@ -1984,33 +2117,47 @@ function setDeckPoolSet(s) { deckPoolSetFilter=s; buildDeckPoolFilters(); render
 function setDeckPoolRarity(r) { deckPoolRarityFilter=r; buildDeckPoolFilters(); renderDeckPool(); }
 
 function renderDeckPool() {
-  syncDeckClanLock();
+
   const deckSearch = (document.getElementById('deck-search')?.value||'').toLowerCase();
   const lockedClan = getDeckClan();
   const dpSetFilterIds = deckPoolSetFilter === 'ALL' ? null
     : new Set((SETS.find(s => s.id === deckPoolSetFilter)?.cards || []).map(c => c.id));
 
+  // Cards currently in deck or set as FV always bypass filters so they're never hidden
+  const alwaysShow = new Set(Object.keys(deck));
+  if (fvCard) alwaysShow.add(fvCard.id);
+
   const allCards = getAllSetCards().filter(card => {
-    if (!deckShowAllCards && !(collection[card.id]?.count > 0)) return false;
-    if (lockedClan && !isClanAllowed(card, lockedClan)) return false;
-    if (!cardIdMatchesSeries(card.id, deckPoolFormat)) return false;
-    if (!cardMatchesPlayFormat(card.id, deckPlayFormat)) return false;
-    if (dpSetFilterIds && !dpSetFilterIds.has(card.id)) return false;
-    if (deckPoolRarityFilter !== 'ALL') { const rMatch = deckPoolRarityFilter === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR') : card.rarity === deckPoolRarityFilter; if (!rMatch) return false; }
-    if (deckPoolClanFilter !== 'ALL' && card.clan !== deckPoolClanFilter) return false;
-    if (deckPoolTypeFilter !== 'ALL') {
-      if ((deckPoolTypeFilter === 'Trigger') && !isTrigger(card)) return false;
-      else if (deckPoolTypeFilter === 'Sentinel' && !isSentinel(card)) return false;
-      else if (deckPoolTypeFilter === 'Heal' || deckPoolTypeFilter === '💚 Heal') { if (!isHeal(card)) return false; }
-      else if (deckPoolTypeFilter === 'Normal' && (isTrigger(card) || isSentinel(card) || isGUnit(card))) return false;
-      else if (deckPoolTypeFilter === '🗡 Critical') { if (getTriggerType(card) !== 'Critical') return false; }
-      else if (deckPoolTypeFilter === '🃏 Draw') { if (getTriggerType(card) !== 'Draw') return false; }
-      else if (deckPoolTypeFilter === '🔄 Stand') { if (getTriggerType(card) !== 'Stand') return false; }
-      else if (['Critical','Draw','Stand'].includes(deckPoolTypeFilter) && getTriggerType(card) !== deckPoolTypeFilter) return false;
+    // Tokens are gallery-only — never in deck building
+    if (card.token) return false;
+    const pinned = alwaysShow.has(card.id);
+    if (!pinned) {
+      if (!deckShowAllCards && !(collection[card.id]?.count > 0)) return false;
+      if (lockedClan && !isClanAllowed(card, lockedClan)) return false;
+      if (!cardIdMatchesSeries(card.id, deckPoolFormat)) return false;
+      if (!cardMatchesPlayFormat(card.id, deckPlayFormat)) return false;
+      if (dpSetFilterIds && !dpSetFilterIds.has(card.id)) return false;
+      if (deckPoolRarityFilter !== 'ALL') { const rMatch = deckPoolRarityFilter === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR') : card.rarity === deckPoolRarityFilter; if (!rMatch) return false; }
+      if (deckPoolTypeFilter !== 'ALL') {
+        const tf = deckPoolTypeFilter;
+        if      (tf === 'Persona Ride')    { if (!card.personaRide) return false; }
+        else if (tf === '📋 Normal Order') { if (card.order !== 'Normal Order') return false; }
+        else if (tf === '⚡ Blitz Order')  { if (card.order !== 'Blitz Order') return false; }
+        else if (tf === '📌 Set Order')    { if (card.order !== 'Set Order') return false; }
+        else if (tf === 'Sentinel')        { if (!isSentinel(card)) return false; }
+        else if (tf === '🔵 Front')        { if (getTriggerType(card) !== 'Front') return false; }
+        else if (tf === '⚡ Overtrigger')  { if (getTriggerType(card) !== 'Overtrigger') return false; }
+        else if (tf === 'Trigger')         { if (!isTrigger(card)) return false; }
+        else if (tf === '🗡 Critical' || tf === 'Critical') { if (getTriggerType(card) !== 'Critical') return false; }
+        else if (tf === '🃏 Draw'     || tf === 'Draw')     { if (getTriggerType(card) !== 'Draw') return false; }
+        else if (tf === '🔄 Stand'    || tf === 'Stand')    { if (getTriggerType(card) !== 'Stand') return false; }
+        else if (tf === '💚 Heal'     || tf === 'Heal')     { if (!isHeal(card)) return false; }
+        else if (tf === 'Normal') { if (isTrigger(card) || isSentinel(card) || isGUnit(card) || card.order || card.personaRide) return false; }
+      }
+      if (deckPoolGradeFilter === 'GUNITS') { if (!isGUnit(card)) return false; }
+      else if (deckPoolGradeFilter !== 'ALL' && card.grade !== parseInt(deckPoolGradeFilter)) return false;
+      if (deckSearch && !card.name.toLowerCase().includes(deckSearch) && !card.clan.toLowerCase().includes(deckSearch)) return false;
     }
-    if (deckPoolGradeFilter === 'GUNITS') { if (!isGUnit(card)) return false; }
-    else if (deckPoolGradeFilter !== 'ALL' && card.grade !== parseInt(deckPoolGradeFilter)) return false;
-    if (deckSearch && !card.name.toLowerCase().includes(deckSearch) && !card.clan.toLowerCase().includes(deckSearch)) return false;
     return true;
   });
 
@@ -2019,9 +2166,25 @@ function renderDeckPool() {
     deckSortDir = 'desc';
   }
   const sortedCards = sortCardList(allCards, deckSortBy, deckSortDir, false);
-
   const deckCounts = {};
   for (const [id, {count}] of Object.entries(deck)) deckCounts[id] = count;
+
+  // Grade-order comparator: FV → G Units → G3→G1 → G0 normal → G0 triggers
+  function gradeOrder(card) {
+    if (fvCard && fvCard.id === card.id) return -1;
+    if (isGUnit(card)) return 0;
+    if (card.grade > 0) return card.grade === 3 ? 1 : card.grade === 2 ? 2 : 3; // G3, G2, G1
+    return isTrigger(card) ? 5 : 4; // G0 normal then G0 trigger
+  }
+
+  sortedCards.sort((a, b) => {
+    const aIn = alwaysShow.has(a.id) ? 0 : 1;
+    const bIn = alwaysShow.has(b.id) ? 0 : 1;
+    if (aIn !== bIn) return aIn - bIn;       // In-deck group first
+    const go = gradeOrder(a) - gradeOrder(b);
+    if (go !== 0) return go;                 // Within group: grade order
+    return a.name.localeCompare(b.name);     // Alphabetical tiebreak
+  });
 
   document.getElementById('deck-pool-grid').innerHTML = '';
   const dpGrid = document.getElementById('deck-pool-grid');
@@ -2041,23 +2204,34 @@ function renderDeckPool() {
     if (wrongClan && deckClanNow) return null;
     const addBlocked = unowned || deckFull || nameMaxed || noMoreCopies;
     let dimReason = unowned ? 'Not in collection' : nameMaxed ? `Max 4 copies of "${card.name}"` : noMoreCopies ? 'No spare copies' : deckFull ? 'Deck full' : '';
-    const svgHandler = card.grade === 0 ? `oncontextmenu="event.preventDefault();setFirstVanguard(getAllCardById('${card.id}'))"` : '';
-    const titleTip = card.grade===0
-      ? `${card.name} — Click: add trigger | Right-click: set as SVG${dimReason?' ('+dimReason+')':''}`
-      : `${card.name}${dimReason?' — '+dimReason:''}`;
-    return `<div class="pool-card rarity-card-${card.rarity} ${addBlocked?'maxed':''} ${unowned?'not-owned':''} ${isTheFV?'svg-selected':''}"
-      onclick="addToDeck(getAllCardById('${card.id}'))" ${svgHandler} title="${titleTip}"
+    const svgHandler = '';
+    const titleTip = `${card.name}${dimReason?' — '+dimReason:''}`;
+    return `<div class="pool-card rarity-card-${card.rarity} ${addBlocked?'maxed':''} ${unowned?'not-owned':''} ${isTheFV?'svg-selected':''} ${inDeck>0?'pool-in-deck':''}"
+      onclick="if(!this.classList.contains('maxed'))addToDeck(getAllCardById('${card.id}'))" title="${titleTip}"
       onmouseenter="previewCard('${card.id}')" onmouseleave="clearPreview()">
       ${seriesTagHtml(card.id)}
       <img data-id="${card.id}" alt="${card.name}" src="${cardImgPath(card.id)}"
            loading="lazy" onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display='none';el.nextElementSibling&&(el.nextElementSibling.style.display=\'flex\');}})(this)">
       <div class="pc-fallback" style="display:none"><span>${card.icon}</span><span style="font-size:8px;text-align:center;padding:0 4px;color:var(--text-muted)">${card.name}</span></div>
       <span class="pc-count-badge">${owned}x</span>
-      ${inDeck>0?`<div class="pc-in-deck">${inDeck} in deck</div>`:''}
-      ${isTheFV?'<div style="position:absolute;top:3px;left:3px;background:rgba(79,142,247,0.9);color:white;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px">★FV</div>':''}
+      <span style="position:absolute;bottom:18px;left:3px;background:rgba(0,0,0,0.72);color:rgba(255,255,255,0.85);font-size:7px;font-weight:700;padding:1px 4px;border-radius:3px;z-index:5;pointer-events:none">G${card.grade}</span>
+      ${isTheFV?'<div data-fv-badge style="position:absolute;top:20px;right:3px;background:rgba(79,142,247,0.9);color:white;font-size:7px;font-weight:700;padding:1px 4px;border-radius:3px;z-index:6;pointer-events:none">★FV</div>':''}
       <button class="wishlist-btn ${wishlist.has(card.id)?'active':''}" onclick="event.stopPropagation();toggleWishlist('${card.id}')" title="${wishlist.has(card.id)?'Remove from wishlist':'Add to wishlist'}">⭐</button>
-      ${isSentinel(card)?'<div style="position:absolute;bottom:22px;left:0;right:0;background:rgba(240,180,41,0.85);color:#000;font-size:7px;font-weight:700;text-align:center;padding:1px">🛡 Sentinel</div>':''}
-      ${card.grade===0&&isTrigger(card)?`<div style="position:absolute;bottom:18px;left:0;right:0;background:${getTriggerColor(getTriggerType(card))};color:#fff;font-size:7px;font-weight:700;text-align:center;padding:1px">${getTriggerType(card)==='Heal'?'💚 Heal':getTriggerType(card)||''}</div>`:''}
+      ${(()=>{
+        if(card.token)   return '<div style="position:absolute;top:3px;left:3px;background:rgba(100,100,100,0.85);color:#fff;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:6;pointer-events:none">TOKEN</div>';
+        if(card.order)   { const ol={['Normal Order']:'N.ORD',['Blitz Order']:'BLITZ',['Set Order']:'S.ORD'}; return `<div style="position:absolute;top:3px;left:3px;background:rgba(59,130,246,0.85);color:#fff;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:6;pointer-events:none">${ol[card.order]||'ORDER'}</div>`; }
+        if(isSentinel(card)) return '<div style="position:absolute;top:3px;left:3px;background:rgba(240,180,41,0.9);color:#000;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:6;pointer-events:none">🛡</div>';
+        const tt=getTriggerType(card);
+        if(!tt) return '';
+        const tLabels={Critical:'CRIT',Draw:'DRAW',Stand:'STND',Heal:'HEAL',Front:'FRNT',Overtrigger:'OT'};
+        return `<div style="position:absolute;top:3px;left:3px;background:${getTriggerColor(tt)};color:#fff;font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;z-index:6;pointer-events:none">${tLabels[tt]||tt}</div>`;
+      })()}
+      <div class="pc-deck-btns">
+        ${card.grade===0 ? `<button class="pc-fv-btn ${isTheFV?'active':''}" onclick="event.stopPropagation();${isTheFV?`clearFV()`:`setFirstVanguard(getAllCardById('${card.id}'))`}" title="${isTheFV?'Remove as First Vanguard':'Set as First Vanguard'}">★FV</button>` : ''}
+        <button class="pc-remove-btn" onclick="event.stopPropagation();removeFromDeck('${card.id}')" title="Remove one from deck">−</button>
+        <span class="pc-deck-count">${inDeck>0?inDeck:''}</span>
+        <button class="pc-add-btn" onclick="event.stopPropagation();addToDeck(getAllCardById('${card.id}'))" title="Add to deck">+</button>
+      </div>
       <span style="position:absolute;bottom:3px;right:3px;background:rgba(0,0,0,0.6);color:rgba(255,255,255,0.7);font-size:6px;font-family:monospace;padding:1px 3px;border-radius:2px;pointer-events:none">${getCardNum(card.id)}</span>
     </div>`;
   }
@@ -2166,9 +2340,14 @@ function addToDeck(card) {
     if (triggerCount + fvTrigger >= 16) { showToast({icon:'⚠️',name:'Max 16 triggers in a deck',rarity:'C'}); return; }
   }
 
+  const clanBefore = getDeckClan();
+
   if (!deck[card.id]) deck[card.id] = { card, count: 0 };
   deck[card.id].count++;
-  _refreshPoolCard(card.id);
+
+  const clanAfter = getDeckClan();
+  if (clanBefore !== clanAfter) buildDeckPoolFilters();
+  renderDeckPool();
   renderDeckPanel();
 }
 
@@ -2200,18 +2379,33 @@ function _refreshPoolCard(cardId) {
     const noMoreCopies = (inDeck + (isTheFV?1:0)) >= owned;
     const addBlocked = deckFull || nameMaxed || noMoreCopies;
     el.classList.toggle('maxed', addBlocked);
+    el.classList.toggle('pool-in-deck', inDeck > 0);
     const badge = el.querySelector('.pc-count-badge');
     if (badge) badge.textContent = owned + 'x';
+    // Live-update the deck count shown between +/− buttons
+    const deckCountEl = el.querySelector('.pc-deck-count');
+    if (deckCountEl) deckCountEl.textContent = inDeck > 0 ? inDeck : '';
+    // Update FV badge (top-right second row)
+    const fvBadge = el.querySelector('[data-fv-badge]');
+    if (isTheFV && !fvBadge) {
+      const d = document.createElement('div');
+      d.setAttribute('data-fv-badge','');
+      d.style.cssText = 'position:absolute;top:20px;right:3px;background:rgba(79,142,247,0.9);color:white;font-size:7px;font-weight:700;padding:1px 4px;border-radius:3px;z-index:6;pointer-events:none';
+      d.textContent = '★FV';
+      el.appendChild(d);
+    } else if (!isTheFV && fvBadge) {
+      fvBadge.remove();
+    }
+    // Update FV button active state and toggle action
+    const fvBtn = el.querySelector('.pc-fv-btn');
+    if (fvBtn) {
+      fvBtn.classList.toggle('active', isTheFV);
+      fvBtn.title = isTheFV ? 'Remove as First Vanguard' : 'Set as First Vanguard';
+      fvBtn.onclick = (e) => { e.stopPropagation(); isTheFV ? clearFV() : setFirstVanguard(getAllCardById(id)); };
+    }
+    // Remove old pc-in-deck if present (legacy)
     const inDeckEl = el.querySelector('.pc-in-deck');
-    if (inDeck > 0) {
-      if (inDeckEl) inDeckEl.textContent = inDeck + ' in deck';
-      else {
-        const d = document.createElement('div');
-        d.className = 'pc-in-deck';
-        d.textContent = inDeck + ' in deck';
-        el.appendChild(d);
-      }
-    } else if (inDeckEl) inDeckEl.remove();
+    if (inDeckEl) inDeckEl.remove();
   }
 }
 
@@ -2229,23 +2423,23 @@ function setFirstVanguard(card) {
 
   const oldFV = fvCard;
 
-  const nameCountExSVG = countByName(getDeckName(card)) - (oldFV && getDeckName(oldFV) === getDeckName(card) ? 1 : 0);
-  if (nameCountExSVG >= CARD_MAX_COPIES) {
+  const nameCountExFV = countByName(getDeckName(card)) - (oldFV && getDeckName(oldFV) === getDeckName(card) ? 1 : 0);
+  if (nameCountExFV >= CARD_MAX_COPIES) {
     showToast({icon:'⚠️',name:`Already have 4 copies of "${card.name}" in deck`,rarity:'C'}); return;
   }
 
   const inDeckMain = deck[card.id]?.count || 0;
   const oldFVUsesThisId = oldFV && oldFV.id === card.id ? 1 : 0;
   if (inDeckMain + 1 - oldFVUsesThisId > owned) {
-    showToast({icon:'⚠️',name:`Not enough copies of ${card.name} (need 1 spare for SVG)`,rarity:'C'}); return;
+    showToast({icon:'⚠️',name:`Not enough copies of ${card.name} (need 1 spare for FV)`,rarity:'C'}); return;
   }
 
   if (!oldFV && getDeckTotal() >= DECK_MAX) {
-    showToast({icon:'⚠️',name:'Deck is at 50 — remove a card before setting SVG',rarity:'C'}); return;
+    showToast({icon:'⚠️',name:'Deck is at 50 — remove a card before setting FV',rarity:'C'}); return;
   }
 
   fvCard = card;
-  syncDeckClanLock();
+
   buildDeckPoolFilters();
   renderDeckPool();
   renderDeckPanel();
@@ -2253,7 +2447,7 @@ function setFirstVanguard(card) {
 
 function clearFV() {
   fvCard = null;
-  syncDeckClanLock();
+
   buildDeckPoolFilters();
   renderDeckPool();
   renderDeckPanel();
@@ -2261,8 +2455,13 @@ function clearFV() {
 
 function removeFromDeck(cardId) {
   if (!deck[cardId]) return;
+  const clanBefore = getDeckClan();
   deck[cardId].count--;
   if (deck[cardId].count <= 0) delete deck[cardId];
+  const clanAfter = getDeckClan();
+  if (clanBefore !== clanAfter) {
+    buildDeckPoolFilters();
+  }
   renderDeckPool();
   renderDeckPanel();
 }
@@ -2271,7 +2470,7 @@ function clearDeck() {
   if (!confirm('Clear the entire deck?')) return;
   deck = {};
   fvCard = null;
-  syncDeckClanLock();
+
   buildDeckPoolFilters();
   renderDeckPool();
   renderDeckPanel();
@@ -2328,18 +2527,9 @@ function renderDeckPanel() {
   const sentinelEl = document.getElementById('ds-sentinel');
   if (sentinelEl) sentinelEl.textContent = sentinels;
 
-  // Section counts
-  const fvCountEl = document.getElementById('dd2-fv-count');
-  if (fvCountEl) fvCountEl.textContent = fvCard ? 1 : 0;
-  const gzCountEl = document.getElementById('dd2-gz-count');
-  if (gzCountEl) gzCountEl.textContent = gUnits + ' / 16';
-  const mainCountEl = document.getElementById('dd2-main-count');
-  if (mainCountEl) mainCountEl.textContent = total + ' / 50';
-
-  // Validation dots (with tooltips, text hidden in sidebar, visible as dots)
   const checks = [
     { ok: total === DECK_MAX,        warn: total > 0 && total < DECK_MAX,  msg: 'Main ' + total + '/50' },
-    { ok: !!fvCard,                  warn: false,                           msg: 'FV: ' + (fvCard ? '★ ' + fvCard.name : 'Not set — right-click G0') },
+    { ok: !!fvCard,                  warn: false,                           msg: 'FV: ' + (fvCard ? '★ ' + fvCard.name : 'Not set — click ★FV on a G0 card') },
     { ok: !!getDeckClan(),           warn: false,                           msg: 'Clan: ' + (getDeckClan()||'None yet') },
     { ok: triggers === 16,           warn: triggers > 0 && triggers < 16,  msg: 'Triggers ' + triggers + '/16' },
     { ok: heals <= 4,                warn: heals > 0 && heals < 4,         msg: 'Heal ' + heals + '/4 max' },
@@ -2351,7 +2541,7 @@ function renderDeckPanel() {
     return '<div class="val-row" title="' + c.msg + '"><div class="val-dot ' + cls + '"></div><span style="color:' + (c.ok?'var(--text)':'var(--text-muted)') + '">' + c.msg + '</span></div>';
   }).join('');
 
-  // ── DD2 visual: Ride Deck (FV) ──
+  // ── Era mismatch indicator ──
   const contentsEra = detectDeckEraFromCards();
   const hasCards = fvCard || Object.keys(deck).length > 0;
   const mismatch = hasCards && (
@@ -2373,76 +2563,11 @@ function renderDeckPanel() {
         '<span style="font-weight:600;color:var(--text)">' + fvCard.icon + ' ' + fvCard.name + '</span>' +
         '<span style="display:block;margin-top:2px">' + fvCard.clan + ' · G' + fvCard.grade + ' · ' + fvCard.rarity + '</span>';
     } else {
-      fvDisplay.textContent = 'R-click a G0 card in the pool to set FV';
+      fvDisplay.textContent = 'Click ★FV on a G0 card in the pool';
     }
   }
 
-  const fvRow = document.getElementById('dd2-fv-row');
-  if (fvRow) {
-    if (fvCard) {
-      fvRow.innerHTML =
-        '<div class="dd2-mini-card r' + fvCard.rarity + '" onclick="openZoom(getAllCardById(\'' + fvCard.id + '\'))" title="' + fvCard.name + ' — First Vanguard">' +
-          '<img src="' + cardImgPath(fvCard.id) + '" alt="' + fvCard.name + '" data-id="' + fvCard.id + '"' +
-          ' onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display=\'none\';}})(this)">' +
-          '<button class="dd2-remove-btn" onclick="event.stopPropagation();clearFV()">✕</button>' +
-          '<div class="dd2-count-overlay">★FV</div>' +
-          (isSentinel(fvCard) ? '<div class="dd2-sentinel-tag">🛡</div>' : '') +
-        '</div>' +
-        '<div style="padding:4px 0 0 8px;font-size:10px;color:var(--text-muted);flex:1;line-height:1.4">' +
-          '<div style="font-weight:700;font-size:12px;color:var(--text)">' + fvCard.name + '</div>' +
-          '<div>' + fvCard.clan + '</div>' +
-          '<div style="color:var(--accent)">G' + fvCard.grade + ' · ' + fvCard.rarity + ' · ' + getCardNum(fvCard.id) + '</div>' +
-          (isSentinel(fvCard) ? '<div style="color:var(--gold);font-size:9px">🛡 Sentinel</div>' : '') +
-        '</div>';
-    } else {
-      fvRow.innerHTML =
-        '<div class="dd2-empty-slot" onclick="showToast({icon:\'ℹ️\',name:\'Right-click a Grade 0 card in the pool to set as First Vanguard\',rarity:\'C\'})">' +
-          '<span style="font-size:20px;opacity:0.3">+</span>' +
-          '<span style="font-size:9px;opacity:0.3;text-align:center">Right-click G0<br>to set FV</span>' +
-        '</div>';
-    }
-  }
-
-  // ── DD2 visual: G Zone grid ──
-  const gzGrid = document.getElementById('dd2-gzone-grid');
-  if (gzGrid) {
-    const gUnitsArr = Object.values(deck).filter(x => isGUnit(x.card));
-    if (gUnitsArr.length === 0) {
-      gzGrid.innerHTML = '<div style="color:var(--text-muted);font-size:10px;padding:6px 0">No G Units added</div>';
-    } else {
-      gzGrid.innerHTML = gUnitsArr.map(function(xu) { return miniCard(xu.card, xu.count); }).join('');
-    }
-  }
-
-  // ── DD2 visual: Main Deck by grade ──
-  const mainDeck = document.getElementById('dd2-main-deck');
-  if (mainDeck) {
-    const nonGUnits = Object.values(deck).filter(x => !isGUnit(x.card));
-    const maxG = nonGUnits.length ? Math.max(...nonGUnits.map(x => x.card.grade)) : 3;
-    const gradeColors = { 0:'var(--rarity-c)', 1:'var(--rarity-r)', 2:'var(--rarity-rr)', 3:'var(--rarity-rrr)' };
-    let html = '';
-    for (let g = Math.max(3, maxG); g >= 0; g--) {
-      const cards = nonGUnits.filter(x => x.card.grade === g);
-      if (!cards.length) continue;
-      const gc = gradeColors[g] || 'var(--text-muted)';
-      const cardTotal = cards.reduce(function(s,x){return s+x.count;}, 0);
-      const sorted = cards.slice().sort(function(a,b){return a.card.name.localeCompare(b.card.name);});
-      html += '<div class="dd2-grade-block">' +
-        '<div class="dd2-grade-label">' +
-          '<span style="color:' + gc + '">G' + g + '</span>' +
-          '<span style="color:var(--text-muted)"> — ' + cards.length + ' type' + (cards.length!==1?'s':'') + ' · ' + cardTotal + ' cards</span>' +
-        '</div>' +
-        '<div class="dd2-card-grid">' + sorted.map(function(xu){return miniCard(xu.card, xu.count);}).join('') + '</div>' +
-      '</div>';
-    }
-    mainDeck.innerHTML = html || '<div style="color:var(--text-muted);font-size:10px;padding:8px">No main deck cards yet</div>';
-  }
-
-  // Legacy hidden list for export compat
-  const legacyList = document.getElementById('deck-list');
-  if (legacyList) legacyList.innerHTML = '';
-
-  // ── Col 3: Compact scrollable deck list ──
+  // ── Deck list ──
   const dclBody = document.getElementById('deck-list-col-body');
   const dclCount = document.getElementById('dcl-count');
   if (dclCount) dclCount.textContent = total + '/50';
@@ -2467,6 +2592,7 @@ function renderDeckPanel() {
           <span style="font-size:10px">${card.icon}</span>
           <span class="dcl-name">${card.name}</span>
           <span class="dcl-cnt">${count}×</span>
+          <button class="dcl-add" onclick="event.stopPropagation();addToDeck(getAllCardById('${card.id}'))" title="Add one">+</button>
           <button class="dcl-remove" onclick="event.stopPropagation();removeFromDeck('${card.id}')" title="Remove one">−</button>
         </div>`;
       });
@@ -2480,14 +2606,20 @@ function renderDeckPanel() {
       const gTotal = cards.reduce((s,x)=>s+x.count,0);
       dclHtml += `<div class="dcl-section-header"><span style="color:${gc}">G${g}</span> <span style="font-weight:400">(${gTotal})</span></div>`;
       cards.sort((a,b)=>a.card.name.localeCompare(b.card.name)).forEach(({card,count}) => {
-        const tag = isSentinel(card) ? '<span class="dcl-badge">🛡</span>' :
-                    isHeal(card)     ? '<span class="dcl-badge" style="background:rgba(61,191,127,.2);color:var(--green)">💚</span>' :
-                    isTrigger(card)  ? '<span class="dcl-badge" style="background:rgba(240,180,41,.15);color:var(--gold)">⚡</span>' : '';
+        const trigType = getTriggerType(card);
+        const trigLabels = {Critical:'CRIT',Draw:'DRAW',Stand:'STND',Heal:'HEAL',Front:'FRNT',Overtrigger:'OT'};
+        const trigBgColors = {Critical:'rgba(240,180,41,0.85)',Draw:'rgba(230,120,40,0.85)',Stand:'rgba(59,130,246,0.85)',Heal:'rgba(61,191,127,0.85)'};
+        const tag = isSentinel(card)
+          ? '<span class="dcl-badge" style="background:rgba(240,180,41,0.2);color:var(--gold)">🛡 Sent</span>'
+          : trigType
+            ? `<span class="dcl-badge" style="background:${trigBgColors[trigType]};color:#fff;font-weight:700">${trigLabels[trigType]||trigType}</span>`
+            : '';
         dclHtml += `<div class="dcl-row" onclick="openZoom(getAllCardById('${card.id}'))">
           <span style="font-size:10px">${card.icon}</span>
           <span class="dcl-name">${card.name}</span>
           ${tag}
           <span class="dcl-cnt">${count}×</span>
+          <button class="dcl-add" onclick="event.stopPropagation();addToDeck(getAllCardById('${card.id}'))" title="Add one">+</button>
           <button class="dcl-remove" onclick="event.stopPropagation();removeFromDeck('${card.id}')" title="Remove one">−</button>
         </div>`;
       });
@@ -2496,19 +2628,8 @@ function renderDeckPanel() {
   }
 }
 
-function miniCard(card, count) {
-  var sentinel = isSentinel(card);
-  var trigType = getTriggerType(card);
-  var trigColor = trigType ? getTriggerColor(trigType) : null;
-  return '<div class="dd2-mini-card r' + card.rarity + '" onclick="openZoom(getAllCardById(\'' + card.id + '\'))" title="' + card.name.replace(/'/g,"&#39;") + ' (' + card.id + ') — ' + count + 'x">' +
-    '<img src="' + cardImgPath(card.id) + '" alt="' + card.name.replace(/"/g,'') + '" data-id="' + card.id + '"' +
-    ' onerror="(function(el){if(!el._cands){el._cands=cardImgCandidates(el.dataset.id);el._ci=1;}if(el._ci<el._cands.length){el.src=el._cands[el._ci++];}else{el.style.display=\'none\';}})(this)">' +
-    '<div class="dd2-count-overlay">×' + count + '</div>' +
-    '<button class="dd2-remove-btn" onclick="event.stopPropagation();removeFromDeck(\'' + card.id + '\')">✕</button>' +
-    (sentinel ? '<div class="dd2-sentinel-tag">🛡</div>' : '') +
-    (trigType && !sentinel ? '<div style="position:absolute;bottom:0;left:0;right:0;background:' + trigColor + ';color:#fff;font-size:5px;font-weight:700;text-align:center;padding:1px">' + trigType[0] + '</div>' : '') +
-  '</div>';
-}
+
+
 
 
 
@@ -2637,6 +2758,7 @@ function doImportDeck() {
     const dn = document.getElementById('deck-name-input');
     if (dn) dn.value = importedName;
   }
+  buildDeckPoolFilters();
   renderDeckPool();
   renderDeckPanel();
   closeImportDeck();
@@ -2656,7 +2778,7 @@ async function exportDeckImage() {
 
   const SCALE = 2;
   const CARD_W = 120, CARD_H = 175, GAP = 10, COLS = 10;
-  const SECTION_HEADER_H = 36, TOP_H = 150, BOTTOM_PAD = 32;
+  const SECTION_HEADER_H = 36, TOP_H = 160, BOTTOM_PAD = 32;
   const COL_W = CARD_W + GAP;
 
   function gradeRows(g) {
@@ -2695,42 +2817,49 @@ async function exportDeckImage() {
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, WIDTH, 5);
   ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 32px Arial';
-  ctx.fillText(deckName, GAP*2, 48);
-  ctx.fillStyle = 'rgba(79,142,247,0.18)';
-  roundRect(ctx, GAP*2, 60, 280, 32, 7); ctx.fill();
-  ctx.fillStyle = '#4f8ef7';
-  ctx.font = '15px Arial';
-  const deckEra = detectDeckEraFromCards();
-  ctx.fillText(`${deckClan}  ·  ${total} / 50  ·  ${deckEra}`, GAP*2+12, 82);
-  ctx.fillStyle = 'rgba(79,142,247,0.35)';
-  roundRect(ctx, GAP*2+12, 88, 200, 22, 5); ctx.fill();
-  ctx.fillStyle = '#9ec5ff';
-  ctx.font = '11px Arial';
-  ctx.fillText(`Format: ${deckPlayFormat}`, GAP*2+20, 103);
+  ctx.font = 'bold 28px Arial';
+  ctx.fillText(deckName, GAP*2, 44);
 
+  // Clan · total · era pill — row 2
+  ctx.fillStyle = 'rgba(79,142,247,0.18)';
+  const deckEra = detectDeckEraFromCards();
+  const subtitleText = `${deckClan}  ·  ${total} / 50  ·  ${deckEra}`;
+  ctx.font = '14px Arial';
+  const subtitleW = ctx.measureText(subtitleText).width + 24;
+  roundRect(ctx, GAP*2, 54, subtitleW, 28, 6); ctx.fill();
+  ctx.fillStyle = '#4f8ef7';
+  ctx.fillText(subtitleText, GAP*2+12, 72);
+
+  // Trigger counts — row 3, full width, no overlap
   const trigCounts = {Critical:0,Draw:0,Stand:0,Heal:0};
   let sentinelCount = 0, gUnitCount = getGZoneTotal();
   if (fvCard) { const t=getTriggerType(fvCard); if(t&&trigCounts[t]!==undefined) trigCounts[t]++; if(isSentinel(fvCard)) sentinelCount++; }
   for (const {card,count} of Object.values(deck)) { const t=getTriggerType(card); if(t&&trigCounts[t]!==undefined) trigCounts[t]+=count; if(isSentinel(card)) sentinelCount+=count; }
   const trigColors = {Critical:'#f0b429',Draw:'#e67820',Stand:'#3b82f6',Heal:'#3dbf7f'};
   let tx = GAP*2;
+  const TRIG_Y = 92, TRIG_H = 26;
+  ctx.font = 'bold 12px Arial';
   for (const [t,cnt] of Object.entries(trigCounts)) {
     if (!cnt) continue;
-    ctx.fillStyle = trigColors[t]+'33'; roundRect(ctx,tx,102,120,26,6); ctx.fill();
-    ctx.fillStyle = trigColors[t]; ctx.font='bold 12px Arial';
-    ctx.fillText(`${t}  ${cnt}x`, tx+10, 119); tx += 128;
+    const lbl = `${t}  ${cnt}x`;
+    const tw = ctx.measureText(lbl).width + 20;
+    ctx.fillStyle = trigColors[t]+'33'; roundRect(ctx,tx,TRIG_Y,tw,TRIG_H,6); ctx.fill();
+    ctx.fillStyle = trigColors[t];
+    ctx.fillText(lbl, tx+10, TRIG_Y+17); tx += tw + 6;
   }
-  // Sentinel + G Unit counts
   if (sentinelCount > 0) {
-    ctx.fillStyle = 'rgba(240,180,41,0.18)'; roundRect(ctx,tx,102,130,26,6); ctx.fill();
-    ctx.fillStyle = '#f0b429'; ctx.font='bold 12px Arial';
-    ctx.fillText(`🛡 Sentinel  ${sentinelCount}x`, tx+10, 119); tx += 138;
+    const lbl = `🛡 Sentinel  ${sentinelCount}x`;
+    const tw = ctx.measureText(lbl).width + 20;
+    ctx.fillStyle = 'rgba(240,180,41,0.18)'; roundRect(ctx,tx,TRIG_Y,tw,TRIG_H,6); ctx.fill();
+    ctx.fillStyle = '#f0b429';
+    ctx.fillText(lbl, tx+10, TRIG_Y+17); tx += tw + 6;
   }
   if (gUnitCount > 0) {
-    ctx.fillStyle = 'rgba(167,139,250,0.18)'; roundRect(ctx,tx,102,120,26,6); ctx.fill();
-    ctx.fillStyle = '#a78bfa'; ctx.font='bold 12px Arial';
-    ctx.fillText(`✨ G Zone  ${gUnitCount}/16`, tx+10, 119); tx += 128;
+    const lbl = `✨ G Zone  ${gUnitCount}/16`;
+    const tw = ctx.measureText(lbl).width + 20;
+    ctx.fillStyle = 'rgba(167,139,250,0.18)'; roundRect(ctx,tx,TRIG_Y,tw,TRIG_H,6); ctx.fill();
+    ctx.fillStyle = '#a78bfa';
+    ctx.fillText(lbl, tx+10, TRIG_Y+17);
   }
 
   let y = TOP_H;
@@ -2750,8 +2879,29 @@ async function exportDeckImage() {
     }
     ctx.strokeStyle=isFV?'#4f8ef7':'rgba(255,255,255,0.15)'; ctx.lineWidth=isFV?2.5:1;
     roundRect(ctx,cx,cy,CARD_W,CARD_H,6); ctx.stroke();
-    if(count>1){ctx.fillStyle='rgba(0,0,0,0.8)';roundRect(ctx,cx+CARD_W-26,cy+3,23,18,4);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(`${count}x`,cx+CARD_W-14,cy+15);ctx.textAlign='left';}
+    // Count badge — bottom-right, above set label, so it doesn't cover trigger tag
+    if(count>1){ctx.fillStyle='rgba(0,0,0,0.82)';roundRect(ctx,cx+CARD_W-28,cy+CARD_H-36,25,18,4);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.fillText(`${count}x`,cx+CARD_W-15,cy+CARD_H-23);ctx.textAlign='left';}
+    // FV badge — top-left
     if(isFV){ctx.fillStyle='#4f8ef7';roundRect(ctx,cx+3,cy+3,34,16,4);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText('★ FV',cx+20,cy+14);ctx.textAlign='left';}
+    // Trigger / Sentinel tag — top-right
+    const trigType = getTriggerType(card);
+    const isSent   = isSentinel(card);
+    if (isSent || trigType) {
+      const TRIG_COLORS = {Critical:'#f0b429',Draw:'#e67820',Stand:'#3b82f6',Heal:'#3dbf7f'};
+      const TRIG_LABELS = {Critical:'CRIT',Draw:'DRAW',Stand:'STAND',Heal:'HEAL',Front:'FRONT',Overtrigger:'OT'};
+      const tagBg  = isSent ? '#f0b429' : (TRIG_COLORS[trigType] || '#888');
+      const tagFg  = isSent ? '#000'    : '#fff';
+      const tagTxt = isSent ? '🛡'       : (TRIG_LABELS[trigType] || trigType.slice(0,4).toUpperCase());
+      ctx.font = 'bold 8px Arial';
+      const tw = ctx.measureText(tagTxt).width + 8;
+      ctx.fillStyle = tagBg;
+      roundRect(ctx, cx + CARD_W - tw - 3, cy + 3, tw, 15, 3);
+      ctx.fill();
+      ctx.fillStyle = tagFg;
+      ctx.textAlign = 'center';
+      ctx.fillText(tagTxt, cx + CARD_W - tw/2 - 3, cy + 13);
+      ctx.textAlign = 'left';
+    }
     const setLabel = getCardSetLabel(card.id);
     ctx.fillStyle='rgba(0,0,0,0.82)';roundRect(ctx,cx+3,cy+CARD_H-18,CARD_W-6,15,3);ctx.fill();
     ctx.fillStyle='#e8ecf4';ctx.font='bold 8px Consolas,monospace';ctx.textAlign='center';
@@ -2847,7 +2997,7 @@ function updatePityDisplay() {
   el.textContent = packsSinceLastRRR;
   const hot = packsSinceLastRRR >= 8;
   el.style.color = hot ? 'var(--gold)' : packsSinceLastRRR >= 5 ? 'var(--rarity-rr)' : 'var(--accent)';
-  document.querySelectorAll('.open-btns .btn').forEach(b => b.classList.toggle('pity-hot', hot));
+  document.querySelectorAll('.open-btns .btn:not([data-no-pity])').forEach(b => b.classList.toggle('pity-hot', hot));
 }
 
 function toggleWishlist(cardId) {
