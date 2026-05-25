@@ -1276,6 +1276,7 @@ function setImgSrcWithFallback(imgEl, id, onBothFail) {
 }
 const IMG_CARDS_OG = 'images/cards/1 OG/';
 const IMG_CARDS_G  = 'images/cards/2 G/';
+const IMG_CARDS_D = 'images/cards/4 D/';
 const IMG_CARDS    = IMG_CARDS_OG;
 const IMG_ASSETS  = 'images/assets/';
 const IMG_BOXES   = 'images/boxes/';
