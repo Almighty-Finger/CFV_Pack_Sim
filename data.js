@@ -3910,15 +3910,15 @@ const SETS = [
       {id:"DBT01_S25EN",name:"Source Dragon Deity of Blessings, Blessfavor",grade:0,clan:"Stoicheia",rarity:"SP",icon:"🌿",trigger:"Overtrigger",overtrigger:true},
       {id:"DBT01_S26EN",name:"Twin Buckler Dragon",grade:1,clan:"Dragon Empire",rarity:"SP",icon:"🐉",trigger:"Sentinel"},
       {id:"DBT01_S27EN",name:"Recusal Hate Dragon",grade:1,clan:"Dark States",rarity:"SP",icon:"😈",trigger:"Sentinel"},
-      {id:"DBT01_S28EN",name:"Cardinal Noid, Cubisia",grade:2,clan:"Brandt Gate",rarity:"SP",icon:"🤖"},
-      {id:"DBT01_S29EN",name:"Violate Dragon",grade:1,clan:"Brandt Gate",rarity:"SP",icon:"🤖",trigger:"Sentinel"},
-      {id:"DBT01_S30EN",name:"Aegismare Dragon",grade:1,clan:"Keter Sanctuary",rarity:"SP",icon:"⚔️",trigger:"Sentinel"},
-      {id:"DBT01_S31EN",name:"Black Tears Husk Dragon",grade:2,clan:"Stoicheia",rarity:"SP",icon:"🌿"},
-      {id:"DBT01_S32EN",name:"Planar Prevent Dragon",grade:1,clan:"Stoicheia",rarity:"SP",icon:"🌿",trigger:"Sentinel"},
-      {id:"DBT01_S33EN",name:"Cardinal Noid, Routis",grade:1,clan:"Brandt Gate",rarity:"SP",icon:"🤖"},
-      {id:"DBT01_S34EN",name:"Cardinal Fang, Phovi",grade:0,clan:"Brandt Gate",rarity:"SP",icon:"🤖"},
-      {id:"DBT01_S35EN",name:"Cardinal Draco, Barbizonde",grade:0,clan:"Brandt Gate",rarity:"SP",icon:"🤖",trigger:"Critical"},
-      {id:"DBT01_S36EN",name:"Cardinal Prima, Nabilem",grade:0,clan:"Brandt Gate",rarity:"SP",icon:"🤖",trigger:"Heal"},
+      {id:"DBT01_S28EN",name:"Violate Dragon",grade:1,clan:"Brandt Gate",rarity:"SP",icon:"🤖",trigger:"Sentinel"},
+      {id:"DBT01_S29EN",name:"Aegismare Dragon",grade:1,clan:"Keter Sanctuary",rarity:"SP",icon:"⚔️",trigger:"Sentinel"},
+      {id:"DBT01_S30EN",name:"Planar Prevent Dragon",grade:1,clan:"Stoicheia",rarity:"SP",icon:"🌿",trigger:"Sentinel"},
+      {id:"DBT01_S31EN",name:"Cardinal Noid, Cubisia",grade:2,clan:"Brandt Gate",rarity:"SP",icon:"🤖"},
+      {id:"DBT01_S32EN",name:"Cardinal Noid, Routis",grade:1,clan:"Brandt Gate",rarity:"SP",icon:"🤖"},
+      {id:"DBT01_S33EN",name:"Cardinal Fang, Phovi",grade:0,clan:"Brandt Gate",rarity:"SP",icon:"🤖"},
+      {id:"DBT01_S34EN",name:"Cardinal Draco, Barbizonde",grade:0,clan:"Brandt Gate",rarity:"SP",icon:"🤖",trigger:"Critical"},
+      {id:"DBT01_S35EN",name:"Cardinal Prima, Nabilem",grade:0,clan:"Brandt Gate",rarity:"SP",icon:"🤖",trigger:"Heal"},
+      {id:"DBT01_S36EN",name:"Black Tears Husk Dragon",grade:2,clan:"Stoicheia",rarity:"SP",icon:"🌿"},
       {id:"DBT01_S37EN",name:"Rancor Chain",grade:1,clan:"Stoicheia",rarity:"SP",icon:"🌿"},
       {id:"DBT01_S38EN",name:"Dream Nibbling",grade:0,clan:"Stoicheia",rarity:"SP",icon:"🌿"},
       {id:"DBT01_S39EN",name:"Abyss Temptation",grade:0,clan:"Stoicheia",rarity:"SP",icon:"🌿",trigger:"Critical"},
@@ -3926,7 +3926,6 @@ const SETS = [
       {id:"DBT01_T01EN",name:"Shadow Army Token",grade:1,clan:"Brandt Gate",rarity:"C",icon:"🤖",token:true}
     ]
   }
-
 ];
 // ==================== RARITY POOLS & SLOT RULES ====================
 const RPLUS_BT    = { raritiesAllowed:["R","RR","RRR","SP"],     weights:[88, 20, 11, 1] };
