@@ -23,17 +23,11 @@ All list for OG is done expect for PR and Special sets
 
 adding the rest of G: GBT04
 
-adding Standard : DBT02
+adding Standard : DBT05
 
 
 fixing some logics of card ratio
 
-
-~~Revamp the deckbuilder~~
-
-~~adding hand sample~~
-
-~~adding a "get whole set" button~~
 ______________________________________________________________________________________________________________________________
 Bug Fixing:
 
