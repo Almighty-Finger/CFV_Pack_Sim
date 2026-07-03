@@ -335,6 +335,10 @@
   .rarity-badge.H   { color: #00e5ff; background: rgba(0,229,255,0.12); } /* Holo — cyan, same tier as RR */
   .rarity-badge.ORR { color: #a78bfa; background: rgba(167,139,250,0.15); } /* Overtrigger double rare */
   .rarity-badge.DSR { background: linear-gradient(90deg,#f0b429,#ef4444,#a78bfa); color:#fff; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+  .rarity-badge.WO  { color: #ff9ff3; background: rgba(255,159,243,0.15); }
+  .rarity-badge.SSR { color: #fff; background: linear-gradient(135deg,#f0b429,#ef4444); }
+  [class~="10thRRR"].rarity-badge, .rarity-badge[class*="10thRRR"] { color: #ffd700; background: rgba(255,215,0,0.18); }
+  [class~="10thSEC"].rarity-badge, .rarity-badge[class*="10thSEC"] { color: #fff; background: linear-gradient(90deg,#ff6b6b,#ffd700,#6bffb8,#6bb8ff,#d06bff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
   .rarity-badge.TD  { background: rgba(100,100,100,0.2); color: #999; border-color: rgba(150,150,150,0.3); }
 
   /* FLIP ALL ANIMATION */
@@ -1004,7 +1008,10 @@
   .rarity-card-SGR.foil-active img,
   .rarity-card-H.foil-active img,
   .rarity-card-ORR.foil-active img,
-  .rarity-card-DSR.foil-active img {
+  .rarity-card-DSR.foil-active img,
+  .rarity-card-SSR.foil-active img,
+  .rarity-card-WO.foil-active img,
+  [class*="rarity-card-10th"].foil-active img {
     transform: perspective(600px)
                rotateX(var(--foil-tilt-x, 0deg))
                rotateY(var(--foil-tilt-y, 0deg))
@@ -1018,7 +1025,10 @@
   .rarity-card-LR.foil-active,
   .rarity-card-H.foil-active,
   .rarity-card-ORR.foil-active,
-  .rarity-card-DSR.foil-active {
+  .rarity-card-DSR.foil-active,
+  .rarity-card-SSR.foil-active,
+  .rarity-card-WO.foil-active,
+  [class*="rarity-card-10th"].foil-active {
     transition: box-shadow 0.08s ease-out;
     z-index: 10;
   }
@@ -1062,6 +1072,53 @@
     opacity: 1; animation: none;
   }
   .rarity-card-DSR.foil-active { box-shadow: 0 0 40px rgba(255,215,0,0.7), 0 0 80px rgba(167,139,250,0.4), 0 0 120px rgba(239,68,68,0.2); }
+
+  /* ── 10thRRR: gold anniversary foil ── */
+  [class*="rarity-card-10thRRR"].foil-active::after {
+    background: radial-gradient(
+      ellipse at var(--foil-x,50%) var(--foil-y,50%),
+      rgba(255,215,0,calc(0.6 * var(--foil-shine,0.5))) 0%,
+      rgba(255,165,0,0.3) 40%, transparent 70%
+    );
+    opacity: 1; animation: none;
+  }
+  [class*="rarity-card-10thRRR"].foil-active { box-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,165,0,0.4); }
+
+  /* ── 10thSEC: full-spectrum anniversary foil ── */
+  [class*="rarity-card-10thSEC"].foil-active::after {
+    background: conic-gradient(
+      from calc(var(--foil-x,50%) * 3.6deg),
+      rgba(255,107,107,0.5) 0deg, rgba(255,215,0,0.5) 72deg,
+      rgba(107,255,184,0.5) 144deg, rgba(107,184,255,0.5) 216deg,
+      rgba(208,107,255,0.5) 288deg, rgba(255,107,107,0.5) 360deg
+    );
+    opacity: 1; animation: none;
+  }
+  [class*="rarity-card-10thSEC"].foil-active { box-shadow: 0 0 50px rgba(255,215,0,0.9), 0 0 100px rgba(167,139,250,0.5), 0 0 150px rgba(107,255,184,0.3); }
+
+  /* ── WO (Wonder Rare): soft pink shimmer ── */
+  .rarity-card-WO.foil-active::after {
+    background: radial-gradient(
+      ellipse at var(--foil-x,50%) var(--foil-y,50%),
+      rgba(255,159,243,calc(0.55 * var(--foil-shine,0.5))) 0%,
+      rgba(200,120,255,0.2) 45%, transparent 70%
+    );
+    opacity: 1; animation: none;
+  }
+  .rarity-card-WO.foil-active { box-shadow: 0 0 25px rgba(255,159,243,0.6), 0 0 50px rgba(200,120,255,0.3); }
+
+  /* ── SSR: gold-red diagonal shimmer ── */
+  .card-front.SSR.foil-active::after,
+  .rarity-card-SSR.foil-active::after {
+    background: linear-gradient(
+      calc(var(--foil-x,50%) * 1.8deg),
+      rgba(240,180,41,calc(0.55 * var(--foil-shine,0.5))) 0%,
+      rgba(239,68,68,0.3) 50%,
+      rgba(240,180,41,0.2) 100%
+    );
+    opacity: 1; animation: none;
+  }
+  .rarity-card-SSR.foil-active { box-shadow: 0 0 28px rgba(240,180,41,0.7), 0 0 56px rgba(239,68,68,0.4); }
 
   /* ── RRR foil-active: gold streak follows cursor ── */
   .card-front.RRR.foil-active::after {

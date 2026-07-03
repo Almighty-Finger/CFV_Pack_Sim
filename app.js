@@ -755,24 +755,39 @@ function generatePack() {
   }
 
   // D-series — single pack with weighted premium slot
-  if (id.startsWith('DBT')) {
-    // Weighted slot-7 odds for single pack (approximate per-pack rates from box ratios)
-    // Box has 16 packs: 4 RRR, 5 RR, 5 H, 1 ORR, 1 SP → per-pack weights
-    const premiumWeights = [
-      { rarity:'RRR', w: 4  },
-      { rarity:'RR',  w: 5  },
-      { rarity:'H',   w: 5  },
-      { rarity:'ORR', w: 1  },
-      { rarity:'SP',  w: 1  },
-      { rarity:'DSR', w: 0.05 },
-    ];
+  if (id.startsWith('DBT') || id.startsWith('DBT')) {
+    const premiumWeights = id === 'DBT05'
+      ? [ // 10th anniversary set — higher premium rates, adds 10thRRR/10thSEC/WO
+          { rarity:'RRR',     w: 3   },
+          { rarity:'RR',      w: 5   },
+          { rarity:'H',       w: 5   },
+          { rarity:'10thRRR', w: 2   },
+          { rarity:'10thSEC', w: 0.5 },
+          { rarity:'WO',      w: 0.3 },
+          { rarity:'SP',      w: 1   },
+          { rarity:'DSR',     w: 0.05},
+        ]
+      : set.cards.some(c => c.rarity === 'SSR')
+      ? [ // DBT04 - has SSR
+          { rarity:'RRR', w: 4   },
+          { rarity:'RR',  w: 5   },
+          { rarity:'H',   w: 5   },
+          { rarity:'SSR', w: 1   },
+          { rarity:'SP',  w: 1   },
+          { rarity:'DSR', w: 0.05},
+        ]
+      : [ // Standard D-BT box ratios
+          { rarity:'RRR', w: 4   },
+          { rarity:'RR',  w: 5   },
+          { rarity:'H',   w: 5   },
+          { rarity:'ORR', w: 1   },
+          { rarity:'SP',  w: 1   },
+          { rarity:'DSR', w: 0.05},
+        ];
     const totalW = premiumWeights.reduce((s, x) => s + x.w, 0);
     let roll = Math.random() * totalW;
     let forcedRar = 'RR';
-    for (const { rarity, w } of premiumWeights) {
-      roll -= w;
-      if (roll <= 0) { forcedRar = rarity; break; }
-    }
+    for (const { rarity, w } of premiumWeights) { roll -= w; if (roll <= 0) { forcedRar = rarity; break; } }
     return generatePackDBT(set.cards, forcedRar);
   }
 
@@ -906,9 +921,11 @@ function generatePack5(cards, rplusPool, forcedRarity, variableTrigger, isGodPac
 // ── D-Series (overDress) pack & box generator ──
 function generatePackDBT(cards, forcedPremium) {
   const used = new Set();
-  const allCPool = cards.filter(c => (c.rarity === 'C') && !c.token);
-  const rPool    = cards.filter(c => c.rarity === 'R');
-  const premiumPool = cards.filter(c => ['RR','H','RRR','ORR','SP','DSR'].includes(c.rarity));
+  // Tokens (T) and Wonder Originals (WO) never appear in packs — gallery/deck only
+  const packCards = cards.filter(c => !c.token && c.rarity !== 'WO' && !c.wonderRare);
+  const allCPool = packCards.filter(c => c.rarity === 'C');
+  const rPool    = packCards.filter(c => c.rarity === 'R');
+  const premiumPool = packCards.filter(c => ['RR','H','RRR','ORR','SP','SSR','DSR','10thRRR','10thSEC'].includes(c.rarity));
 
   function pick(pool, fallback) {
     const fresh = pool.filter(c => !used.has(c.id));
@@ -941,7 +958,14 @@ function generateBoxDBT(set) {
   const NATIONS = ['Dragon Empire','Dark States','Brandt Gate','Keter Sanctuary','Stoicheia'];
 
   // Box slot-7 distribution: 4 RRR, 5 RR (1/nation), 5 H, 1 ORR, 1 SP
-  let slot7 = ['RRR','RRR','RRR','RRR','RR','RR','RR','RR','RR','H','H','H','H','H','ORR','SP'];
+  // DBT04 has SSR instead of ORR; DBT01 has ORR
+  const hasSSR = set.cards.some(c => c.rarity === 'SSR');
+  const hasORR = set.cards.some(c => c.rarity === 'ORR');
+  let slot7 = hasSSR
+    ? ['RRR','RRR','RRR','RRR','RR','RR','RR','RR','RR','H','H','H','H','H','SSR','SP']
+    : hasORR
+    ? ['RRR','RRR','RRR','RRR','RR','RR','RR','RR','RR','H','H','H','H','H','ORR','SP']
+    : ['RRR','RRR','RRR','RRR','RR','RR','RR','RR','RR','H','H','H','H','H','SP','SP'];
   for (let i = slot7.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [slot7[i], slot7[j]] = [slot7[j], slot7[i]];
@@ -956,11 +980,6 @@ function generateBoxDBT(set) {
   }
   let rrIdx = 0;
 
-  // Token: 50% chance per box, injected into 1 random C slot in 1 random pack
-  const tokenCards = cards.filter(c => c.token);
-  const includeToken = tokenCards.length > 0 && Math.random() < 0.5;
-  const tokenPackIdx = includeToken ? Math.floor(Math.random() * 16) : -1;
-
   const allCards = [];
   for (let i = 0; i < 16; i++) {
     const rar = slot7[i];
@@ -972,11 +991,6 @@ function generateBoxDBT(set) {
       else if (rrCard) pack.push(rrCard);
     } else {
       pack = generatePackDBT(cards, rar);
-    }
-    if (i === tokenPackIdx && tokenCards.length) {
-      const token = tokenCards[Math.floor(Math.random() * tokenCards.length)];
-      const slot = Math.floor(Math.random() * 4);
-      pack[slot] = token;
     }
     allCards.push(...pack);
   }
@@ -1040,9 +1054,9 @@ function stageBox() {
   const sub = set.subtype || '';
 
   // D-series box — dedicated generator
-  if (set.id.startsWith('DBT')) {
+  if (set.id.startsWith('DBT') || set.id.startsWith('DBT')) {
     stagedCards = generateBoxDBT(set);
-    _presentStagedCards(16);
+    _presentStagedCards(set.boxPacks || 16);
     return;
   }
   const isGBT11plus = set.id.startsWith('GBT') && parseInt(set.id.replace('GBT','')) >= 11;
@@ -1176,7 +1190,7 @@ function revealCards() {
   for (const c of allCards) {
     sessionStats.totalPulled++;
     sessionStats.byRarity[c.rarity] = (sessionStats.byRarity[c.rarity]||0) + 1;
-    const rarityOrder = ["C","R","H","RR","RRR","ORR","SP","DSR","LR","SCR","GR","SGR","OR"];
+    const rarityOrder = ["C","R","H","RR","RRR","ORR","SP","DSR","10thRRR","10thSEC","WO","LR","SCR","GR","SGR","OR"];
     if (!sessionStats.bestPull || rarityOrder.indexOf(c.rarity) > rarityOrder.indexOf(sessionStats.bestPull.rarity))
       sessionStats.bestPull = c;
     if (wishlist.has(c.id)) {
@@ -1239,7 +1253,7 @@ function cardImgPath(id, ext) {
   ext = ext || 'webp';
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD|CB)/.test(setId);
-  const isDSeries = /^D(BT|EB|TD|CB)/.test(setId);
+  const isDSeries = /^D(BT|EB|TD|CB)/.test(setId) || setId.startsWith('DBT');
   const base = isDSeries ? IMG_CARDS_D : isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
 
   if (setId === 'EB10') {
@@ -1253,7 +1267,7 @@ function cardImgPath(id, ext) {
 function cardImgCandidates(id) {
   const setId = id.split('_')[0];
   const isGSeries = /^G(BT|EB|TD|CB)/.test(setId);
-  const isDSeries = /^D(BT|EB|TD|CB)/.test(setId);
+  const isDSeries = /^D(BT|EB|TD|CB)/.test(setId) || setId.startsWith('DBT');
   const base = isDSeries ? IMG_CARDS_D : isGSeries ? IMG_CARDS_G : IMG_CARDS_OG;
 
   if (setId === 'EB10') {
@@ -1369,7 +1383,7 @@ function updateCollection() {
   document.getElementById('coll-dupes').textContent = dupes;
 
   const rarityCounts = {};
-  const rarityOrder = ["TD","C","R","H","RR","RRR","ORR","SP","DSR","LR","SCR","GR","SGR","OR"];
+  const rarityOrder = ["TD","C","R","H","RR","RRR","ORR","SP","DSR","10thRRR","10thSEC","WO","LR","SCR","GR","SGR","OR"];
   for (const r of rarityOrder) rarityCounts[r] = 0;
   for (const {card,count} of boosterCards) rarityCounts[card.rarity] = (rarityCounts[card.rarity]||0)+count;
   const maxCount = Math.max(...Object.values(rarityCounts), 1);
@@ -1451,7 +1465,7 @@ function updateHistory() {
     el.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Your pack history will appear here.</p></div>';
     return;
   }
-  const rarityOrder = ["DSR","ORR","SGR","SCR","GR","OR","LR","SP","RRR","H","RR","R","C"];
+  const rarityOrder = ["10thSEC","10thRRR","WO","DSR","ORR","SGR","SCR","GR","OR","LR","SP","RRR","H","RR","R","C"];
   el.innerHTML = history.slice(0,20).map((entry,i) => {
     const rrrs = entry.cards.filter(c=>["RRR","SP"].includes(c.rarity));
     const open = historyExpanded.has(i);
@@ -1517,7 +1531,7 @@ function openZoom(card) {
   tryNext();
   
   document.getElementById('zoom-name').textContent = card.name;
-  document.getElementById('zoom-sub').textContent = `${card.clan} · Grade ${card.grade} · ${card.rarity}`;
+  document.getElementById('zoom-sub').textContent = `${card.clan.replace('/',' / ')} · Grade ${card.grade} · ${card.rarity}`;
   document.getElementById('zoom-sub').style.color = `var(--rarity-${card.rarity.toLowerCase()})`;
   
   const owned = collection[card.id]?.count || 0;
@@ -1595,8 +1609,8 @@ function buildGalleryFilters() {
   const btn = filterChipBtn;
   const allCards = getAllSetCards();
   const EXTRA_CLANS = ['Angel Feather','Dimension Police','Gear Chronicle','Genesis','Link Joker','Neo Nectar','Pale Moon'];
-  const clans = ['ALL', ...new Set([...allCards.map(c => c.clan), ...EXTRA_CLANS])].sort((a,b) => a==='ALL'?-1:a.localeCompare(b));
-  const RARITY_ORDER_ALL = ['ALL','TD','C','R','H','RR','RRR','ORR','SP','DSR','LR','SCR','GR','SGR'];
+  const clans = ['ALL', ...new Set([...allCards.flatMap(c => getCardClans(c)), ...EXTRA_CLANS])].sort((a,b) => a==='ALL'?-1:a.localeCompare(b));
+  const RARITY_ORDER_ALL = ['ALL','TD','C','R','H','RR','RRR','ORR','SP','SSR','DSR','10thRRR','10thSEC','WO','LR','SCR','GR','SGR'];
   const presentRarities = new Set(allCards.map(c=>c.rarity));
   const rarities = RARITY_ORDER_ALL.filter(r => r==='ALL'||r==='TD'||presentRarities.has(r));
   const _galInFmt = s => galleryFormat === 'ALL' || setMatchesFormat(s, galleryFormat);
@@ -1712,14 +1726,18 @@ function renderGallery() {
     if (setFilterIds && !setFilterIds.has(card.id)) return false;
     if (galleryRarityFilter !== 'ALL') {
       const r = galleryRarityFilter;
-      const match = r === 'RRR' ? (card.rarity === 'RRR' || card.rarity === 'OR')
-                  : r === 'H'   ? card.rarity === 'H'
-                  : r === 'ORR' ? card.rarity === 'ORR'
-                  : r === 'DSR' ? card.rarity === 'DSR'
+      const match = r === 'RRR'     ? (card.rarity === 'RRR' || card.rarity === 'OR')
+                  : r === 'H'       ? card.rarity === 'H'
+                  : r === 'ORR'     ? card.rarity === 'ORR'
+                  : r === 'DSR'     ? card.rarity === 'DSR'
+                  : r === '10thRRR' ? card.rarity === '10thRRR'
+                  : r === '10thSEC' ? card.rarity === '10thSEC'
+                  : r === 'WO'      ? card.rarity === 'WO'
+                  : r === 'SSR'     ? card.rarity === 'SSR'
                   : card.rarity === r;
       if (!match) return false;
     }
-    if (galleryClanFilter !== 'ALL' && card.clan !== galleryClanFilter) return false;
+    if (galleryClanFilter !== 'ALL' && !getCardClans(card).includes(galleryClanFilter)) return false;
     if (galleryTypeFilter === 'Wishlist') return wishlist.has(card.id);
     if (galleryTypeFilter !== 'ALL') {
       const tf = galleryTypeFilter;
@@ -1897,7 +1915,7 @@ function getCardSetLabel(id) {
   return setId ? `${setId} · ${num}` : num;
 }
 
-const FOIL_RARITIES = new Set(['RRR','SP','GR','LR','SCR','SGR','OR','H','ORR','DSR']);
+const FOIL_RARITIES = new Set(['RRR','SP','GR','LR','SCR','SGR','OR','H','ORR','DSR','SSR','10thRRR','10thSEC','WO']);
 
 function isToken(card) { return !!(card && card.token); }
 function isOrder(card) { return !!(card && card.order); }
@@ -1938,13 +1956,14 @@ function resolveBaseCard(card) {
 }
 
 function getDeckClan() {
+  // Use single-nation cards to determine the locked clan; skip multi-nation cards
   for (const {card} of Object.values(deck)) {
-    if (card.grade >= 1 && !isGUnit(card)) return card.clan;
+    if (card.grade >= 1 && !isGUnit(card) && !card.clan.includes('/')) return card.clan;
   }
   for (const {card} of Object.values(deck)) {
-    if (!isGUnit(card)) return card.clan;
+    if (!isGUnit(card) && !card.clan.includes('/')) return card.clan;
   }
-  if (fvCard) return fvCard.clan;
+  if (fvCard && !fvCard.clan.includes('/')) return fvCard.clan;
   return null;
 }
 
@@ -2023,11 +2042,11 @@ function buildDeckPoolFilters() {
 
   const lockedClan = getDeckClan();
   const EXTRA_CLANS = ['Angel Feather','Dimension Police','Gear Chronicle','Genesis','Link Joker','Neo Nectar','Pale Moon'];
-  let clans = ['ALL', ...new Set([...getAllSetCards().map(c=>c.clan), ...EXTRA_CLANS])].sort((a,b)=>a==='ALL'?-1:a.localeCompare(b));
+  let clans = ['ALL', ...new Set([...getAllSetCards().flatMap(c=>getCardClans(c)), ...EXTRA_CLANS])].sort((a,b)=>a==='ALL'?-1:a.localeCompare(b));
   if (lockedClan) clans = [lockedClan];
   const _dpInFmt = s => deckPoolFormat === 'ALL' || setMatchesFormat(s, deckPoolFormat);
   const sets = ['ALL', ...SETS.filter(s => _dpInFmt(s)).map(s => s.id)];
-  const RARITY_ORDER_ALL2 = ['ALL','C','R','H','RR','RRR','ORR','SP','DSR','LR','SCR','GR','SGR'];
+  const RARITY_ORDER_ALL2 = ['ALL','C','R','H','RR','RRR','ORR','SP','SSR','DSR','10thRRR','10thSEC','WO','LR','SCR','GR','SGR'];
   const presentRarities2 = new Set(getAllSetCards().map(c=>c.rarity));
   const rarities = RARITY_ORDER_ALL2.filter(r => r==='ALL'||presentRarities2.has(r));
   const hasD = SETS.some(s => s.format === 'D');
@@ -2264,11 +2283,20 @@ const CROSS_CLAN_ALLOW = {
   'Blaster Dark': ['Royal Paladin'],
 };
 
+function getCardClans(card) {
+  // Returns array of clans/nations — handles multi-nation cards stored as "Dragon Empire/Keter Sanctuary"
+  if (!card || !card.clan) return [];
+  return card.clan.split('/').map(c => c.trim()).filter(Boolean);
+}
+
 function isClanAllowed(card, deckClan) {
   if (card.crayElemental) return true;
-  if (!deckClan || card.clan === deckClan) return true;
+  if (!deckClan) return true;
+  const clans = getCardClans(card);
+  if (clans.includes(deckClan)) return true;
+  // Cross-clan exceptions (specific card names allowed in certain clans)
   const exceptions = CROSS_CLAN_ALLOW[card.name];
-  return exceptions && exceptions.includes(deckClan);
+  return !!(exceptions && exceptions.includes(deckClan));
 }
 
 function isGUnit(card) {
