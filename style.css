@@ -179,11 +179,23 @@
     padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;
     letter-spacing: 0.5px;
   }
-  .rarity-tag.C { background: rgba(138,147,168,0.15); color: var(--rarity-c); }
-  .rarity-tag.R { background: rgba(79,142,247,0.15); color: var(--rarity-r); }
-  .rarity-tag.RR { background: rgba(155,89,247,0.15); color: var(--rarity-rr); }
-  .rarity-tag.RRR { background: rgba(240,180,41,0.15); color: var(--rarity-rrr); }
-  .rarity-tag.SP { background: rgba(239,69,101,0.15); color: var(--rarity-sp); }
+  .rarity-tag.C    { background: rgba(138,147,168,0.15); color: var(--rarity-c); }
+  .rarity-tag.R    { background: rgba(79,142,247,0.15);  color: var(--rarity-r); }
+  .rarity-tag.RR   { background: rgba(155,89,247,0.15);  color: var(--rarity-rr); }
+  .rarity-tag.RRR  { background: rgba(240,180,41,0.15);  color: var(--rarity-rrr); }
+  .rarity-tag.SP   { background: rgba(239,69,101,0.15);  color: var(--rarity-sp); }
+  .rarity-tag.H    { background: rgba(0,229,255,0.15);   color: #00e5ff; }
+  .rarity-tag.ORR  { background: rgba(167,139,250,0.18); color: #a78bfa; }
+  .rarity-tag.DSR  { background: linear-gradient(90deg,#f0b429,#ef4444,#a78bfa); color: #fff; }
+  .rarity-tag.SSR  { background: linear-gradient(135deg,#f0b429,#ef4444); color: #fff; }
+  .rarity-tag.WO   { background: rgba(255,159,243,0.18); color: #ff9ff3; }
+  .rarity-tag.10thRRR { background: #ffd700; color: #000; }
+  .rarity-tag.10thSEC { background: linear-gradient(90deg,#ff6b6b,#d4a017,#2ecc71,#3498db,#9b59b6); color: #fff; }
+  .rarity-tag.GR   { background: rgba(155,89,247,0.2);   color: #c084fc; }
+  .rarity-tag.LR   { background: rgba(255,165,0,0.15);   color: #ffa500; }
+  .rarity-tag.SCR  { background: rgba(255,215,0,0.15);   color: #ffd700; }
+  .rarity-tag.SGR  { background: rgba(255,100,150,0.15); color: #ff6496; }
+  .rarity-tag.TD   { background: rgba(100,100,100,0.2);  color: #999; }
 
   .open-btns { display: flex; gap: 10px; }
   .btn {
@@ -327,19 +339,19 @@
   /* RRR, SP, GR card-front styles are defined in the CARD SHINE SYSTEM above */
 
   .rarity-badge { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
-  .rarity-badge.C { color: var(--rarity-c); }
-  .rarity-badge.R { color: var(--rarity-r); }
-  .rarity-badge.RR { color: var(--rarity-rr); }
-  .rarity-badge.RRR { color: var(--rarity-rrr); }
-  .rarity-badge.SP { color: var(--rarity-sp); }
-  .rarity-badge.H   { color: #00e5ff; background: rgba(0,229,255,0.12); } /* Holo — cyan, same tier as RR */
-  .rarity-badge.ORR { color: #a78bfa; background: rgba(167,139,250,0.15); } /* Overtrigger double rare */
-  .rarity-badge.DSR { background: linear-gradient(90deg,#f0b429,#ef4444,#a78bfa); color:#fff; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  .rarity-badge.WO  { color: #ff9ff3; background: rgba(255,159,243,0.15); }
+  .rarity-badge.C   { color: var(--rarity-c); background: rgba(138,147,168,0.12); }
+  .rarity-badge.R   { color: var(--rarity-r); background: rgba(79,142,247,0.12); }
+  .rarity-badge.RR  { color: var(--rarity-rr); background: rgba(155,89,247,0.12); }
+  .rarity-badge.RRR { color: var(--rarity-rrr); background: rgba(240,180,41,0.18); }
+  .rarity-badge.SP  { color: var(--rarity-sp); background: rgba(239,69,101,0.18); }
+  .rarity-badge.H   { color: #00e5ff; background: rgba(0,229,255,0.12); }
+  .rarity-badge.ORR { color: #a78bfa; background: rgba(167,139,250,0.18); }
+  .rarity-badge.DSR { color: #fff; background: linear-gradient(90deg,#f0b429,#ef4444,#a78bfa); }
+  .rarity-badge.WO  { color: #ff9ff3; background: rgba(255,159,243,0.18); }
   .rarity-badge.SSR { color: #fff; background: linear-gradient(135deg,#f0b429,#ef4444); }
-  [class~="10thRRR"].rarity-badge, .rarity-badge[class*="10thRRR"] { color: #ffd700; background: rgba(255,215,0,0.18); }
-  [class~="10thSEC"].rarity-badge, .rarity-badge[class*="10thSEC"] { color: #fff; background: linear-gradient(90deg,#ff6b6b,#ffd700,#6bffb8,#6bb8ff,#d06bff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-  .rarity-badge.TD  { background: rgba(100,100,100,0.2); color: #999; border-color: rgba(150,150,150,0.3); }
+  [class~="10thRRR"].rarity-badge, .rarity-badge[class*="10thRRR"] { color: #000; background: #ffd700; }
+  [class~="10thSEC"].rarity-badge, .rarity-badge[class*="10thSEC"] { color: #fff; background: linear-gradient(90deg,#ff6b6b,#d4a017,#2ecc71,#3498db,#9b59b6); }
+  .rarity-badge.TD  { background: rgba(100,100,100,0.2); color: #999; }
 
   /* FLIP ALL ANIMATION */
   @keyframes card-appear {
